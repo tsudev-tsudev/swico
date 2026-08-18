@@ -63,13 +63,15 @@ public static class LicenseReportBuilder
         });
 
         // --- 2b. Office / M365 ---
+        var (officeTable, office) = OfficeLicenseCollector.Collect(ctx);
         report.Sections.Add(new ReportSection
         {
             Id = "sec-office", NavLabel = "2b. Office/M365",
             Heading = "2b. Bản quyền Microsoft Office / Microsoft 365",
             Description = "Kiểm tra qua công cụ chính thức <code>ospp.vbs</code> đi kèm bộ cài Office. " +
-                          "Nếu máy không cài Office, mục này sẽ trống - đây KHÔNG phải lỗi.",
-            Tables = { OfficeLicenseCollector.Collect(ctx) }
+                          "Nếu máy không cài Office, mục này sẽ trống - đây KHÔNG phải lỗi.<br>" +
+                          $"<b>Tổng hợp:</b> {office.Describe()}.",
+            Tables = { officeTable }
         });
 
         // --- 4. Phan mem (thu thap truoc de tinh diem rui ro o muc 3) ---
@@ -84,7 +86,7 @@ public static class LicenseReportBuilder
 
         // Trang thai Genuine suy ra tu TOAN BO cac SKU, khong phai tu mot SKU
         // bat ky nao dat trang thai Licensed - xem WindowsLicenseSummary.
-        var verdict = RiskScoring.BuildVerdict(findings, license.Overall);
+        var verdict = RiskScoring.BuildVerdict(findings, license.Overall, office.Overall);
         var score = RiskScoring.Compute(findings, genuineCheckFailed: license.HasProblem, manualReview.Count);
 
         report.VerdictLevel = verdict.Level;
@@ -154,6 +156,11 @@ public static class LicenseReportBuilder
 
         report.SummaryCards.Add(new SummaryCard { Value = software.Count.ToString(CultureInfo.InvariantCulture), Label = "Tổng số phần mềm đã cài" });
         report.SummaryCards.Add(new SummaryCard { Value = $"{license.Ok}/{license.Total}", Label = "SKU Windows hợp lệ / tổng số" });
+        report.SummaryCards.Add(new SummaryCard
+        {
+            Value = office.IsInstalled ? $"{office.Ok}/{office.Total}" : "—",
+            Label = office.IsInstalled ? "Sản phẩm Office hợp lệ / tổng số" : "Office (không phát hiện)"
+        });
         report.SummaryCards.Add(new SummaryCard { Value = findings.Count.ToString(CultureInfo.InvariantCulture), Label = "Dấu hiệu kích hoạt trái phép" });
         report.SummaryCards.Add(new SummaryCard { Value = $"{score.Value}/100", Label = $"Điểm rủi ro ({score.Label})" });
 

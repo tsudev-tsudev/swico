@@ -48,7 +48,22 @@
   `sheetView` khai báo `workbookViewId="0"`), chống cắt vỡ cặp thế thay thế khi
   rút gọn tên sheet, giới hạn 32.767 ký tự mỗi ô, và loại bỏ thế thay thế lẻ
   cùng `U+FFFE`/`U+FFFF` khỏi dữ liệu WMI.
-- **Kết luận bản quyền báo NHẦM là hợp lệ.** Trạng thái Genuine được suy ra bằng
+- **Trạng thái Office không hề tham gia vào kết luận.** Đây là nguyên nhân thật
+  của việc báo cáo kết luận "không phát hiện dấu hiệu" trên một máy có Windows
+  hợp lệ nhưng Office ở trạng thái `Notification` (chưa kích hoạt) — trong khi
+  bộ PowerShell cũ báo không hợp lệ. Nay Office có tiếng nói riêng trong kết
+  luận, ở mức **cảnh báo**: đó là vấn đề tuân thủ bản quyền, không phải dấu
+  hiệu kích hoạt trái phép, nên gộp chung vào mức Bad sẽ làm mất ý nghĩa của
+  mức Bad.
+- **Office cài bằng Click-to-Run thường bị báo nhầm là "không có Office".**
+  Danh sách đường dẫn `ospp.vbs` thiếu bố cục `...\Microsoft Office\root\Office16`
+  mà mọi bản Office 2016 trở đi đều dùng. Bổ sung thêm nguồn thứ hai đọc trực
+  tiếp từ `SoftwareLicensingProduct` theo ApplicationID của Office — nguồn này
+  không phụ thuộc vào việc tìm thấy `ospp.vbs`.
+- **Adapter WMI giả lập bỏ qua hoàn toàn `whereClause`.** Nghĩa là mọi bộ lọc —
+  đặc biệt `ApplicationID` phân biệt SKU Windows với SKU Office — **chưa từng
+  được kiểm thử**, đúng nơi phát sinh lớp lỗi kết luận sai về bản quyền.
+- **Kết luận bản quyền có thể báo NHẦM là hợp lệ.** Trạng thái Genuine được suy ra bằng
   `licensedCount > 0` — chỉ cần **một SKU bất kỳ** ở trạng thái Licensed. Windows
   khai báo nhiều SKU dưới cùng một ApplicationID, nên máy có SKU chính đang
   `Notification`/`Unlicensed` nhưng có SKU phụ `Licensed` vẫn bị chấm "hợp lệ".

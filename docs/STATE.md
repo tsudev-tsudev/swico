@@ -17,7 +17,7 @@ lúc nhận bàn giao (khi đó **không build được**).
 
 ```
 Build:    ✅ Build succeeded
-Test:     ✅ 81 PASS, 0 FAIL
+Test:     ✅ 88 PASS, 0 FAIL
 Publish:  ✅ publish/swico.exe — 34 MB, PE32+ x86-64
 Repo:     ✅ github.com/tsudev-tsudev/swico (PUBLIC)
 CI:       ✅ xanh ca hai job, gom smoke test tren Windows runner
@@ -79,9 +79,13 @@ Mở `docs/WINDOWS-VERIFICATION.md`, chạy từng mục, điền cột "Kết q
 | Mục | Kết quả | Trạng thái |
 |---|---|---|
 | Chạy exe, sinh báo cáo HTML | ✅ Được | xong |
-| **C3** mở `.xlsx` bằng Excel | ❌ Excel báo hỏng, tự sửa | ✅ đã sửa — **thử lại** |
-| **D1** đối chiếu PowerShell cũ | ❌ swico báo hợp lệ, PowerShell báo không | ✅ đã sửa — **thử lại** |
-| **B2** tên thuộc tính WMI | ⚠️ chạy nhầm trong bash trên Linux | ⛔ **chưa chạy** |
+| **C3** mở `.xlsx` bằng Excel | ❌ Excel báo hỏng | ✅ **đã sửa và người dùng xác nhận mở bình thường** |
+| **B2** tên thuộc tính WMI | ✅ chạy được, đọc đúng SKU Windows + Office | ✅ xong |
+| **D1** đối chiếu PowerShell cũ | ❌ swico báo hợp lệ, PowerShell báo không | ✅ đã sửa — **cần thử lại** |
+
+**Nguyên nhân thật của D1** (chẩn đoán đầu tiên đã sai): Windows *đúng là* hợp
+lệ (`LicenseStatus 1`); vấn đề nằm ở **Office `LicenseStatus 5` không hề tham
+gia vào kết luận**. Xem `docs/journal/` mục 20:30.
 
 **Ba mục còn lại, quan trọng nhất:**
 - **B2** — `MSFT_MpThreatDetection` có trường `ThreatName` không?

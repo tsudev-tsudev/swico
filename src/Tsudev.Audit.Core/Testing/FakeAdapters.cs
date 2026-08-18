@@ -22,9 +22,54 @@ public sealed class FakeWmiQuery : IWmiQuery
 
     public IReadOnlyList<IReadOnlyDictionary<string, object?>> Query(
         string className, string? whereClause = null, string wmiNamespace = "root\\cimv2")
-        => _data.TryGetValue(className, out var rows)
-            ? rows.Cast<IReadOnlyDictionary<string, object?>>().ToList()
-            : Array.Empty<IReadOnlyDictionary<string, object?>>();
+    {
+        if (!_data.TryGetValue(className, out var rows))
+            return Array.Empty<IReadOnlyDictionary<string, object?>>();
+
+        return rows
+            .Where(r => Matches(r, whereClause))
+            .Cast<IReadOnlyDictionary<string, object?>>()
+            .ToList();
+    }
+
+    /// <summary>
+    /// Danh gia mot menh de WHERE don gian.
+    ///
+    /// Vi sao adapter gia lap can dieu nay: truoc day no BO QUA hoan toan
+    /// whereClause va tra ve moi dong. Nghia la cac bo loc quan trong - dac
+    /// biet <c>ApplicationID='...'</c> phan biet SKU Windows voi SKU Office -
+    /// CHUA TUNG duoc kiem thu. Do dung la noi phat sinh loi ket luan sai ve
+    /// ban quyen tim ra ngay 18/08/2026.
+    ///
+    /// Chi ho tro dung nhung dang menh de ma cac collector thuc su dung:
+    /// <c>Field IS NOT NULL</c> va <c>Field='giá trị'</c>, noi voi nhau bang AND.
+    /// Gap dang khac thi tra ve true de khong am tham loai bo du lieu.
+    /// </summary>
+    private static bool Matches(Dictionary<string, object?> row, string? whereClause)
+    {
+        if (string.IsNullOrWhiteSpace(whereClause)) return true;
+
+        foreach (var raw in whereClause.Split(" AND ", StringSplitOptions.TrimEntries))
+        {
+            if (raw.EndsWith(" IS NOT NULL", StringComparison.OrdinalIgnoreCase))
+            {
+                var field = raw[..^" IS NOT NULL".Length].Trim();
+                if (!row.TryGetValue(field, out var v) || v is null) return false;
+                if (v is string str && str.Length == 0) return false;
+                continue;
+            }
+
+            var eq = raw.IndexOf('=', StringComparison.Ordinal);
+            if (eq <= 0) continue;   // dang khong ho tro -> khong loc
+
+            var name = raw[..eq].Trim();
+            var expected = raw[(eq + 1)..].Trim().Trim('\'');
+            if (!row.TryGetValue(name, out var actual)) return false;
+            if (!string.Equals(actual?.ToString(), expected, StringComparison.OrdinalIgnoreCase)) return false;
+        }
+
+        return true;
+    }
 }
 
 public sealed class FakeRegistryReader : IRegistryReader

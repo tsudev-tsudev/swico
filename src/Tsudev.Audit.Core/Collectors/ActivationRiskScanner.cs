@@ -269,13 +269,29 @@ public static class RiskScoring
     /// duoc tong hop THAN TRONG (xem <c>WindowsLicenseSummary</c>): chi coi la
     /// hop le khi khong con SKU nao co van de.
     /// </summary>
-    public static Verdict BuildVerdict(IReadOnlyList<RiskFinding> findings, LicenseHealth license)
+    /// <summary>
+    /// Ket luan tong the tu ba nguon: dau hieu artifact, trang thai ban quyen
+    /// Windows, va trang thai ban quyen Office.
+    ///
+    /// VI SAO OFFICE PHAI CO TIENG NOI: mot may co Windows hop le nhung Office
+    /// chua kich hoat VAN LA may co van de ve ban quyen. Truoc day trang thai
+    /// Office duoc thu thap va hien thi nhung khong he anh huong toi ket luan,
+    /// nen bao cao ket luan "khong phat hien dau hieu" trong khi Office dang o
+    /// trang thai Notification. Doi chieu voi bo PowerShell cu tren may that da
+    /// lo ra dung diem nay.
+    ///
+    /// Office chua kich hoat duoc xep muc CANH BAO chu khong phai Bad: do la
+    /// van de tuan thu ban quyen, KHONG dong nghia voi dau hieu kich hoat trai
+    /// phep. Gop chung hai thu se lam mat y nghia cua muc Bad.
+    /// </summary>
+    public static Verdict BuildVerdict(
+        IReadOnlyList<RiskFinding> findings, LicenseHealth windows, LicenseHealth office)
     {
         ArgumentNullException.ThrowIfNull(findings);
 
         bool hasSevere = findings.Any(f => f.Level >= RiskLevel.High);
 
-        if (hasSevere || license == LicenseHealth.Problem)
+        if (hasSevere || windows == LicenseHealth.Problem)
         {
             return new Verdict
             {
@@ -286,14 +302,24 @@ public static class RiskScoring
             };
         }
 
-        // Con han dung thu KHONG phai vi pham, nhung cung KHONG phai hop le.
-        // Truoc day truong hop nay bi cham diem "hop le" - nay ha xuong canh bao.
-        if (license == LicenseHealth.Grace)
+        if (office == LicenseHealth.Problem)
         {
             return new Verdict
             {
                 Level = VerdictLevel.Warning,
-                Title = "⚠️ WINDOWS ĐANG TRONG THỜI GIAN DÙNG THỬ / GIA HẠN",
+                Title = "⚠️ WINDOWS HỢP LỆ NHƯNG OFFICE CHƯA ĐƯỢC KÍCH HOẠT",
+                Detail = "Bản quyền Windows không có vấn đề, nhưng ít nhất một sản phẩm Office đang ở trạng thái " +
+                         "chưa kích hoạt. Đây là vấn đề tuân thủ bản quyền cần xử lý, dù không phải dấu hiệu " +
+                         "của công cụ kích hoạt trái phép. Xem mục bản quyền Office bên dưới."
+            };
+        }
+
+        if (windows == LicenseHealth.Grace || office == LicenseHealth.Grace)
+        {
+            return new Verdict
+            {
+                Level = VerdictLevel.Warning,
+                Title = "⚠️ ĐANG TRONG THỜI GIAN DÙNG THỬ / GIA HẠN",
                 Detail = "Máy chưa ở trạng thái kích hoạt vĩnh viễn. Đây chưa phải vi phạm, nhưng license sẽ hết hiệu lực " +
                          "khi hết thời gian gia hạn. Cần kích hoạt bằng license hợp pháp trước thời điểm đó."
             };
@@ -310,13 +336,17 @@ public static class RiskScoring
             };
         }
 
-        if (license == LicenseHealth.Ok)
+        if (windows == LicenseHealth.Ok)
         {
+            var officeNote = office == LicenseHealth.Ok
+                ? "Bản quyền Windows và Office đều hợp lệ"
+                : "Bản quyền Windows hợp lệ; không phát hiện Office trên máy";
+
             return new Verdict
             {
                 Level = VerdictLevel.Ok,
                 Title = "✅ KHÔNG PHÁT HIỆN DẤU HIỆU KÍCH HOẠT TRÁI PHÉP",
-                Detail = "Windows API xác nhận bản quyền hợp lệ và không tìm thấy artifact của công cụ crack đã biết. " +
+                Detail = $"{officeNote}, và không tìm thấy artifact của công cụ crack đã biết. " +
                          "Lưu ý: đây là kết quả quét theo dấu hiệu đã biết, không phải bảo chứng tuyệt đối."
             };
         }

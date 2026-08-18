@@ -233,6 +233,10 @@ static SystemContext LicenseCtx(params (long Status, string Key)[] skus)
         {
             ["Name"] = "Windows(R), Professional edition",
             ["Description"] = "Windows(R) Operating System",
+            // ApplicationID la BAT BUOC: collector loc theo truong nay de tach
+            // SKU Windows khoi SKU Office. Adapter gia lap nay tuan thu
+            // whereClause, nen thieu truong la khong dong nao lot qua bo loc.
+            ["ApplicationID"] = "55c92734-d682-4d71-983e-d6ec3f16059f",
             ["LicenseStatus"] = status,
             ["PartialProductKey"] = key,
             ["ProductKeyChannel"] = "Retail"
@@ -250,31 +254,111 @@ var mixed = WindowsLicenseCollector.Collect(LicenseCtx((1, "AAAAA"), (5, "BBBBB"
 Check(!mixed.IsGenuine,
     "SKU vua Licensed vua Notification -> KHONG duoc ket luan hop le");
 Check(mixed.Overall == LicenseHealth.Problem, "tron lan co SKU hong -> xep loai Problem");
-Check(RiskScoring.BuildVerdict(Array.Empty<RiskFinding>(), mixed.Overall).Level == VerdictLevel.Bad,
+Check(RiskScoring.BuildVerdict(Array.Empty<RiskFinding>(), mixed.Overall, LicenseHealth.Unknown).Level == VerdictLevel.Bad,
     "ket luan cuoi cung la Bad khi co SKU chua kich hoat");
 
 var allOk = WindowsLicenseCollector.Collect(LicenseCtx((1, "AAAAA"), (1, "BBBBB"))).Summary;
 Check(allOk.IsGenuine && allOk.Overall == LicenseHealth.Ok, "moi SKU Licensed -> hop le");
-Check(RiskScoring.BuildVerdict(Array.Empty<RiskFinding>(), allOk.Overall).Level == VerdictLevel.Ok,
+Check(RiskScoring.BuildVerdict(Array.Empty<RiskFinding>(), allOk.Overall, LicenseHealth.Unknown).Level == VerdictLevel.Ok,
     "ket luan Ok khi moi SKU deu hop le");
 
 // 2 = OOB Grace: chua sai nhung cung CHUA hop le -> canh bao, khong phai Ok
 var graceOnly = WindowsLicenseCollector.Collect(LicenseCtx((1, "AAAAA"), (2, "BBBBB"))).Summary;
 Check(!graceOnly.IsGenuine && graceOnly.Overall == LicenseHealth.Grace,
     "con han dung thu -> KHONG phai hop le");
-Check(RiskScoring.BuildVerdict(Array.Empty<RiskFinding>(), graceOnly.Overall).Level == VerdictLevel.Warning,
+Check(RiskScoring.BuildVerdict(Array.Empty<RiskFinding>(), graceOnly.Overall, LicenseHealth.Unknown).Level == VerdictLevel.Warning,
     "con han dung thu -> canh bao, khong phai Ok cung khong phai Bad");
+
+// Bo loc ApplicationID phai tach dung SKU Windows khoi SKU Office: neu khong,
+// mot Office chua kich hoat se bi cham diem nham thanh "Windows co van de".
+var mixedApps = new FakeWmiQuery()
+    .Add("SoftwareLicensingProduct", new Dictionary<string, object?>
+    {
+        ["Name"] = "Windows(R), Professional edition",
+        ["ApplicationID"] = "55c92734-d682-4d71-983e-d6ec3f16059f",
+        ["LicenseStatus"] = 1L, ["PartialProductKey"] = "AAAAA"
+    })
+    .Add("SoftwareLicensingProduct", new Dictionary<string, object?>
+    {
+        ["Name"] = "Office 16, Office16HomePremR_Retail edition",
+        ["ApplicationID"] = "0ff1ce15-a989-479d-af46-f275c6370663",
+        ["LicenseStatus"] = 5L, ["PartialProductKey"] = "BBBBB"
+    });
+var winOnly = WindowsLicenseCollector.Collect(new SystemContext
+{
+    Wmi = mixedApps, Registry = new FakeRegistryReader(),
+    Process = new FakeProcessRunner(), Files = new FakeFileProbe(),
+    ComputerName = "MAY-TEST", ScanTime = DateTimeOffset.Now, IsElevated = true
+}).Summary;
+Check(winOnly.Total == 1 && winOnly.IsGenuine,
+    "bo loc ApplicationID tach dung SKU Windows, KHONG lay nham SKU Office");
 
 var none = WindowsLicenseCollector.Collect(LicenseCtx()).Summary;
 Check(!none.IsKnown && none.Overall == LicenseHealth.Unknown, "khong doc duoc SKU nao -> Unknown");
-Check(RiskScoring.BuildVerdict(Array.Empty<RiskFinding>(), none.Overall).Level == VerdictLevel.Unknown,
+Check(RiskScoring.BuildVerdict(Array.Empty<RiskFinding>(), none.Overall, LicenseHealth.Unknown).Level == VerdictLevel.Unknown,
     "khong co du lieu -> chua du co so ket luan, KHONG mac dinh la hop le");
 
 // Dau hieu crack muc cao van thang moi trang thai license
 Check(RiskScoring.BuildVerdict(
         new[] { new RiskFinding { Category = "x", Detection = "y", Level = RiskLevel.Critical } },
-        LicenseHealth.Ok).Level == VerdictLevel.Bad,
+        LicenseHealth.Ok, LicenseHealth.Ok).Level == VerdictLevel.Bad,
     "phat hien muc Rat cao -> Bad du license bao hop le");
+
+Console.WriteLine("\n=== 8c. Office phai co tieng noi trong ket luan ===");
+
+// CA HOI QUY DUNG THEO MAY THAT CUA NGUOI DUNG (TSUITSTMY, 18/08/2026):
+//   Windows Professional (ApplicationID 55c92734-...) -> LicenseStatus 1 (Licensed)
+//   Office 16 HomePremR  (ApplicationID 0ff1ce15-...) -> LicenseStatus 5 (Notification)
+// Truoc day cong cu ket luan "KHONG PHAT HIEN DAU HIEU" vi:
+//   (a) WindowsLicenseCollector loc theo ApplicationID cua Windows nen khong
+//       thay SKU Office, va
+//   (b) trang thai Office khong he tham gia vao ket luan tong the.
+// Bo PowerShell cu bao "khong hop le" - va no dung.
+var realWorld = new FakeWmiQuery()
+    .Add("SoftwareLicensingProduct", new Dictionary<string, object?>
+    {
+        ["Name"] = "Windows(R), Professional edition",
+        ["Description"] = "Windows(R) Operating System, RETAIL channel",
+        ["ApplicationID"] = "55c92734-d682-4d71-983e-d6ec3f16059f",
+        ["LicenseStatus"] = 1L, ["PartialProductKey"] = "ABCDE", ["ID"] = "sku-win"
+    })
+    .Add("SoftwareLicensingProduct", new Dictionary<string, object?>
+    {
+        ["Name"] = "Office 16, Office16HomePremR_Retail edition",
+        ["Description"] = "Office 16, RETAIL channel",
+        ["ApplicationID"] = "0ff1ce15-a989-479d-af46-f275c6370663",
+        ["LicenseStatus"] = 5L, ["PartialProductKey"] = "FGHIJ", ["ID"] = "sku-office"
+    });
+
+var realCtx = new SystemContext
+{
+    Wmi = realWorld, Registry = new FakeRegistryReader(),
+    Process = new FakeProcessRunner(), Files = new FakeFileProbe(),
+    ComputerName = "TSUITSTMY", ScanTime = DateTimeOffset.Now, IsElevated = true
+};
+
+var officeSummary = OfficeLicenseCollector.Collect(realCtx).Summary;
+Check(officeSummary.IsInstalled && officeSummary.Total == 1,
+    "doc duoc SKU Office tu WMI (khong can ospp.vbs)");
+Check(officeSummary.Overall == LicenseHealth.Problem,
+    "Office o trang thai Notification -> xep loai Problem");
+
+var realVerdict = RiskScoring.BuildVerdict(
+    Array.Empty<RiskFinding>(), LicenseHealth.Ok, officeSummary.Overall);
+Check(realVerdict.Level == VerdictLevel.Warning,
+    "Windows hop le + Office chua kich hoat -> CANH BAO, khong con la 'khong phat hien dau hieu'");
+Check(realVerdict.Title.Contains("OFFICE", StringComparison.Ordinal),
+    "ket luan noi RO la van de nam o Office");
+
+// Office chua kich hoat la van de TUAN THU, khong phai dau hieu crack.
+// Gop chung vao muc Bad se lam mat y nghia cua muc Bad.
+Check(realVerdict.Level != VerdictLevel.Bad,
+    "Office chua kich hoat KHONG bi day len muc Bad");
+
+Check(OfficeLicenseCollector.ClassifyOspp("Notification (Chưa kích hoạt - đã hết hạn thông báo)") == LicenseHealth.Problem
+   && OfficeLicenseCollector.ClassifyOspp("Licensed (Đã kích hoạt)") == LicenseHealth.Ok
+   && OfficeLicenseCollector.ClassifyOspp("Grace period (Chưa kích hoạt - còn hạn dùng thử)") == LicenseHealth.Grace,
+    "xep loai trang thai ospp.vbs dung");
 
 Console.WriteLine("\n=== 9b. Toan ven goi OPC cua file .xlsx ===");
 
