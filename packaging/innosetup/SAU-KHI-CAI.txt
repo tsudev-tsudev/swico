@@ -1,0 +1,50 @@
+tsuowlit SWICO đã được cài đặt.
+
+CÁCH DÙNG NHANH
+---------------
+Mở Command Prompt hoặc PowerShell rồi gõ:
+
+    swico --help        Xem toàn bộ tham số
+    swico               Quét đầy đủ và mở báo cáo khi xong
+    swico --silent      Quét mà không mở trình duyệt (dùng cho triển khai hàng loạt)
+
+Nếu lệnh "swico" không chạy được, hãy mở lại cửa sổ dòng lệnh, hoặc chạy trực
+tiếp file swico.exe trong thư mục cài đặt.
+
+
+CÔNG CỤ ĐỌC NHỮNG GÌ
+--------------------
+- Trạng thái kích hoạt Windows và Office, một phần mã sản phẩm
+- Cấu hình phần cứng, gồm số sê-ri máy, bo mạch chủ và ổ đĩa
+- Danh sách phần mềm đã cài đặt
+- Trạng thái Microsoft Defender và tính toàn vẹn hệ thống
+
+
+DỮ LIỆU ĐI ĐÂU
+--------------
+KHÔNG đi đâu cả.
+
+Công cụ không kết nối Internet và không gửi bất kỳ thông tin nào ra ngoài.
+Mọi kết quả chỉ được ghi ra đĩa của chính máy này, vào thư mục bạn chỉ định.
+
+Từ lúc file kết quả được ghi ra, dữ liệu thuộc quyền kiểm soát của bạn. Nếu bạn
+gửi báo cáo cho người khác, hãy nhớ nó chứa số sê-ri phần cứng và toàn bộ danh
+sách phần mềm của máy.
+
+
+LƯU Ý QUAN TRỌNG VỀ KẾT QUẢ
+---------------------------
+Báo cáo là DỮ LIỆU KỸ THUẬT ĐỂ THAM KHẢO, không phải kết luận pháp lý.
+
+Kết quả có thể sai theo cả hai chiều: bỏ sót vi phạm thật, hoặc báo động nhầm
+với hệ thống hoàn toàn hợp lệ. Việc kích hoạt qua máy chủ KMS trong doanh
+nghiệp, chẳng hạn, là hợp pháp nhưng có thể trùng dấu hiệu với kích hoạt trái
+phép.
+
+Không dùng báo cáo này làm căn cứ duy nhất cho bất kỳ quyết định kỷ luật, chấm
+dứt hợp đồng lao động hay xử phạt nào. Chi tiết xem file EULA.txt mục 3.
+
+
+MÃ NGUỒN VÀ TÀI LIỆU
+--------------------
+https://github.com/tsudev-tsudev/swico

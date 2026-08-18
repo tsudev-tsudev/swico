@@ -45,15 +45,29 @@ AllowNoIcons=yes
 ; cho TOAN MAY. Dat o day de Inno hien hop UAC ngay tu dau thay vi de nguoi
 ; dung cai xong roi moi phat hien khong chay duoc.
 PrivilegesRequired=admin
+; "x64compatible" chi co tu Inno Setup 6.3 tro len; ban cu hon dung "x64".
+; Runner cua GitHub co the mang bat ky ban 6.x nao, nen phai do phien ban thay
+; vi gia dinh - viet cung mot trong hai gia tri se lam ISCC bao loi o ban kia.
+#if Ver >= EncodeVer(6,3,0,0)
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
+#else
+ArchitecturesAllowed=x64
+ArchitecturesInstallIn64BitMode=x64
+#endif
 MinVersion=10.0
 
 LicenseFile=..\..\EULA.txt
-InfoAfterFile=..\..\PRIVACY.md
+; Trinh cai dat hien file nay nhu VAN BAN THUAN. Dung .md o day se hien nguyen
+; cac dau markdown, nen cho tro toi ban .txt sinh rieng cho trinh cai dat.
+InfoAfterFile=SAU-KHI-CAI.txt
 OutputDir=..\output
 OutputBaseFilename=swico-setup-{#AppVersion}
+; Icon di kem trong repo. Neu thieu, ISCC bao loi va dung han - nen kiem tra
+; su ton tai thay vi tin la no luon o do.
+#if FileExists(AddBackslash(SourcePath) + "swico.ico")
 SetupIconFile=swico.ico
+#endif
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
@@ -63,8 +77,14 @@ CloseApplications=yes
 RestartApplications=no
 
 [Languages]
-Name: "vi"; MessagesFile: "compiler:Languages\Vietnamese.isl"
+; Vietnamese.isl la ban dich DO CONG DONG DONG GOP, KHONG nam trong ban cai
+; Inno Setup 6 mac dinh (chi tai rieng tu jrsoftware.org/files/istrans/).
+; Vi vay file duoc kem thang trong repo - neu tro toi "compiler:Languages\..."
+; thi ISCC se bao loi tren may sach va tren runner cua GitHub.
 Name: "en"; MessagesFile: "compiler:Default.isl"
+#if FileExists(AddBackslash(SourcePath) + "Vietnamese.isl")
+Name: "vi"; MessagesFile: "Vietnamese.isl"
+#endif
 
 [CustomMessages]
 vi.AddToPathTask=Thêm vào biến môi trường PATH (chạy được lệnh "swico" từ mọi thư mục)
@@ -88,6 +108,7 @@ Source: "..\..\EULA.txt";            DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\PRIVACY.md";          DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\THIRD-PARTY-NOTICES.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\README.md";           DestDir: "{app}"; Flags: ignoreversion
+Source: "SAU-KHI-CAI.txt";           DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\{#AppName}";                 Filename: "{app}\{#AppExeName}"
