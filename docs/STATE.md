@@ -4,8 +4,8 @@
 > Phiên Claude Code mới **BẮT BUỘC đọc file này đầu tiên**, trước cả README.
 > Quy ước cập nhật: `docs/CONTINUITY.md`.
 
-- **Cập nhật lần cuối:** 2026-08-18 (cuối phiên S001)
-- **Phiên gần nhất:** S001 — `docs/journal/S001-2026-08-18.md`
+- **Cập nhật lần cuối:** 2026-08-19 (phiên S002)
+- **Phiên gần nhất:** S002 — `docs/journal/S002-2026-08-19.md`
 - **Giai đoạn:** đã phát hành `v26.8.18.2`; còn 3 việc chờ người dùng + 1 nhóm việc kỹ thuật
 
 ---
@@ -43,19 +43,23 @@ Windows   : ✅ đã chạy thật, cài thật, dữ liệu đúng, đối chi�
 
 PR đã mở: https://github.com/microsoft/winget-pkgs/pull/419878
 
-**QUAN TRỌNG — tôi đã ghi RÕ TRONG PR là hai việc sau CHƯA làm.** Đừng tick chúng
-mà chưa thực sự chạy:
+**Đã xong:** ký CLA (`license/cla` pass). Lỗi `Error-Hash-Mismatch` **đã sửa** ở
+phiên S002 — commit `49ed455` trên nhánh `tsudev.SWICO-26.8.18.2` đặt lại
+`InstallerSha256` thành `63833A50C758C69D1A466707C682754F647F0A09F6ABED6575FC9310B17EC1CA`,
+đúng hash của file `.exe` đang nằm trên release (đã tự tải về tính lại, khớp cả
+`SHA256SUMS.txt` lẫn manifest do CI sinh). Nguyên nhân gốc và cách tránh:
+`docs/journal/S002-2026-08-19.md` + mục 4.4 dưới đây.
 
-1. **Ký CLA** khi bot của Microsoft yêu cầu trên PR.
-2. Trên máy Windows, chạy rồi **báo kết quả vào PR**:
-   ```powershell
-   winget validate --manifest <thư-mục-manifest>
-   winget install  --manifest <thư-mục-manifest>
-   ```
-   Manifest lấy từ `winget-manifest-26.8.18.2.zip` đính kèm bản phát hành.
+**Còn lại — cần máy Windows.** `winget` không có trên Linux nên phiên Claude
+không chạy được hai lệnh này; đừng tick chúng trong PR khi chưa thực sự chạy:
 
-Đã kiểm chứng sẵn: hash khớp file đã phát hành, URL tải được HTTP 200 đúng dung
-lượng, manifest đúng lược đồ 1.6.
+```powershell
+winget validate --manifest <thư-mục-manifest>
+winget install  --manifest <thư-mục-manifest>
+```
+
+Manifest lấy từ `winget-manifest-26.8.18.2.zip` đính kèm bản phát hành — artifact
+này mang hash ĐÚNG, dùng thẳng được, không cần sửa gì.
 
 `winget install tsudev.SWICO` chỉ chạy được **sau khi PR được hợp nhất**. Trong
 lúc chờ, dùng `packaging/tools/winget-local-install.ps1`.
@@ -153,6 +157,14 @@ Xếp theo giá trị giảm dần:
   `gh api repos/OWNER/REPO/releases` lấy id rồi `gh api -X DELETE .../releases/<id>`.
 - **Manifest winget KHÔNG cam kết sẵn trong repo** — chỉ có template. Hash chỉ
   biết sau khi đóng gói và ký, nên manifest cam kết sẵn luôn mang hash sai.
+- **CHẠY LẠI `release.yml` cho một phiên bản ĐÃ NỘP MANIFEST là làm hỏng manifest
+  đó trong im lặng.** Inno Setup đóng gói lại ra file **khác byte** (dấu thời gian
+  bên trong installer) → hash mới → asset trên release bị ghi đè → manifest đã nộp
+  bỗng trỏ tới một hash không còn tồn tại. **Đã xảy ra thật với PR #419878**: bản
+  `v26.8.18.2` chạy `release.yml` ba lần (16:29, 16:33, 16:39); manifest nộp lúc
+  16:41 mang hash của bản build 16:33, còn asset bị lần chạy 16:39 ghi đè lúc
+  16:43. Quy tắc: **nộp manifest SAU KHI asset trên release đã ở trạng thái cuối
+  cùng**, và trước khi nộp luôn tải file từ chính `InstallerUrl` rồi tính lại hash.
 - **Logo và biến thể** sinh bằng `packaging/tools/make-assets.py`. Sửa
   `assets/tsudev-logo.png` xong phải chạy lại script.
 

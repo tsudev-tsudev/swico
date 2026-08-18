@@ -116,6 +116,25 @@ winget install --manifest packaging\winget-out\manifests\t\tsudev\SWICO\26.8.18
 Lệnh thứ hai cài **từ manifest cục bộ** — cách duy nhất kiểm chứng manifest đúng
 trước khi nộp lên kho công khai.
 
+### ⚠️ Nộp XONG rồi thì ĐỪNG chạy lại `release.yml` cho phiên bản đó
+
+Inno Setup đóng gói lại ra file **khác byte** mỗi lần chạy, nên mỗi lần chạy lại
+là một `InstallerSha256` mới. Asset trên GitHub Release bị ghi đè, còn manifest
+đã nộp thì vẫn mang hash cũ → PR đỏ với nhãn `Error-Hash-Mismatch`.
+
+**Đã xảy ra thật với PR #419878** (bản `v26.8.18.2`): `release.yml` chạy ba lần;
+manifest nộp lúc 16:41 mang hash của bản dựng 16:33, còn asset bị lần chạy 16:39
+ghi đè lúc 16:43. Chi tiết: `docs/journal/S002-2026-08-19.md`.
+
+Quy tắc: **chốt asset trên release trước, nộp manifest sau.** Và ngay trước khi
+nộp, tải file từ chính `InstallerUrl` rồi tính lại hash — đừng tin giá trị đã ghi
+sẵn ở bất kỳ đâu:
+
+```powershell
+curl.exe -sSL -o setup.exe <InstallerUrl>
+(Get-FileHash setup.exe -Algorithm SHA256).Hash
+```
+
 ## Sau khi pull request được hợp nhất
 
 Bot của winget chạy kiểm thử tự động, thường mất vài giờ tới vài ngày. Khi xong:
