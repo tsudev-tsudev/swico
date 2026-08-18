@@ -39,6 +39,21 @@ Tải từ [Releases](https://github.com/tsudev-tsudev/swico/releases):
 Cả ba chứa **cùng một chương trình**; chỉ khác cách giao đến máy đích. Đối chiếu
 tệp tải về với `SHA256SUMS.txt` đính kèm mỗi bản phát hành.
 
+**Về dung lượng:** từ bản 26.8.18.2, file `swico.exe` không còn được nén sẵn bên
+trong. Nghe ngược trực giác, nhưng nén hai lần là phản tác dụng — payload đã nén
+thì trình cài đặt không nén thêm được nữa, nên **file setup lại to hơn**. Bỏ nén
+cũng xoá luôn bước giải nén runtime mỗi lần khởi động.
+
+| Tệp | 26.8.18 | 26.8.18.2 |
+|---|---|---|
+| `swico-setup-*.exe` | 31,2 MB | **26,1 MB** |
+| `swico-portable-*.zip` | 30,5 MB | ~32 MB |
+| `swico.exe` (tải trực tiếp) | 35,7 MB | 79,5 MB |
+
+Bản portable và file exe trực tiếp **to hơn** vì `.zip` dùng Deflate, yếu hơn
+LZMA2 của trình cài đặt. Đổi lại: khởi động nhanh hơn ở cả ba dạng. Nếu bạn ưu
+tiên dung lượng tải, dùng **file setup**.
+
 > ⚠️ **`winget install tsudev.SWICO` chưa dùng được.** Gói chưa được nộp lên kho
 > cộng đồng `microsoft/winget-pkgs`, nên lệnh này sẽ báo *"No package found
 > matching input criteria"*. Manifest đã sẵn sàng và đính kèm mỗi bản phát hành;

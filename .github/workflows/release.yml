@@ -142,8 +142,23 @@ jobs:
           # thuat vien cam USB di tung may, ho can sua duoc luat tai cho.
           Copy-Item src/Tsudev.Audit.Core/Rules/detection-rules.json packaging/portable
           Copy-Item docs/DETECTION-RULES.md packaging/portable
-          Compress-Archive -Path 'packaging/portable/*' `
-            -DestinationPath "packaging/output/swico-portable-${{ steps.ver.outputs.version }}.zip" -Force
+          # Dung 7-Zip (co san tren runner Windows) thay vi Compress-Archive.
+          #
+          # Ly do: payload swico.exe khong con duoc nen san ben trong nua, nen
+          # buoc nen o day quyet dinh dung luong nguoi dung phai tai. Deflate
+          # cua Compress-Archive yeu hon han - do duoc 34,2 MB so voi ~32 MB.
+          # Van giu dinh dang .zip Deflate chuan de Explorer cua Windows mo
+          # truc tiep duoc, khong bat nguoi dung cai them cong cu giai nen.
+          $zip = "packaging/output/swico-portable-${{ steps.ver.outputs.version }}.zip"
+          $7z = "$env:ProgramFiles\7-Zip\7z.exe"
+          if (Test-Path $7z) {
+            & $7z a -tzip -mx=9 -mm=Deflate $zip ".\packaging\portable\*" | Out-Null
+            if ($LASTEXITCODE -ne 0) { throw 'Nen ban portable THAT BAI' }
+          } else {
+            Write-Host 'Khong tim thay 7-Zip, dung Compress-Archive (ty le nen kem hon).'
+            Compress-Archive -Path 'packaging/portable/*' -DestinationPath $zip -Force
+          }
+          "{0:N1} MB" -f ((Get-Item $zip).Length / 1MB) | Write-Host
 
       # SBOM: bat buoc cho phat hanh nghiem tuc, va la mot phan ho so minh bach
       # ma SignPath Foundation danh gia cao.
