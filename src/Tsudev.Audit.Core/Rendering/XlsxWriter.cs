@@ -94,7 +94,7 @@ public sealed class XlsxWriter
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>
         """;
 
-    private static string Workbook(IReadOnlyList<string> sheetNames)
+    private static string Workbook(List<string> sheetNames)
     {
         var sb = new StringBuilder();
         sb.Append("""<?xml version="1.0" encoding="UTF-8" standalone="yes"?>""");

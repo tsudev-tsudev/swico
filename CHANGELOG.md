@@ -46,6 +46,11 @@
   ngôn ngữ Thái hoặc Ả Rập, lịch mặc định không phải Gregorian nên năm cho ra
   hoàn toàn khác (2569 thay vì 2026) — sai tên thư mục, vô hiệu quy ước 3 cấp,
   và trang tổng hợp không gom được kết quả giữa các máy khác ngôn ngữ.
+- **Máy dev và CI build bằng hai SDK khác nhau.** Runner GitHub có sẵn .NET 10
+  SDK, và `dotnet build` luôn chọn SDK mới nhất trên máy nếu không có
+  `global.json`. CI vì thế build bằng .NET 10 trong khi máy dev dùng .NET 8 —
+  làm lời hứa "build tái lập được" không thành lập. Đã thêm `global.json` ghim
+  SDK và đổi workflow sang đọc từ đó.
 - Dọn sạch 27 cảnh báo trình phân tích (CA1305/CA1826/CA1822/CA1869/CA1716) và
   bật `TreatWarningsAsErrors` để chúng không tích tụ trở lại.
 - **Dự án không build được.** Thiếu `Tsudev.Audit.Core.csproj` (cả hai csproj

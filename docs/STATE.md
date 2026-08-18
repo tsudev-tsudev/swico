@@ -75,6 +75,9 @@ Chi tiết: `docs/SIGNING.md`.
 
 ## 5. Cạm bẫy đã biết — đọc để khỏi vấp lại
 
+- **`global.json` ghim SDK 8.0.424 — đừng xoá.** Runner GitHub có sẵn .NET 10
+  SDK và `dotnet build` luôn chọn bản mới nhất nếu không ghim, khiến CI và máy
+  dev dùng hai bộ phân tích khác nhau (đã từng làm CI đỏ với CA1859).
 - Máy dev là **Linux**. `dotnet` **không có trong PATH mặc định**:
   `export PATH="$HOME/.dotnet:$PATH"` (SDK 8.0.424 đã cài ở `~/.dotnet`).
 - `net8.0-windows` **build được trên Linux**, `publish -r win-x64` cũng chạy.

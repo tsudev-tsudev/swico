@@ -32,9 +32,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Doc phien ban TU global.json, khong ghi cung o day.
+      # Runner cua GitHub co san .NET 10 SDK, ma `dotnet build` luon chon SDK
+      # MOI NHAT tren may - khong ghim thi CI build bang .NET 10 con may dev
+      # build bang .NET 8, ra hai ket qua phan tich khac nhau.
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          global-json-file: global.json
 
       - name: Xac dinh phien ban
         id: ver
