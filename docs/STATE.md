@@ -20,6 +20,8 @@ Build:    ✅ Build succeeded
 Test:     ✅ 120 PASS, 0 FAIL
 Publish:  ✅ publish/swico.exe — 34 MB, PE32+ x86-64
 Repo:     ✅ github.com/tsudev-tsudev/swico (PUBLIC)
+Release:  ✅ quy trinh phat hanh CHAY THAT - ban nhap v3.0.0 du 5 tep
+Installer:✅ Inno Setup BIEN DICH DUOC (truoc do co 4 loi dung han)
 CI:       ✅ xanh ca hai job, gom smoke test tren Windows runner
 Windows:  ✅ DA CHAY THAT - sinh duoc bao cao HTML
 Canh bao: ✅ 0 (TreatWarningsAsErrors dang bat)
@@ -82,8 +84,11 @@ Mở `docs/WINDOWS-VERIFICATION.md`, chạy từng mục, điền cột "Kết q
 | **C3** mở `.xlsx` bằng Excel | ❌ Excel báo hỏng | ✅ **đã sửa và người dùng xác nhận mở bình thường** |
 | **B2** tên thuộc tính WMI | ✅ chạy được, đọc đúng SKU Windows + Office | ✅ xong |
 | **D1** đối chiếu PowerShell cũ | ❌ swico báo hợp lệ, PowerShell báo không | ✅ **đã sửa và người dùng xác nhận chuẩn xác** |
-| Mã thoát không phản ánh kết luận | ❌ luôn trả 0 | ✅ đã sửa — **cần thử lại** |
-| Terminal mất màu lịch sử cuộn | ❌ do gán `Console.OutputEncoding` | ✅ đã sửa — **cần thử lại** |
+| Mã thoát không phản ánh kết luận | ❌ luôn trả 0 | ✅ **đã sửa, xác nhận trả về 10** |
+| Terminal mất màu lịch sử cuộn | ❌ do gán `Console.OutputEncoding` | ✅ **đã sửa, xác nhận buffer nguyên vẹn** |
+
+**Phase 4 đã đóng hoàn toàn.** Còn lại duy nhất mục F (chạy thử installer) —
+file setup nay đã tồn tại trong bản nháp `v3.0.0` nhưng **chưa ai cài thử**.
 
 **Nguyên nhân thật của D1** (chẩn đoán đầu tiên đã sai): Windows *đúng là* hợp
 lệ (`LicenseStatus 1`); vấn đề nằm ở **Office `LicenseStatus 5` không hề tham

@@ -74,7 +74,7 @@ lại của Phase 5.
 - ✅ 10 test mới → **64 PASS, 0 FAIL**
 - ✅ `docs/DETECTION-RULES.md`
 
-## Phase 4 — Kiểm chứng trên Windows thật 🔄 **ĐANG CHỜ NGƯỜI DÙNG**
+## Phase 4 — Kiểm chứng trên Windows thật ✅
 
 **Đã xong một phần:** người dùng chạy `swico.exe` trên Windows thật và **nhận
 được báo cáo HTML**. Đây là lần đầu `WindowsAdapters.cs` thực thi — và nó qua
@@ -110,7 +110,18 @@ Làm khi đã có kết quả từ Phase 4 — sửa theo dữ liệu thật, kh
 - ⬜ **Đánh giá NativeAOT** thay `PublishSingleFile`: file nhỏ hơn nhiều (hiện
       34 MB), khởi động nhanh hơn, và **ít bị diệt virus báo nhầm hơn hẳn**
 
-## Phase 6 — Ký số & phát hành ⛔ **CHỜ NGƯỜI DÙNG**
+## Phase 6a — Kiểm chứng quy trình phát hành ✅
+
+Chạy thật `release.yml` trên runner Windows, ba lần, sửa từng lỗi lộ ra:
+
+- ✅ **Inno Setup biên dịch được** — trước đó kịch bản có 4 lỗi *dừng hẳn*:
+  thiếu `swico.ico`; `Vietnamese.isl` không có trong bản cài mặc định;
+  `x64compatible` chỉ có từ 6.3; `InfoAfterFile` trỏ tới `.md`
+- ✅ SBOM CycloneDX — ban 6 đổi tham số (`-f`→`-fn`, `-j`→`-F Json`), đã ghim `6.2.0`
+- ✅ `tag_name` phải chỉ rõ, nếu không `workflow_dispatch` sẽ hỏng
+- ✅ Bản nháp `v3.0.0` với đủ 5 tệp: exe, setup, portable zip, SBOM, checksum
+
+## Phase 6b — Ký số & phát hành ⛔ **CHỜ NGƯỜI DÙNG**
 
 - ⛔ **Nộp hồ sơ SignPath Foundation** — duyệt mất vài ngày tới vài tuần,
       **nộp càng sớm càng tốt**, làm việc khác trong lúc chờ

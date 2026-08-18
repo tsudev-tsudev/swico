@@ -41,6 +41,14 @@
 
 ### Sửa
 
+- **Kịch bản Inno Setup có 4 lỗi khiến `ISCC` dừng hẳn** — nó chưa từng được
+  biên dịch lần nào: thiếu `swico.ico`; `Vietnamese.isl` là bản dịch cộng đồng
+  không có trong bản cài Inno Setup mặc định; `x64compatible` chỉ hợp lệ từ
+  Inno Setup 6.3; `InfoAfterFile` trỏ tới `.md` nên hiện nguyên dấu markdown.
+- **Bước sinh SBOM dùng tham số của CycloneDX 5.** Bản 6 đổi `-f`→`-fn` và
+  `-j`→`-F Json`. Đã ghim phiên bản công cụ để quy trình phát hành tái lập được.
+- **Bước tạo GitHub Release không chỉ rõ `tag_name`**, nên chỉ chạy được khi
+  đẩy tag, còn `workflow_dispatch` thì hỏng.
 - **Kết luận đánh giá không hề ảnh hưởng tới mã thoát.** Một máy có Office chưa
   kích hoạt vẫn trả về `0`, nên script không bắt được. Nay mã thoát tách hai
   nhóm: sức khoẻ công cụ (`0/1/2/3`) và kết luận đánh giá (`10` cảnh báo,
