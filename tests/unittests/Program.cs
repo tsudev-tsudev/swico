@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -216,6 +217,130 @@ var n1 = XlsxWriter.MakeSafeSheetName("Phạm vi quét (luôn hiển thị dù c
 var n2 = XlsxWriter.MakeSafeSheetName("Phạm vi quét (luôn hiển thị dù có phát hiện hay không)", used);
 Check(n1.Length <= 31 && n2.Length <= 31 && n1 != n2, "ten sheet bi cat 31 ky tu va khong trung nhau");
 File.Delete(tmp);
+
+Console.WriteLine("\n=== 8b. Ket luan license: khong duoc bao NHAM la hop le ===");
+
+// LOI HOI QUY THAT (phat hien khi doi chieu voi bo PowerShell cu tren may that):
+// truoc day ket luan duoc suy ra bang licensedCount > 0, tuc chi can MOT SKU
+// bat ky o trang thai Licensed. Windows khai bao NHIEU SKU duoi cung mot
+// ApplicationID, nen may co SKU chinh dang Notification nhung co SKU phu
+// Licensed van bi cham diem "hop le".
+static SystemContext LicenseCtx(params (long Status, string Key)[] skus)
+{
+    var wmi = new FakeWmiQuery();
+    foreach (var (status, key) in skus)
+        wmi.Add("SoftwareLicensingProduct", new Dictionary<string, object?>
+        {
+            ["Name"] = "Windows(R), Professional edition",
+            ["Description"] = "Windows(R) Operating System",
+            ["LicenseStatus"] = status,
+            ["PartialProductKey"] = key,
+            ["ProductKeyChannel"] = "Retail"
+        });
+    return new SystemContext
+    {
+        Wmi = wmi, Registry = new FakeRegistryReader(),
+        Process = new FakeProcessRunner(), Files = new FakeFileProbe(),
+        ComputerName = "MAY-TEST", ScanTime = DateTimeOffset.Now, IsElevated = true
+    };
+}
+
+// 1 = Licensed, 5 = Notification (chua kich hoat)
+var mixed = WindowsLicenseCollector.Collect(LicenseCtx((1, "AAAAA"), (5, "BBBBB"))).Summary;
+Check(!mixed.IsGenuine,
+    "SKU vua Licensed vua Notification -> KHONG duoc ket luan hop le");
+Check(mixed.Overall == LicenseHealth.Problem, "tron lan co SKU hong -> xep loai Problem");
+Check(RiskScoring.BuildVerdict(Array.Empty<RiskFinding>(), mixed.Overall).Level == VerdictLevel.Bad,
+    "ket luan cuoi cung la Bad khi co SKU chua kich hoat");
+
+var allOk = WindowsLicenseCollector.Collect(LicenseCtx((1, "AAAAA"), (1, "BBBBB"))).Summary;
+Check(allOk.IsGenuine && allOk.Overall == LicenseHealth.Ok, "moi SKU Licensed -> hop le");
+Check(RiskScoring.BuildVerdict(Array.Empty<RiskFinding>(), allOk.Overall).Level == VerdictLevel.Ok,
+    "ket luan Ok khi moi SKU deu hop le");
+
+// 2 = OOB Grace: chua sai nhung cung CHUA hop le -> canh bao, khong phai Ok
+var graceOnly = WindowsLicenseCollector.Collect(LicenseCtx((1, "AAAAA"), (2, "BBBBB"))).Summary;
+Check(!graceOnly.IsGenuine && graceOnly.Overall == LicenseHealth.Grace,
+    "con han dung thu -> KHONG phai hop le");
+Check(RiskScoring.BuildVerdict(Array.Empty<RiskFinding>(), graceOnly.Overall).Level == VerdictLevel.Warning,
+    "con han dung thu -> canh bao, khong phai Ok cung khong phai Bad");
+
+var none = WindowsLicenseCollector.Collect(LicenseCtx()).Summary;
+Check(!none.IsKnown && none.Overall == LicenseHealth.Unknown, "khong doc duoc SKU nao -> Unknown");
+Check(RiskScoring.BuildVerdict(Array.Empty<RiskFinding>(), none.Overall).Level == VerdictLevel.Unknown,
+    "khong co du lieu -> chua du co so ket luan, KHONG mac dinh la hop le");
+
+// Dau hieu crack muc cao van thang moi trang thai license
+Check(RiskScoring.BuildVerdict(
+        new[] { new RiskFinding { Category = "x", Detection = "y", Level = RiskLevel.Critical } },
+        LicenseHealth.Ok).Level == VerdictLevel.Bad,
+    "phat hien muc Rat cao -> Bad du license bao hop le");
+
+Console.WriteLine("\n=== 9b. Toan ven goi OPC cua file .xlsx ===");
+
+// Bo test cu chi kiem "file co ton tai va lon hon 1000 byte". Do la ly do mot
+// file .xlsx THIEU QUAN HE toi styles.xml van di qua duoc toan bo 54 test, roi
+// Excel that bao "We found a problem with some content" khi nguoi dung mo len.
+// Cac kiem tra duoi day soi vao CAU TRUC goi, khong chi soi kich thuoc.
+var opcPath = Path.Combine(Path.GetTempPath(), $"tsudev-opc-{Guid.NewGuid():N}.xlsx");
+new XlsxWriter().Write(opcPath, licReport.Sections.SelectMany(s => s.Tables)
+    .Select((t, i) => { if (string.IsNullOrWhiteSpace(t.Title)) t.Title = $"Bang {i + 1}"; return t; }));
+
+using (var zip = ZipFile.OpenRead(opcPath))
+{
+    string Part(string name) => new StreamReader(zip.GetEntry(name)!.Open()).ReadToEnd();
+
+    var names = zip.Entries.Select(e => e.FullName).ToHashSet(StringComparer.Ordinal);
+    var wbRels = Part("xl/_rels/workbook.xml.rels");
+    var contentTypes = Part("[Content_Types].xml");
+    var workbook = Part("xl/workbook.xml");
+
+    Check(names.Contains("xl/styles.xml"), "goi co phan styles.xml");
+
+    // Day la ca kiem thu bat duoc dung loi that: phan nam trong goi nhung
+    // KHONG co quan he nao tro toi thi theo chuan OPC coi nhu khong ton tai.
+    Check(wbRels.Contains("Target=\"styles.xml\"", StringComparison.Ordinal),
+        "workbook.xml.rels CO quan he tro toi styles.xml");
+
+    // Moi phan trong goi (tru chinh cac file .rels) phai duoc mot quan he tro toi.
+    var rootRels = Part("_rels/.rels");
+    var allRels = rootRels + wbRels;
+    var unreferenced = names
+        .Where(n => !n.EndsWith(".rels", StringComparison.Ordinal) && n != "[Content_Types].xml")
+        .Where(n => !allRels.Contains(Path.GetFileName(n), StringComparison.Ordinal))
+        .ToList();
+    Check(unreferenced.Count == 0,
+        $"moi phan trong goi deu duoc quan he tro toi (mo coi: {string.Join(", ", unreferenced)})");
+
+    // Moi phan phai duoc khai bao kieu noi dung, neu khong Excel khong biet doc.
+    var undeclared = names
+        .Where(n => n.EndsWith(".xml", StringComparison.Ordinal) && n != "[Content_Types].xml")
+        .Where(n => !contentTypes.Contains("/" + n, StringComparison.Ordinal))
+        .ToList();
+    Check(undeclared.Count == 0,
+        $"moi phan .xml deu khai bao trong [Content_Types] (thieu: {string.Join(", ", undeclared)})");
+
+    // sheetView khai bao workbookViewId="0" nen bookViews phai ton tai.
+    Check(workbook.Contains("<bookViews>", StringComparison.Ordinal),
+        "workbook.xml co <bookViews> (vi sheetView tro toi workbookViewId=0)");
+
+    // Moi phan phai la XML doc duoc.
+    bool allParse = true;
+    foreach (var e in zip.Entries)
+    {
+        try { System.Xml.Linq.XDocument.Parse(new StreamReader(e.Open()).ReadToEnd()); }
+        catch (System.Xml.XmlException) { allParse = false; }
+    }
+    Check(allParse, "moi phan trong goi deu la XML hop le");
+}
+File.Delete(opcPath);
+
+// Cat ten sheet KHONG duoc lam vo cap the thay the (surrogate pair): mot nua
+// the thay the khong phai ky tu XML hop le va se lam Excel bao file hong.
+var emojiTitle = new string('A', 30) + "\U0001F600" + "duoi";
+var emojiName = XlsxWriter.MakeSafeSheetName(emojiTitle, new HashSet<string>());
+Check(emojiName.Length <= 31 && !char.IsSurrogate(emojiName[^1]),
+    "cat ten sheet khong lam vo cap the thay the");
 
 Console.WriteLine("\n=== 10. Bo luat phat hien tach roi ===");
 

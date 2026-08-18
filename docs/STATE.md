@@ -17,9 +17,9 @@ lúc nhận bàn giao (khi đó **không build được**).
 
 ```
 Build:    ✅ Build succeeded
-Test:     ✅ 64 PASS, 0 FAIL
+Test:     ✅ 81 PASS, 0 FAIL
 Publish:  ✅ publish/swico.exe — 34 MB, PE32+ x86-64
-Repo:     ✅ github.com/tsudev-tsudev/swico (PRIVATE, 12 commit)
+Repo:     ✅ github.com/tsudev-tsudev/swico (PUBLIC)
 CI:       ✅ xanh ca hai job, gom smoke test tren Windows runner
 Windows:  ✅ DA CHAY THAT - sinh duoc bao cao HTML
 Canh bao: ✅ 0 (TreatWarningsAsErrors dang bat)
@@ -74,7 +74,14 @@ chạy thử trên Windows thật, và nộp hồ sơ SignPath Foundation.
 
 Mở `docs/WINDOWS-VERIFICATION.md`, chạy từng mục, điền cột "Kết quả thật".
 
-**Đã xong:** `swico.exe` chạy được trên Windows thật và sinh ra báo cáo HTML.
+**Đã chạy 18/08 và tìm ra HAI LỖI THẬT, cả hai đã sửa — cần thử lại:**
+
+| Mục | Kết quả | Trạng thái |
+|---|---|---|
+| Chạy exe, sinh báo cáo HTML | ✅ Được | xong |
+| **C3** mở `.xlsx` bằng Excel | ❌ Excel báo hỏng, tự sửa | ✅ đã sửa — **thử lại** |
+| **D1** đối chiếu PowerShell cũ | ❌ swico báo hợp lệ, PowerShell báo không | ✅ đã sửa — **thử lại** |
+| **B2** tên thuộc tính WMI | ⚠️ chạy nhầm trong bash trên Linux | ⛔ **chưa chạy** |
 
 **Ba mục còn lại, quan trọng nhất:**
 - **B2** — `MSFT_MpThreatDetection` có trường `ThreatName` không?

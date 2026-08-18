@@ -97,9 +97,19 @@ Rồi trên Windows `git clone` như bình thường.
 
 ## B. Tên thuộc tính WMI — chỗ dễ sai nhất
 
-Đây là những lớp WMI mà README gốc đã tự cảnh báo là chưa xác nhận. Chạy từng
-lệnh dưới đây trong PowerShell **có quyền Administrator** rồi đối chiếu tên
-thuộc tính với mã nguồn.
+> ⚠️ **Các lệnh dưới đây là PowerShell, chạy TRÊN MÁY WINDOWS.** Không phải bash,
+> không phải trên máy Linux. Dấu hiệu nhận biết bạn đang ở sai chỗ:
+>
+> | Dấu nhắc | Đây là gì | `Get-CimInstance` |
+> |---|---|---|
+> | `PS C:\Users\...>` | PowerShell trên Windows ✅ | chạy được |
+> | `~/projects/tsudev-swico$` | bash trên Linux ❌ | *command not found* |
+>
+> Cách mở đúng: bấm **Start** → gõ `powershell` → chuột phải →
+> **Run as administrator**.
+>
+> Khi chép lệnh, gõ dấu ống `|` **trơn**. Nếu thấy `\|` (có gạch chéo ngược) thì
+> đó là cách escape của bash — PowerShell sẽ báo lỗi cú pháp.
 
 | # | Lệnh kiểm tra | Cần xác nhận | Kết quả thật |
 |---|---|---|---|
@@ -118,7 +128,7 @@ thuộc tính với mã nguồn.
 |---|---|---|---|
 | C1 | `.\publish\swico.exe --silent` | Tạo đủ 3 cấp thư mục theo quy ước | |
 | C2 | Mở file `.html` sinh ra | Hiển thị đúng, tiếng Việt có dấu, không vỡ trang | |
-| C3 | **Mở file `.xlsx` bằng Excel thật** | **Excel KHÔNG báo "file hỏng, cần sửa"** | |
+| C3 | **Mở file `.xlsx` bằng Excel thật** | **Excel KHÔNG báo "file hỏng, cần sửa"** | ❌ **ĐÃ LỖI (18/08) — đã sửa, cần thử lại** |
 | C4 | Kiểm tra `.xlsx`: dòng tiêu đề | Đóng băng khi cuộn, in đậm, nền xanh nhạt | |
 | C5 | Kiểm tra `.xlsx`: cột mã số | `"007"` giữ nguyên số 0 ở đầu, **không** thành `7` | |
 | C6 | Mở file `.json` | Đọc được, đúng `SchemaVersion` | |
@@ -139,7 +149,7 @@ thuộc tính với mã nguồn.
 
 | # | Việc cần làm | Kỳ vọng | Kết quả thật |
 |---|---|---|---|
-| D1 | Chạy bộ PowerShell cũ và `swico.exe` trên **cùng một máy** | Kết luận bản quyền giống nhau | |
+| D1 | Chạy bộ PowerShell cũ và `swico.exe` trên **cùng một máy** | Kết luận bản quyền giống nhau | ❌ **ĐÃ LỖI (18/08): swico báo hợp lệ, PowerShell báo không — đã sửa, cần thử lại** |
 | D2 | So danh sách phần mềm phát hiện được | Không thiếu mục nào so với bản cũ | |
 | D3 | So điểm rủi ro và số phát hiện | Cùng thang, cùng kết luận | |
 

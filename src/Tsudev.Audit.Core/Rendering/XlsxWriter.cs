@@ -98,7 +98,11 @@ public sealed class XlsxWriter
     {
         var sb = new StringBuilder();
         sb.Append("""<?xml version="1.0" encoding="UTF-8" standalone="yes"?>""");
-        sb.Append("""<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>""");
+        sb.Append("""<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">""");
+        // Moi <sheetView> khai bao workbookViewId="0", tro toi phan tu thu 0
+        // trong <bookViews>. Thieu khoi nay thi do la mot tham chieu treo.
+        sb.Append("""<bookViews><workbookView xWindow="0" yWindow="0" windowWidth="20000" windowHeight="12000"/></bookViews>""");
+        sb.Append("<sheets>");
         for (int i = 0; i < sheetNames.Count; i++)
             sb.Append("<sheet name=\"").Append(X(sheetNames[i]))
               .Append("\" sheetId=\"").Append(i + 1)
@@ -112,10 +116,20 @@ public sealed class XlsxWriter
         var sb = new StringBuilder();
         sb.Append("""<?xml version="1.0" encoding="UTF-8" standalone="yes"?>""");
         sb.Append("""<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">""");
+
         for (int i = 1; i <= sheetCount; i++)
             sb.Append("<Relationship Id=\"rId").Append(i)
               .Append("\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/sheet")
               .Append(i).Append(".xml\"/>");
+
+        // BAT BUOC: khong co quan he nay thi theo chuan OPC, styles.xml coi nhu
+        // KHONG TON TAI - du no nam trong goi va da khai bao o [Content_Types].
+        // Moi o deu tham chieu s="0"/s="1" vao do, nen Excel se bao "We found a
+        // problem with some content" va tu sua file. Thieu dung mot dong nay da
+        // lam hong toan bo file .xlsx.
+        sb.Append("<Relationship Id=\"rId").Append(sheetCount + 1)
+          .Append("\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles\" Target=\"styles.xml\"/>");
+
         sb.Append("</Relationships>");
         return sb.ToString();
     }
@@ -275,27 +289,50 @@ public sealed class XlsxWriter
         cleaned = cleaned.Trim('\'');
         if (cleaned.Length == 0) cleaned = "Bảng";
 
-        var candidate = cleaned.Length <= MaxSheetNameLength ? cleaned : cleaned[..MaxSheetNameLength];
+        var candidate = Truncate(cleaned, MaxSheetNameLength);
 
         int suffix = 2;
         while (!usedNames.Add(candidate))
         {
             var tag = $" ({suffix++})";
-            var keep = Math.Min(cleaned.Length, MaxSheetNameLength - tag.Length);
-            candidate = cleaned[..keep] + tag;
+            candidate = Truncate(cleaned, MaxSheetNameLength - tag.Length) + tag;
         }
 
         return candidate;
     }
+
+    /// <summary>
+    /// Cat chuoi ve toi da <paramref name="maxLength"/> ky tu MA KHONG lam vo
+    /// mot cap the thay the (surrogate pair).
+    ///
+    /// Ky tu ngoai mat phang co ban (emoji, mot so chu Han hiem) duoc luu bang
+    /// HAI ma don UTF-16. Cat ngay giua chung se de lai mot nua the thay the -
+    /// day KHONG phai ky tu XML hop le, va Excel se bao file hong.
+    /// </summary>
+    private static string Truncate(string value, int maxLength)
+    {
+        if (maxLength <= 0) return "";
+        if (value.Length <= maxLength) return value;
+
+        var end = maxLength;
+        if (char.IsHighSurrogate(value[end - 1])) end--;
+        return value[..end];
+    }
+
+    /// <summary>Excel tu choi o co qua 32.767 ky tu.</summary>
+    private const int MaxCellTextLength = 32767;
 
     /// <summary>Escape XML. Ky tu dieu khien bi loai bo vi XML 1.0 khong chap nhan.</summary>
     private static string X(string? value)
     {
         if (string.IsNullOrEmpty(value)) return "";
 
-        var sb = new StringBuilder(value.Length + 16);
-        foreach (var ch in value)
+        var text = Truncate(value, MaxCellTextLength);
+        var sb = new StringBuilder(text.Length + 16);
+
+        for (int i = 0; i < text.Length; i++)
         {
+            var ch = text[i];
             switch (ch)
             {
                 case '<': sb.Append("&lt;"); break;
@@ -303,7 +340,20 @@ public sealed class XlsxWriter
                 case '&': sb.Append("&amp;"); break;
                 case '"': sb.Append("&quot;"); break;
                 case '\'': sb.Append("&apos;"); break;
+
                 default:
+                    // Cap the thay the day du -> giu ca hai ma don.
+                    if (char.IsHighSurrogate(ch) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
+                    {
+                        sb.Append(ch).Append(text[++i]);
+                        break;
+                    }
+
+                    // Loai bo: ma dieu khien, the thay the LE, va U+FFFE/U+FFFF.
+                    // Ba nhom nay khong phai ky tu XML 1.0 hop le. Du lieu WMI
+                    // la du lieu ben ngoai, hoan toan co the chua chung.
+                    if (char.IsSurrogate(ch)) break;
+                    if (ch is '\uFFFE' or '\uFFFF') break;
                     if (ch is '\t' or '\n' or '\r' || ch >= ' ') sb.Append(ch);
                     break;
             }

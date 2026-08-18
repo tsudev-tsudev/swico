@@ -264,11 +264,18 @@ public static class RiskScoring
     }
 
     /// <summary>Ket luan tong the tu ket qua API Genuine + cac phat hien.</summary>
-    public static Verdict BuildVerdict(IReadOnlyList<RiskFinding> findings, bool genuineOk, bool genuineKnown)
+    /// <summary>
+    /// Ket luan tong the. <paramref name="license"/> la trang thai license da
+    /// duoc tong hop THAN TRONG (xem <c>WindowsLicenseSummary</c>): chi coi la
+    /// hop le khi khong con SKU nao co van de.
+    /// </summary>
+    public static Verdict BuildVerdict(IReadOnlyList<RiskFinding> findings, LicenseHealth license)
     {
+        ArgumentNullException.ThrowIfNull(findings);
+
         bool hasSevere = findings.Any(f => f.Level >= RiskLevel.High);
 
-        if (hasSevere || (genuineKnown && !genuineOk))
+        if (hasSevere || license == LicenseHealth.Problem)
         {
             return new Verdict
             {
@@ -276,6 +283,19 @@ public static class RiskScoring
                 Title = "❌ CÓ DẤU HIỆU RÕ RÀNG CỦA KÍCH HOẠT TRÁI PHÉP",
                 Detail = "Windows API và/hoặc dấu hiệu artifact cho thấy khả năng cao máy đang dùng license không hợp pháp. " +
                          "Cần kiểm tra thủ công ngay và đối chiếu với hồ sơ mua bản quyền của tổ chức."
+            };
+        }
+
+        // Con han dung thu KHONG phai vi pham, nhung cung KHONG phai hop le.
+        // Truoc day truong hop nay bi cham diem "hop le" - nay ha xuong canh bao.
+        if (license == LicenseHealth.Grace)
+        {
+            return new Verdict
+            {
+                Level = VerdictLevel.Warning,
+                Title = "⚠️ WINDOWS ĐANG TRONG THỜI GIAN DÙNG THỬ / GIA HẠN",
+                Detail = "Máy chưa ở trạng thái kích hoạt vĩnh viễn. Đây chưa phải vi phạm, nhưng license sẽ hết hiệu lực " +
+                         "khi hết thời gian gia hạn. Cần kích hoạt bằng license hợp pháp trước thời điểm đó."
             };
         }
 
@@ -290,7 +310,7 @@ public static class RiskScoring
             };
         }
 
-        if (genuineKnown && genuineOk)
+        if (license == LicenseHealth.Ok)
         {
             return new Verdict
             {

@@ -50,11 +50,14 @@ public static class LicenseReportBuilder
         });
 
         // --- 2. Ban quyen Windows ---
-        var (licTable, licensedCount) = WindowsLicenseCollector.Collect(ctx);
+        var (licTable, license) = WindowsLicenseCollector.Collect(ctx);
         report.Sections.Add(new ReportSection
         {
             Id = "sec-license", NavLabel = "2. Bản quyền Windows",
             Heading = "2. Trạng thái bản quyền Windows (Activation License)",
+            Description = $"Tổng hợp: {license.Describe()}. " +
+                          "Windows khai báo nhiều SKU dưới cùng một sản phẩm; kết luận chỉ là <b>hợp lệ</b> khi " +
+                          "<b>không còn SKU nào</b> ở trạng thái có vấn đề hoặc đang trong thời gian dùng thử.",
             Tables = { licTable },
             PreformattedText = SlmgrCollector.Collect(ctx)
         });
@@ -79,12 +82,10 @@ public static class LicenseReportBuilder
         var scope = ActivationRiskScanner.BuildScope(findings, rules);
         report.DetectionRulesVersion = rules.Version;
 
-        // Trang thai Genuine: suy ra tu LicenseStatus cua Windows.
-        bool genuineKnown = licensedCount > 0 || licTable.Rows.Count > 0;
-        bool genuineOk = licensedCount > 0;
-
-        var verdict = RiskScoring.BuildVerdict(findings, genuineOk, genuineKnown);
-        var score = RiskScoring.Compute(findings, genuineCheckFailed: genuineKnown && !genuineOk, manualReview.Count);
+        // Trang thai Genuine suy ra tu TOAN BO cac SKU, khong phai tu mot SKU
+        // bat ky nao dat trang thai Licensed - xem WindowsLicenseSummary.
+        var verdict = RiskScoring.BuildVerdict(findings, license.Overall);
+        var score = RiskScoring.Compute(findings, genuineCheckFailed: license.HasProblem, manualReview.Count);
 
         report.VerdictLevel = verdict.Level;
         report.VerdictText = verdict.Title;
@@ -152,7 +153,7 @@ public static class LicenseReportBuilder
         });
 
         report.SummaryCards.Add(new SummaryCard { Value = software.Count.ToString(CultureInfo.InvariantCulture), Label = "Tổng số phần mềm đã cài" });
-        report.SummaryCards.Add(new SummaryCard { Value = licensedCount.ToString(CultureInfo.InvariantCulture), Label = "Sản phẩm Windows có license" });
+        report.SummaryCards.Add(new SummaryCard { Value = $"{license.Ok}/{license.Total}", Label = "SKU Windows hợp lệ / tổng số" });
         report.SummaryCards.Add(new SummaryCard { Value = findings.Count.ToString(CultureInfo.InvariantCulture), Label = "Dấu hiệu kích hoạt trái phép" });
         report.SummaryCards.Add(new SummaryCard { Value = $"{score.Value}/100", Label = $"Điểm rủi ro ({score.Label})" });
 

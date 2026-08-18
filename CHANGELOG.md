@@ -41,6 +41,19 @@
 
 ### Sửa
 
+- **File `.xlsx` bị Excel báo hỏng và tự sửa.** `xl/_rels/workbook.xml.rels`
+  thiếu quan hệ trỏ tới `styles.xml`. Theo chuẩn OPC, một phần nằm trong gói mà
+  không quan hệ nào trỏ tới thì coi như không tồn tại — trong khi mọi ô đều
+  tham chiếu `s="0"`/`s="1"` vào đó. Kèm theo: bổ sung `<bookViews>` (vì
+  `sheetView` khai báo `workbookViewId="0"`), chống cắt vỡ cặp thế thay thế khi
+  rút gọn tên sheet, giới hạn 32.767 ký tự mỗi ô, và loại bỏ thế thay thế lẻ
+  cùng `U+FFFE`/`U+FFFF` khỏi dữ liệu WMI.
+- **Kết luận bản quyền báo NHẦM là hợp lệ.** Trạng thái Genuine được suy ra bằng
+  `licensedCount > 0` — chỉ cần **một SKU bất kỳ** ở trạng thái Licensed. Windows
+  khai báo nhiều SKU dưới cùng một ApplicationID, nên máy có SKU chính đang
+  `Notification`/`Unlicensed` nhưng có SKU phụ `Licensed` vẫn bị chấm "hợp lệ".
+  Nay chỉ kết luận hợp lệ khi **không còn SKU nào** ở trạng thái có vấn đề; trạng
+  thái còn hạn dùng thử hạ xuống mức **cảnh báo** thay vì hợp lệ.
 - **Lỗi định dạng phụ thuộc ngôn ngữ máy trong `FileNaming`.** Tên thư mục kết
   quả dùng `ToString("yyyyMMdd")` không truyền `IFormatProvider`. Trên máy đặt
   ngôn ngữ Thái hoặc Ả Rập, lịch mặc định không phải Gregorian nên năm cho ra
