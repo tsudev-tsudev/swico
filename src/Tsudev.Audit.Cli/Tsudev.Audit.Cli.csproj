@@ -22,8 +22,8 @@
 
            nen trong single-file + khong cat tia   29,1 MB   <- cau hinh cu
            bo nen                                  22,2 MB
-           bo nen + ReadyToRun                     23,7 MB
-           bo nen + ReadyToRun + cat tia            8,8 MB   <- cau hinh nay
+           bo nen + ReadyToRun                     23,7 MB   <- cau hinh nay
+           bo nen + ReadyToRun + cat tia            9,6 MB   <- DA THU, PHAI BO
 
          EnableCompressionInSingleFile=FALSE tuong nhu phan truc giac, nhung
          nen HAI LAN la phan tac dung: payload da nen roi thi Inno khong nen
@@ -35,21 +35,26 @@
          Ton them ~1,5 MB trong file setup, doi lai khoi dong nhanh hon han. -->
     <PublishReadyToRun>true</PublishReadyToRun>
 
-    <!-- Cat bo phan .NET khong duoc dung toi. Day la thiet lap co tac dong lon
-         nhat: file setup tu 23,7 MB con 8,8 MB.
-         Doi lai: moi cho doc/ghi JSON phai dung ma sinh luc bien dich thay vi
-         phan chieu - xem Core/Serialization/AuditJson.cs. -->
-    <PublishTrimmed>true</PublishTrimmed>
-    <TrimMode>partial</TrimMode>
+    <!-- ===== KHONG BAT PublishTrimmed - da thu va PHAI BO =====
 
-    <!-- Ha ba ma nay tu LOI xuong CANH BAO, CHI trong project nay.
-         Ca ba deu phat sinh tu ben trong System.Management/System.CodeDom -
-         cu the la ManagementClassGenerator, tinh nang sinh ma C# tu luoc do
-         WMI ma cong cu nay KHONG dung. Assembly do da duoc giu nguyen ven
-         bang TrimmerRootAssembly nen khong co gi bi cat.
-         Van de o muc canh bao (khong phai NoWarn) de con nhin thay chung neu
-         danh sach nay doi. Core va Windows van giu nguyen muc LOI. -->
-    <WarningsNotAsErrors>IL2026;IL2104;NETSDK1144</WarningsNotAsErrors>
+         Cat tia dua file setup tu 23,7 MB xuong 9,6 MB, rat hap dan. Nhung khi
+         chay THAT tren Windows, no lam MAT DU LIEU WMI mot cach am tham:
+
+           ban cat tia : 11 dong du lieu, tom tat "- - . 0 CPU . -"
+           ban day du  : 15 dong du lieu, tom tat "Microsoft Corporation
+                         Virtual Machine . 1 CPU . 16.0 GB"
+
+         Van hong DU DA dat TrimmerRootAssembly cho System.Management va dung
+         TrimMode=partial. Goi nay lam viec qua COM va phan chieu, nen trinh cat
+         tia khong the biet cai gi that su duoc dung.
+
+         Day la kieu sai TE NHAT ma cong cu nay co the mac: bao cao van sinh ra,
+         nhin binh thuong, nhung THIEU DU LIEU - va nguoi doc khong co dau hieu
+         nao de biet. Doi voi mot cong cu ket luan ve ban quyen, 15 MB tiet kiem
+         duoc khong the danh doi voi dieu do.
+
+         Neu sau nay muon thu lai: job smoke-windows trong ci.yml co san buoc so
+         sanh hai ban tren cung mot may - do la cach duy nhat phat hien duoc. -->
 
     <!-- Yeu cau quyen Administrator ngay khi chay (hien hop UAC).
          Can file app.manifest di kem - xem ben duoi. -->
