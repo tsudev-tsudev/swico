@@ -14,6 +14,15 @@ JavaScript nào từ bên ngoài.
 |---|---|---|---|---|
 | `System.Management` | 8.0.0 | MIT | `Tsudev.Audit.Windows` | Gói chính thức của Microsoft để truy vấn WMI/CIM. Không có cách nào khác để đọc thông tin phần cứng và trạng thái Defender trên Windows. |
 
+## Phụ thuộc bắc cầu
+
+Kéo theo tự động, không do dự án khai báo trực tiếp:
+
+| Gói | Phiên bản | Giấy phép | Đến từ |
+|---|---|---|---|
+| `System.CodeDom` | 8.0.0 | MIT | `System.Management` |
+| `Microsoft.NET.ILLink.Tasks` | 8.0.30 | MIT | SDK .NET (chỉ dùng lúc build, **không** đi vào file phát hành) |
+
 ## Nền tảng thực thi
 
 Bản phát hành là **self-contained**: thư viện thực thi .NET được đóng kèm nên
@@ -33,6 +42,9 @@ dùng gói bên thứ ba nào**.
 ```bash
 dotnet list Tsudev.SystemAudit.sln package --include-transitive
 ```
+
+Danh sách này được đối chiếu với SBOM sinh tự động trong quy trình phát hành.
+Chính SBOM đã phát hiện thiếu `System.CodeDom` ở bảng trên.
 
 SBOM chuẩn CycloneDX được sinh tự động và đính kèm mỗi bản phát hành (xem
 `.github/workflows/release.yml`).

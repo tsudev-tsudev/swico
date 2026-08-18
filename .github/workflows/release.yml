@@ -146,8 +146,19 @@ jobs:
       - name: Sinh SBOM (CycloneDX)
         shell: pwsh
         run: |
-          dotnet tool install --global CycloneDX
-          dotnet CycloneDX Tsudev.SystemAudit.sln -o packaging/output -f swico-sbom.json -j
+          # Ghim phien ban cong cu. Bai hoc tu viec CI tung build bang .NET 10:
+          # mot quy trinh phat hanh phai TAI LAP DUOC, khong duoc doi hanh vi vi
+          # mot cong cu ben ngoai tu nang cap. CycloneDX 6 da doi tham so dong
+          # lenh so voi ban 5 (-f -> -fn, -j -> -F Json) va lam hong buoc nay.
+          dotnet tool install --global CycloneDX --version 6.2.0
+          dotnet CycloneDX Tsudev.SystemAudit.sln `
+            --output packaging/output `
+            --filename swico-sbom.json `
+            --output-format Json `
+            --exclude-test-projects `
+            --set-name "tsuowlit SWICO" `
+            --set-version ${{ steps.ver.outputs.version }}
+          if ($LASTEXITCODE -ne 0) { throw 'Sinh SBOM THAT BAI' }
 
       # Checksum la bien phap bu dap khi CHUA co chu ky so, va van huu ich sau
       # khi da co: nguoi dung tu doi chieu duoc file tai ve.
