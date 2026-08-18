@@ -177,6 +177,12 @@ jobs:
       - name: Tao GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          # Phai chi RO tag. Khi chay bang workflow_dispatch, github.ref la
+          # "refs/heads/main" chu khong phai mot tag, va action se di tim release
+          # cho "tag" do roi that bai. Chi ro tag khien ca hai cach kich hoat
+          # (day tag va chay tay) deu hoat dong giong nhau.
+          tag_name: v${{ steps.ver.outputs.version }}
+          name: v${{ steps.ver.outputs.version }}
           files: packaging/output/*
           generate_release_notes: true
           draft: true
