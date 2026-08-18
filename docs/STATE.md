@@ -19,9 +19,11 @@ lúc nhận bàn giao (khi đó **không build được**).
 Build:    ✅ Build succeeded
 Test:     ✅ 64 PASS, 0 FAIL
 Publish:  ✅ publish/swico.exe — 34 MB, PE32+ x86-64
-Repo:     ✅ github.com/tsudev-tsudev/swico (PRIVATE)
+Repo:     ✅ github.com/tsudev-tsudev/swico (PRIVATE, 12 commit)
 CI:       ✅ xanh ca hai job, gom smoke test tren Windows runner
 Windows:  ✅ DA CHAY THAT - sinh duoc bao cao HTML
+Canh bao: ✅ 0 (TreatWarningsAsErrors dang bat)
+SDK:      ✅ ghim 8.0.424 qua global.json - dev va CI dung CUNG mot SDK
 ```
 
 **Việc còn lại KHÔNG nằm ở mã nguồn mà ở kiểm chứng thực tế và thủ tục:**
@@ -56,18 +58,39 @@ chạy thử trên Windows thật, và nộp hồ sơ SignPath Foundation.
 | CI/CD workflows | ✅ Viết xong — ⚠️ **chưa chạy thật** |
 | Tài liệu | ✅ README/PLAN/DECISIONS/SIGNING/CONTINUITY/CHANGELOG |
 
+## 3b. Đã làm thêm sau Phase 3
+
+| Việc | Trạng thái |
+|---|---|
+| Kho mã trên GitHub (private) | ✅ `tsudev-tsudev/swico` |
+| Tách luật phát hiện ra dữ liệu có phiên bản | ✅ `Core/Rules/` — điều kiện để công khai repo |
+| CLI `--rules`, `--version`; sửa `--help` sót tên cũ | ✅ |
+| Dọn 27 cảnh báo + bật `TreatWarningsAsErrors` | ✅ Lộ ra 1 lỗi thật ở `FileNaming` |
+| Ghim SDK bằng `global.json` | ✅ Lộ ra CI đang build bằng .NET 10 |
+
 ## 4. VIỆC TIẾP THEO — hai việc, cả hai đều cần người dùng
 
 ### 4.1 ⛔ Chạy kịch bản kiểm chứng Windows
 
 Mở `docs/WINDOWS-VERIFICATION.md`, chạy từng mục, điền cột "Kết quả thật".
 
-**Ba mục quan trọng nhất:**
+**Đã xong:** `swico.exe` chạy được trên Windows thật và sinh ra báo cáo HTML.
+
+**Ba mục còn lại, quan trọng nhất:**
 - **B2** — `MSFT_MpThreatDetection` có trường `ThreatName` không?
 - **C3** — mở file `.xlsx` bằng **Excel thật**, xem có báo "file hỏng" không
 - **D1** — đối chiếu kết quả với bộ PowerShell cũ trên cùng một máy
 
-### 4.2 ⛔ Nộp hồ sơ SignPath Foundation
+Bản mới nhất để thử: `dist/swico-portable.zip` (đã kèm `detection-rules.json`).
+
+### 4.2 ⛔ Chuyển repo sang public rồi nộp hồ sơ SignPath Foundation
+
+Rào cản kỹ thuật đã gỡ: luật phát hiện nay là dữ liệu cập nhật độc lập
+(Phase 5a), nên công khai mã nguồn không còn đồng nghĩa "đóng băng" bộ luật.
+
+```bash
+gh repo edit tsudev-tsudev/swico --visibility public --accept-visibility-change-consequences
+```
 
 Duyệt mất vài ngày tới vài tuần → **nộp sớm, làm việc khác trong lúc chờ**.
 Cần trước: đưa repo lên GitHub công khai + bật xác thực đa yếu tố.
