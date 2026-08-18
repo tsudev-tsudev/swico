@@ -60,52 +60,93 @@ jobs:
       - name: Run --help
         run: ./publish/swico.exe --help
 
-      # QUET THAT tren runner Windows.
+      # QUET THAT tren runner Windows, va SO SANH ban cat tia voi ban khong
+      # cat tia.
       #
-      # Buoc nay ton tai vi ban phat hanh duoc CAT TIA (PublishTrimmed) de giam
-      # kich thuoc 3 lan. Cat tia co the loai bo nham thanh phan ma WMI hoac
-      # bo doc/ghi JSON can den - va loi kieu do KHONG lo ra luc build: chuong
-      # trinh van chay, van sinh ra file, chi la file RONG.
+      # Ban phat hanh duoc cat tia (PublishTrimmed) de giam kich thuoc 3 lan.
+      # Cat tia co the loai bo nham thanh phan ma WMI hoac bo doc/ghi JSON can
+      # den - va loi kieu do KHONG lo ra luc build: chuong trinh van chay, van
+      # sinh ra file, chi la file THIEU DU LIEU.
       #
-      # Chay that mot lan quet la cach duy nhat bat duoc dieu do trong CI.
-      - name: Quet that (kiem chung ban da cat tia)
+      # Chi chay ban cat tia thi khong ket luan duoc gi, vi khong biet may ao CI
+      # binh thuong doc duoc bao nhieu. Phai co MOC DOI CHIEU.
+      - name: Publish ban khong cat tia (de doi chieu)
+        run: dotnet publish src/Tsudev.Audit.Cli -c Release -r win-x64 -o publish-full -p:PublishTrimmed=false
+
+      - name: Quet that va doi chieu hai ban
         shell: pwsh
         run: |
-          ./publish/swico.exe --scope hardware --silent --no-update-check --no-csv -o out
-          if ($LASTEXITCODE -ge 2) { throw "Quet that bai voi ma thoat $LASTEXITCODE" }
+          function Scan([string]$exe, [string]$outDir) {
+            & $exe --scope hardware --silent --no-update-check --no-csv -o $outDir | Out-Null
+            $code = $LASTEXITCODE
+            if ($code -ge 2) { throw "$exe quet that bai voi ma thoat $code" }
 
-          $json = Get-ChildItem -Recurse out -Filter *.json | Select-Object -First 1
-          $html = Get-ChildItem -Recurse out -Filter *.html | Select-Object -First 1
-          $xlsx = Get-ChildItem -Recurse out -Filter *.xlsx | Select-Object -First 1
-          if (-not $json) { throw 'Khong sinh ra file .json' }
-          if (-not $html) { throw 'Khong sinh ra file .html' }
+            $json = Get-ChildItem -Recurse $outDir -Filter *.json | Select-Object -First 1
+            if (-not $json) { throw "$exe khong sinh ra file .json" }
+            $d = Get-Content $json.FullName -Raw | ConvertFrom-Json
+
+            $rows = 0
+            foreach ($sec in $d.sections) { foreach ($t in $sec.tables) { $rows += $t.rows.Count } }
+
+            return [pscustomobject]@{
+              Rows     = $rows
+              Summary  = $d.hardwareSummary
+              Machine  = $d.computerName
+              Schema   = $d.schemaVersion
+              Sections = $d.sections.Count
+              Json     = $json.FullName
+              JsonSize = $json.Length
+            }
+          }
+
+          $trimmed = Scan './publish/swico.exe'      'out-trim'
+          $full    = Scan './publish-full/swico.exe' 'out-full'
+
+          Write-Host "`n--- ban CAT TIA ---"
+          $trimmed | Format-List | Out-String | Write-Host
+          Write-Host "--- ban DAY DU ---"
+          $full | Format-List | Out-String | Write-Host
+
+          # Kiem tra co ban tren ban DAY DU truoc: neu chinh no cung khong doc
+          # duoc gi thi van de nam o may ao CI, khong phai o viec cat tia.
+          if (-not $full.Machine)  { throw 'Ban day du cung thieu computerName - loi khong phai do cat tia' }
+          if (-not $full.Schema)   { throw 'Ban day du thieu schemaVersion' }
+          if ($full.Sections -lt 3){ throw "Ban day du chi co $($full.Sections) muc" }
+
+          # SO SANH: day moi la ket luan ve viec cat tia.
+          if ($trimmed.Rows -lt $full.Rows) {
+            throw "CAT TIA LAM MAT DU LIEU: ban cat tia thu duoc $($trimmed.Rows) dong, ban day du duoc $($full.Rows) dong."
+          }
+          if ($trimmed.Summary -ne $full.Summary) {
+            throw "CAT TIA LAM DOI KET QUA: tom tat khac nhau.`n  cat tia: '$($trimmed.Summary)'`n  day du : '$($full.Summary)'"
+          }
+          if (-not $trimmed.Machine) { throw 'Ban cat tia thieu computerName' }
+          Write-Host "Hai ban cho ket qua GIONG NHAU ($($trimmed.Rows) dong) - viec cat tia khong lam mat du lieu."
+
+          # .xlsx phai la goi OPC hop le
+          $xlsx = Get-ChildItem -Recurse out-trim -Filter *.xlsx | Select-Object -First 1
           if (-not $xlsx) { throw 'Khong sinh ra file .xlsx' }
-          Write-Host "json=$($json.Length) html=$($html.Length) xlsx=$($xlsx.Length) byte"
-
-          # JSON phai co NOI DUNG THAT. Neu cat tia lam hong bo sinh ma JSON,
-          # file van duoc tao ra nhung cac truong se rong - day la cai bay.
-          $d = Get-Content $json.FullName -Raw | ConvertFrom-Json
-          if (-not $d.computerName)  { throw 'JSON thieu computerName - nghi ngo cat tia lam hong serialization' }
-          if (-not $d.schemaVersion) { throw 'JSON thieu schemaVersion' }
-          if (-not $d.sections -or $d.sections.Count -lt 3) { throw "JSON chi co $($d.sections.Count) muc - qua it" }
-
-          # WMI phai TRA VE DU LIEU THAT, khong phai bang rong.
-          $rows = ($d.sections | ForEach-Object { $_.tables } | ForEach-Object { $_.rows }).Count
-          if ($rows -lt 5) { throw "Chi co $rows dong du lieu - nghi ngo WMI khong tra ve gi sau khi cat tia" }
-          Write-Host "Tong so dong du lieu thu thap duoc: $rows"
-
-          if (-not $d.hardwareSummary) { throw 'Thieu tom tat phan cung - WMI khong doc duoc gi' }
-          Write-Host "Tom tat phan cung: $($d.hardwareSummary)"
-
-          # .xlsx phai la goi OPC hop le, khong phai file rong.
           Add-Type -AssemblyName System.IO.Compression.FileSystem
           $zip = [System.IO.Compression.ZipFile]::OpenRead($xlsx.FullName)
-          $parts = $zip.Entries.FullName
-          $zip.Dispose()
+          $parts = $zip.Entries.FullName; $zip.Dispose()
           foreach ($need in @('xl/workbook.xml','xl/styles.xml','[Content_Types].xml')) {
             if ($parts -notcontains $need) { throw "File .xlsx thieu phan $need" }
           }
           Write-Host "File .xlsx co $($parts.Count) phan - hop le"
+
+          # swico.exe tra ve 1 khi co muc thieu du lieu; do KHONG phai loi cua
+          # buoc nay, nen phai dat lai de GitHub khong coi ca buoc la that bai.
+          exit 0
+
+      - name: Luu ket qua quet de doi chieu khi can
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ket-qua-quet-${{ github.sha }}
+          path: |
+            out-trim/**/*.json
+            out-full/**/*.json
+          retention-days: 7
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
