@@ -1,5 +1,5 @@
 ; ============================================================================
-;  tsuowlit SWICO - kich ban dong goi Inno Setup 6
+;  tsudev SWICO - kich ban dong goi Inno Setup 6
 ;
 ;  Bien dich:
 ;     iscc /DAppVersion=3.0.0 packaging\innosetup\swico.iss
@@ -10,11 +10,11 @@
 ; ============================================================================
 
 #ifndef AppVersion
-  #define AppVersion "3.0.0"
+  #define AppVersion "26.8.18"
 #endif
 
-#define AppName        "tsuowlit SWICO"
-#define AppPublisher   "tsuowlit"
+#define AppName        "tsudev SWICO"
+#define AppPublisher   "tsudev"
 #define AppUrl         "https://github.com/tsudev-tsudev/swico"
 #define AppExeName     "swico.exe"
 #define SourceExe      "..\..\publish\" + AppExeName
@@ -65,8 +65,18 @@ OutputDir=..\output
 OutputBaseFilename=swico-setup-{#AppVersion}
 ; Icon di kem trong repo. Neu thieu, ISCC bao loi va dung han - nen kiem tra
 ; su ton tai thay vi tin la no luon o do.
-#if FileExists(AddBackslash(SourcePath) + "swico.ico")
-SetupIconFile=swico.ico
+#if FileExists(AddBackslash(SourcePath) + "..\..\assets\swico.ico")
+SetupIconFile=..\..\assets\swico.ico
+#endif
+
+; Anh thuong hieu trong trinh thuat si. Inno Setup CHI nhan dinh dang BMP -
+; khong nhan PNG - nen hai file nay duoc sinh tu logo goc boi
+; packaging/tools/make-assets.py.
+#if FileExists(AddBackslash(SourcePath) + "..\..\assets\wizard-large.bmp")
+WizardImageFile=..\..\assets\wizard-large.bmp
+#endif
+#if FileExists(AddBackslash(SourcePath) + "..\..\assets\wizard-small.bmp")
+WizardSmallImageFile=..\..\assets\wizard-small.bmp
 #endif
 Compression=lzma2/max
 SolidCompression=yes

@@ -132,7 +132,7 @@ public sealed class CliOptions
 
     /// <summary>Toan van phan tro giup - tach ra de kiem thu duoc.</summary>
     public static string UsageText => """
-tsuowlit SWICO - Kiểm tra bản quyền Windows & cấu hình phần cứng
+tsudev SWICO - Kiểm tra bản quyền Windows & cấu hình phần cứng
 
 CÁCH DÙNG:
   swico.exe [tham số]

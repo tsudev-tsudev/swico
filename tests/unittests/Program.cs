@@ -427,6 +427,36 @@ var emojiName = XlsxWriter.MakeSafeSheetName(emojiTitle, new HashSet<string>());
 Check(emojiName.Length <= 31 && !char.IsSurrogate(emojiName[^1]),
     "cat ten sheet khong lam vo cap the thay the");
 
+Console.WriteLine("\n=== 9c. Thuong hieu trong bao cao ===");
+
+Check(html.Contains("data:image/png;base64,", StringComparison.Ordinal),
+    "logo duoc NHUNG thang vao trang (khong phu thuoc file ngoai)");
+Check(!html.Contains("src=\"assets/", StringComparison.Ordinal)
+   && !html.Contains(".png\"", StringComparison.Ordinal),
+    "khong tro toi file anh ben ngoai - bao cao copy di van hien duoc logo");
+Check(html.Contains("bw-tsu", StringComparison.Ordinal) && html.Contains("bw-dev", StringComparison.Ordinal),
+    "chu ky thuong hieu tach 'tsu' va 'dev' thanh hai the rieng de to hai mau");
+Check(html.Contains(">tsu<", StringComparison.Ordinal) && html.Contains(">dev<", StringComparison.Ordinal),
+    "chu ky la VAN BAN that (sac net khi in, doc duoc bang trinh doc man hinh)");
+
+// Logo phai la mot lien ket bam duoc toi tsudev.com
+var brandIdx = html.IndexOf("class=\"brand\"", StringComparison.Ordinal);
+Check(brandIdx > 0 && html.LastIndexOf("https://tsudev.com", brandIdx + 200, StringComparison.Ordinal) > 0,
+    "logo nam trong lien ket toi tsudev.com");
+Check(html.Contains("role=\"img\"", StringComparison.Ordinal)
+   && html.Contains("aria-label=\"tsudev\"", StringComparison.Ordinal),
+    "logo co van ban thay the cho trinh doc man hinh");
+
+// Logo hien o nhieu cho nhung du lieu base64 chi duoc nhung MOT lan (nam trong
+// CSS). Nhung lap se cong them ~13 KB cho moi lan xuat hien.
+Check(html.Split("data:image/png;base64,").Length - 1 == 1,
+    "du lieu logo chi xuat hien DUNG MOT lan trong ca trang");
+Check(html.Contains("rel=\"noopener noreferrer\"", StringComparison.Ordinal),
+    "lien ket ra ngoai co rel=noopener noreferrer");
+
+// Logo xuat hien o CA dau trang lan chan trang
+Check(html.Split("class=\"brand").Length - 1 >= 2, "thuong hieu hien o ca dau trang va chan trang");
+
 Console.WriteLine("\n=== 10. Bo luat phat hien tach roi ===");
 
 // Bo luat dong kem phai nap duoc va hop le - neu hong thi moi may deu "sach",

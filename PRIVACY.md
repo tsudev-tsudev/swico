@@ -1,6 +1,6 @@
 # Tuyên bố quyền riêng tư
 
-**Áp dụng cho:** `tsuowlit SWICO` phiên bản 3.x (bản CLI)
+**Áp dụng cho:** `tsudev SWICO` phiên bản 3.x (bản CLI)
 **Cập nhật:** 18/08/2026
 
 ## Tóm tắt trong một câu

@@ -3,6 +3,30 @@
 Định dạng theo [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/);
 đánh số phiên bản theo [SemVer](https://semver.org/lang/vi/).
 
+## [26.8.18] — 18/08/2026
+
+### Thay đổi
+
+- **Đổi hệ đánh số phiên bản sang CalVer `yy.M.d`.** Phiên bản `26.8.18` nghĩa là
+  bản phát hành ngày 18/08/2026 — nhìn tên file là biết ngay cũ hay mới.
+- **Đổi toàn bộ tên `tsuowlit` thành `tsudev`** cho khớp chủ sở hữu tsudev.com.
+  Winget ID nay là `tsudev.SWICO`. Bản ghi lịch sử trong `docs/journal/` và
+  `docs/DECISIONS.md` **giữ nguyên** tên cũ — sửa chúng là làm sai sự thật về
+  những gì đã diễn ra.
+
+### Thêm
+
+- **Logo tsudev trong báo cáo HTML**, kèm chữ ký thương hiệu "tsu" (xanh) +
+  "dev" (cam), cả khối là một liên kết tới tsudev.com. Hiện ở cả đầu trang lẫn
+  chân trang. Logo được **nhúng thẳng** dưới dạng data URI đặt trong CSS: báo
+  cáo phải xem được khi không có mạng và khi copy đi một mình, mà đặt trong CSS
+  thì dữ liệu chỉ xuất hiện **một lần** dù thương hiệu hiện ở nhiều chỗ
+  (tiết kiệm 13,4 KB mỗi báo cáo).
+- **Icon ứng dụng và ảnh trình thuật sĩ cài đặt** sinh từ chính logo gốc.
+- `packaging/tools/make-assets.py` — sinh mọi biến thể của logo từ file gốc.
+  Tự viết bộ giải mã/thu nhỏ PNG bằng zlib thuần vì môi trường không có thư
+  viện ảnh, và thêm một phụ thuộc chỉ để đổi kích thước một file là không đáng.
+
 ## [Chưa phát hành]
 
 ### Thêm
@@ -31,7 +55,7 @@
 
 ### Thay đổi
 
-- **Đổi tên sản phẩm thành `tsuowlit SWICO`.** Trước đó ba tên dùng lẫn lộn:
+- **Đổi tên sản phẩm thành `tsudev SWICO`.** Trước đó ba tên dùng lẫn lộn:
   thư mục `tsudev-swico`, assembly `tsudev-audit`, manifest `tsudev.SystemAudit`.
   Tên assembly nay là `swico.exe`; namespace `Tsudev.Audit.*` **giữ nguyên** vì
   đó là chi tiết nội bộ người dùng không thấy.

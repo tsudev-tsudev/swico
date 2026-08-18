@@ -1,4 +1,7 @@
-# tsuowlit SWICO
+# tsudev SWICO
+
+<img src="assets/tsudev-logo-144.png" alt="tsudev" align="right" height="120">
+
 
 Kiểm tra tình trạng bản quyền Windows/Office và thu thập cấu hình phần cứng —
 **một file `.exe` duy nhất**, không cần cài .NET Runtime.
@@ -10,6 +13,19 @@ Kiểm tra tình trạng bản quyền Windows/Office và thu thập cấu hình
 > luận pháp lý.** Xem [`EULA.txt`](EULA.txt) mục 3 trước khi dùng kết quả vào
 > bất kỳ quyết định nào có hệ quả với con người.
 
+## Đánh số phiên bản
+
+Dự án dùng **CalVer** theo dạng `yy.M.d` — phiên bản chính là ngày phát hành:
+
+| Phiên bản | Phát hành ngày |
+|---|---|
+| `26.8.18` | 18/08/2026 |
+| `26.9.3` | 03/09/2026 |
+
+Không có số 0 thừa ở đầu (`26.8.18`, không phải `26.08.18`) để khớp cách .NET và
+Inno Setup diễn giải số hiệu phiên bản. Ưu điểm: nhìn tên file
+`swico-setup-26.8.18.exe` là biết ngay bản đó cũ hay mới, không cần tra bảng.
+
 ## Cài đặt
 
 > ⚠️ **Chưa phát hành.** Repo GitHub và các lệnh dưới đây **chưa hoạt động** —
@@ -17,7 +33,7 @@ Kiểm tra tình trạng bản quyền Windows/Office và thu thập cấu hình
 > nguồn hiện chỉ tồn tại cục bộ. Xem `docs/STATE.md` để biết trạng thái thật.
 
 ```powershell
-winget install tsuowlit.SWICO
+winget install tsudev.SWICO
 ```
 
 Hoặc tải từ [Releases](https://github.com/tsudev-tsudev/swico/releases): file setup,
@@ -122,8 +138,11 @@ src/
     Testing/                                   Adapter giả lập cho unit test
   Tsudev.Audit.Windows/     net8.0-windows  ← Adapter mỏng: WMI, Registry, Process
   Tsudev.Audit.Cli/         net8.0-windows  ← 1 file exe
+assets/                     Logo gốc + các biến thể sinh tự động (icon, ảnh trình thuật sĩ)
+packaging/
+  tools/make-assets.py      Sinh mọi biến thể của logo từ file gốc
 tests/
-  unittests/                net8.0          ← 120 test, chạy được trên mọi nền tảng
+  unittests/                net8.0          ← 129 test, chạy được trên mọi nền tảng
 ```
 
 ### Vì sao tách `Core` khỏi Windows?
@@ -132,7 +151,7 @@ tests/
 
 1. **Kiểm thử được** — toàn bộ logic nghiệp vụ (quét dấu hiệu crack, tính điểm
    rủi ro, phân loại phần mềm, dựng HTML/XLSX) unit-test được **không cần máy
-   Windows**. 120 test chạy trên Linux.
+   Windows**. 129 test chạy trên Linux.
 2. **Dễ audit** — mọi lệnh gọi hệ thống tập trung trong đúng một file
    (`WindowsAdapters.cs`). Với một công cụ đọc dữ liệu nhạy cảm và đòi quyền
    Administrator, việc rà soát bảo mật làm được nhanh là điều thiết yếu.
@@ -169,6 +188,7 @@ trên máy không có mạng. Chi tiết: [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY
 | Chống HTML injection | ✅ Đã test |
 | XLSX: quy đổi tên cột, nhận diện số, tên sheet | ✅ Đã test |
 | Dashboard đọc sâu đa máy | ✅ Đã test |
+| Logo & chữ ký thương hiệu trong báo cáo | ✅ 9 test |
 | Bộ luật tách rời (nạp, kiểm tra, quay về mặc định) | ✅ Đã test |
 | CLI parse tham số | ✅ 21 test |
 | Mã thoát (gồm ca hồi quy Office chưa kích hoạt) | ✅ 11 test |
@@ -183,7 +203,7 @@ thật**. Cần xác nhận tên thuộc tính WMI, đặc biệt `MSFT_MpComput
 `MSFT_MpThreat`) và `MSFT_ScheduledTask`.
 
 Nếu có lỗi, hầu hết sẽ nằm gọn trong `WindowsAdapters.cs` — logic nghiệp vụ đã
-được 120 test kiểm chứng nên không cần đụng tới.
+được 129 test kiểm chứng nên không cần đụng tới.
 
 Kịch bản kiểm chứng đầy đủ: [`docs/WINDOWS-VERIFICATION.md`](docs/WINDOWS-VERIFICATION.md).
 
@@ -203,5 +223,5 @@ Kịch bản kiểm chứng đầy đủ: [`docs/WINDOWS-VERIFICATION.md`](docs/
 ## Giấy phép
 
 [Apache-2.0](LICENSE). Bạn được fork và phân phối bản sửa đổi, nhưng **không
-được dùng tên "tsuowlit" hay "SWICO"** để phát hành bản của mình (mục 6 của
+được dùng tên "tsudev" hay "SWICO"** để phát hành bản của mình (mục 6 của
 giấy phép). Xem [`NOTICE`](NOTICE).

@@ -170,7 +170,7 @@ Chạy tối thiểu trên 3 máy khác nhau. Càng khác nhau càng tốt.
 |---|---|---|---|
 | F1 | Chạy `swico-setup-3.0.0.exe` | Hiện EULA, cài được, hiện tiếng Việt | |
 | F2 | Mở Command Prompt mới, gõ `swico --help` | Chạy được (nếu đã chọn thêm vào PATH) | |
-| F3 | Bảng điều khiển → Programs | Có mục "tsuowlit SWICO", gỡ được | |
+| F3 | Bảng điều khiển → Programs | Có mục "tsudev SWICO", gỡ được | |
 | F4 | Sau khi gỡ: kiểm tra biến PATH | Đường dẫn đã bị rút ra, không để lại rác | |
 | F5 | Cài đè phiên bản cũ | Nâng cấp tại chỗ, **không** tạo mục thứ hai | |
 | F6 | `swico-setup-3.0.0.exe /VERYSILENT` | Cài im lặng, không hiện cửa sổ nào | |

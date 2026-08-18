@@ -1,19 +1,19 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
-PackageIdentifier: tsuowlit.SWICO
-PackageVersion: 3.0.0
+PackageIdentifier: tsudev.SWICO
+PackageVersion: 26.8.18
 PackageLocale: vi-VN
-Publisher: tsuowlit
+Publisher: tsudev
 PublisherUrl: https://github.com/tsudev-tsudev
 PublisherSupportUrl: https://github.com/tsudev-tsudev/swico/issues
-PackageName: tsuowlit SWICO
+PackageName: tsudev SWICO
 PackageUrl: https://github.com/tsudev-tsudev/swico
 License: Apache-2.0
 LicenseUrl: https://github.com/tsudev-tsudev/swico/blob/main/LICENSE
-Copyright: Copyright (c) 2026 tsuowlit
+Copyright: Copyright (c) 2026 tsudev
 CopyrightUrl: https://github.com/tsudev-tsudev/swico/blob/main/NOTICE
 ShortDescription: Kiểm tra bản quyền Windows và thu thập cấu hình phần cứng
 Description: |-
-  tsuowlit SWICO kiểm tra tình trạng kích hoạt bản quyền Windows và Office, thu
+  tsudev SWICO kiểm tra tình trạng kích hoạt bản quyền Windows và Office, thu
   thập cấu hình phần cứng, và rà soát các dấu hiệu kích hoạt bất thường trên máy.
 
   Kết quả xuất ra bốn định dạng cùng lúc: HTML để đọc, JSON để tích hợp, XLSX và
@@ -31,7 +31,7 @@ Tags:
   - inventory
   - license
   - windows
-ReleaseNotesUrl: https://github.com/tsudev-tsudev/swico/releases/tag/v3.0.0
+ReleaseNotesUrl: https://github.com/tsudev-tsudev/swico/releases/tag/v26.8.18
 Documentations:
   - DocumentLabel: Hướng dẫn sử dụng
     DocumentUrl: https://github.com/tsudev-tsudev/swico/blob/main/README.md

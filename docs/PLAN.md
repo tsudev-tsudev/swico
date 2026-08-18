@@ -46,7 +46,7 @@
 
 ## Phase 3 — Danh tính, pháp lý, đóng gói, CI/CD ✅
 
-- ✅ Chốt tên: **`tsuowlit SWICO`**, assembly `swico.exe`, winget `tsuowlit.SWICO`
+- ✅ Chốt tên: **`tsudev SWICO`**, assembly `swico.exe`, winget `tsudev.SWICO`
 - ✅ `LICENSE` (Apache-2.0), `NOTICE`, `THIRD-PARTY-NOTICES.md`
 - ✅ `EULA.txt` — mục 3 nói rõ báo cáo **không phải kết luận pháp lý**
 - ✅ `PRIVACY.md` — công cụ không kết nối mạng, không gửi dữ liệu đi đâu

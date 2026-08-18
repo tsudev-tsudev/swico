@@ -1,5 +1,5 @@
 <#
-    build.ps1 - Build, test va dong goi tsuowlit SWICO
+    build.ps1 - Build, test va dong goi tsudev SWICO
 
     Chay tren Windows co .NET 8 SDK. Cung chay duoc tren Linux/macOS bang
     pwsh - ke ca buoc publish win-x64 (cross-compile duoc), chi khong chay
@@ -24,7 +24,7 @@ Set-Location $PSScriptRoot
 $version = ([xml](Get-Content Directory.Build.props)).Project.PropertyGroup.VersionPrefix |
            Where-Object { $_ } | Select-Object -First 1
 if (-not $version) { throw 'Khong doc duoc VersionPrefix tu Directory.Build.props' }
-Write-Host "tsuowlit SWICO $version" -ForegroundColor Cyan
+Write-Host "tsudev SWICO $version" -ForegroundColor Cyan
 
 # --- 1/4 test ---------------------------------------------------------------
 if ($SkipTests) {

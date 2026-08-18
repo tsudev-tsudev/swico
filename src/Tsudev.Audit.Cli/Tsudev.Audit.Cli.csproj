@@ -20,6 +20,11 @@
     <!-- Yeu cau quyen Administrator ngay khi chay (hien hop UAC).
          Can file app.manifest di kem - xem ben duoi. -->
     <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <!-- Icon cua chinh file exe - hien trong Explorer, thanh tac vu va hop
+         thoai UAC. Dung CHUNG mot nguon voi trinh cai dat de khong bao gio
+         lech nhau; sinh tu logo goc boi packaging/tools/make-assets.py. -->
+    <ApplicationIcon>../../assets/swico.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>

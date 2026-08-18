@@ -31,13 +31,13 @@ SDK:      ✅ ghim 8.0.424 qua global.json - dev va CI dung CUNG mot SDK
 **Việc còn lại KHÔNG nằm ở mã nguồn mà ở kiểm chứng thực tế và thủ tục:**
 chạy thử trên Windows thật, và nộp hồ sơ SignPath Foundation.
 
-## 2. Sản phẩm: `tsuowlit SWICO`
+## 2. Sản phẩm: `tsudev SWICO`
 
 | Hạng mục | Giá trị |
 |---|---|
-| Tên sản phẩm | `tsuowlit SWICO` |
+| Tên sản phẩm | `tsudev SWICO` |
 | Assembly | `swico.exe` |
-| Winget ID | `tsuowlit.SWICO` |
+| Winget ID | `tsudev.SWICO` |
 | Namespace | `Tsudev.Audit.*` — **giữ nguyên**, chi tiết nội bộ |
 | Solution | `Tsudev.SystemAudit.sln` — giữ nguyên |
 | Tên miền thương hiệu | `https://tsudev.com` — **giữ nguyên** (bộ test khẳng định điều này) |

@@ -264,7 +264,7 @@ public static class Program
         var plus = version.IndexOf('+', StringComparison.Ordinal);
         if (plus > 0) version = version[..plus];
 
-        Console.WriteLine($"tsuowlit SWICO {version}");
+        Console.WriteLine($"tsudev SWICO {version}");
         Console.WriteLine($"Lược đồ dữ liệu: {AuditReport.CurrentSchemaVersion}");
         Console.WriteLine($"Bộ luật phát hiện đóng kèm: {DetectionRuleSet.Embedded.Version}");
     }

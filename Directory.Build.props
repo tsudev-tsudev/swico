@@ -5,11 +5,11 @@
        lay theo. Khong khai bao Version trong tung .csproj nua.
        ============================================================ -->
   <PropertyGroup>
-    <VersionPrefix>3.0.0</VersionPrefix>
-    <Company>tsuowlit</Company>
-    <Authors>tsuowlit</Authors>
-    <Product>tsuowlit SWICO</Product>
-    <Copyright>Copyright (c) 2026 tsuowlit</Copyright>
+    <VersionPrefix>26.8.18</VersionPrefix>
+    <Company>tsudev</Company>
+    <Authors>tsudev</Authors>
+    <Product>tsudev SWICO</Product>
+    <Copyright>Copyright (c) 2026 tsudev</Copyright>
     <Description>Kiểm tra bản quyền Windows và thu thập cấu hình phần cứng</Description>
     <RepositoryUrl>https://github.com/tsudev-tsudev/swico</RepositoryUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>

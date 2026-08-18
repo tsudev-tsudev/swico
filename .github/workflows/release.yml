@@ -156,7 +156,7 @@ jobs:
             --filename swico-sbom.json `
             --output-format Json `
             --exclude-test-projects `
-            --set-name "tsuowlit SWICO" `
+            --set-name "tsudev SWICO" `
             --set-version ${{ steps.ver.outputs.version }}
           if ($LASTEXITCODE -ne 0) { throw 'Sinh SBOM THAT BAI' }
 
@@ -190,7 +190,7 @@ jobs:
             ## Cài đặt
 
             ```
-            winget install tsuowlit.SWICO
+            winget install tsudev.SWICO
             ```
 
             Hoặc tải file setup bên dưới. Bản portable là file `.zip`, giải nén
