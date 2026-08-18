@@ -1,161 +1,199 @@
 # STATE — Trạng thái sống của dự án
 
 > **File này là nguồn sự thật DUY NHẤT về "đang làm tới đâu".**
-> Phiên Claude Code mới **BẮT BUỘC đọc file này đầu tiên**.
-> Quy ước cập nhật: xem `docs/CONTINUITY.md`.
+> Phiên Claude Code mới **BẮT BUỘC đọc file này đầu tiên**, trước cả README.
+> Quy ước cập nhật: `docs/CONTINUITY.md`.
 
-- **Cập nhật lần cuối:** 2026-08-18
-- **Phiên gần nhất:** S001
-- **Giai đoạn:** Phase 1–3 + 5a xong ✅ · **Phase 4 đang chờ người dùng** 🔄
+- **Cập nhật lần cuối:** 2026-08-18 (cuối phiên S001)
+- **Phiên gần nhất:** S001 — `docs/journal/S001-2026-08-18.md`
+- **Giai đoạn:** đã phát hành `v26.8.18.2`; còn 3 việc chờ người dùng + 1 nhóm việc kỹ thuật
 
 ---
 
-## 1. Kết luận ngắn gọn về hiện trạng
-
-Dự án **đã build được, test xanh, đóng gói được**. Đây là thay đổi lớn so với
-lúc nhận bàn giao (khi đó **không build được**).
+## 1. Tình trạng kỹ thuật
 
 ```
-Build:    ✅ Build succeeded
-Test:     ✅ 173 PASS, 0 FAIL
-Publish:  ✅ publish/swico.exe — 34 MB, PE32+ x86-64
-Repo:     ✅ github.com/tsudev-tsudev/swico (PUBLIC)
-Release:  ✅ v26.8.18 DA PHAT HANH CHINH THUC (khong con ban nhap)
-Installer:✅ Inno Setup BIEN DICH DUOC (truoc do co 4 loi dung han)
-CI:       ✅ xanh ca hai job, gom smoke test tren Windows runner
-Windows:  ✅ DA CHAY THAT - sinh duoc bao cao HTML
-Canh bao: ✅ 0 (TreatWarningsAsErrors dang bat)
-SDK:      ✅ ghim 8.0.424 qua global.json - dev va CI dung CUNG mot SDK
+Build     : ✅ 0 cảnh báo (TreatWarningsAsErrors đang bật)
+Test      : ✅ 173 PASS, 0 FAIL
+CI        : ✅ xanh — gồm QUÉT THẬT trên Windows runner + kiểm tra chất lượng dữ liệu
+Release   : ✅ v26.8.18.2 đã phát hành chính thức (Latest)
+Repo      : ✅ github.com/tsudev-tsudev/swico — PUBLIC, 33 commit, working tree sạch
+SDK       : ✅ ghim 8.0.424 qua global.json (dev và CI dùng CÙNG một SDK)
+Windows   : ✅ đã chạy thật, cài thật, dữ liệu đúng, đối chiếu với bản PowerShell cũ xong
 ```
 
-**Việc còn lại KHÔNG nằm ở mã nguồn mà ở kiểm chứng thực tế và thủ tục:**
-chạy thử trên Windows thật, và nộp hồ sơ SignPath Foundation.
-
-## 2. Sản phẩm: `tsudev SWICO`
+## 2. Sản phẩm
 
 | Hạng mục | Giá trị |
 |---|---|
-| Tên sản phẩm | `tsudev SWICO` |
+| Tên | `tsudev SWICO` |
 | Assembly | `swico.exe` |
 | Winget ID | `tsudev.SWICO` |
+| Phiên bản | **26.8.18.2** — CalVer `yy.M.d[.N]` (`Directory.Build.props`) |
 | Namespace | `Tsudev.Audit.*` — **giữ nguyên**, chi tiết nội bộ |
-| Solution | `Tsudev.SystemAudit.sln` — giữ nguyên |
-| Tên miền thương hiệu | `https://tsudev.com` — **giữ nguyên** (bộ test khẳng định điều này) |
+| Tên miền | `https://tsudev.com` (bộ test khẳng định điều này) |
 | Giấy phép | Apache-2.0 |
-| Ký số | SignPath Foundation |
-| Phiên bản | **26.8.18.1** — CalVer `yy.M.d[.N]` (`Directory.Build.props`) |
+| Ký số | SignPath Foundation — **đang chờ duyệt** |
 
-## 3. Cái gì đã có
+---
 
-| Thành phần | Trạng thái |
+## 3. VIỆC TIẾP THEO — đọc mục này rồi làm
+
+### 3.1 ⛔ Hoàn tất PR winget #419878 — **cần người dùng**
+
+PR đã mở: https://github.com/microsoft/winget-pkgs/pull/419878
+
+**QUAN TRỌNG — tôi đã ghi RÕ TRONG PR là hai việc sau CHƯA làm.** Đừng tick chúng
+mà chưa thực sự chạy:
+
+1. **Ký CLA** khi bot của Microsoft yêu cầu trên PR.
+2. Trên máy Windows, chạy rồi **báo kết quả vào PR**:
+   ```powershell
+   winget validate --manifest <thư-mục-manifest>
+   winget install  --manifest <thư-mục-manifest>
+   ```
+   Manifest lấy từ `winget-manifest-26.8.18.2.zip` đính kèm bản phát hành.
+
+Đã kiểm chứng sẵn: hash khớp file đã phát hành, URL tải được HTTP 200 đúng dung
+lượng, manifest đúng lược đồ 1.6.
+
+`winget install tsudev.SWICO` chỉ chạy được **sau khi PR được hợp nhất**. Trong
+lúc chờ, dùng `packaging/tools/winget-local-install.ps1`.
+
+### 3.2 ⛔ Kiểm chứng chức năng tự cập nhật — **cần người dùng**
+
+`v26.8.18.2` đã phát hành nên bản **26.8.18 đang cài trên máy** sẽ phát hiện được.
+Chạy nó và kiểm:
+
+| Việc | Kỳ vọng |
 |---|---|
-| `Core/Models`, `Abstractions`, `Collectors`, `Reports`, `Testing` | ✅ Có từ đầu |
-| **`Core/Rendering`** | ✅ **Đã viết mới ~840 dòng** ở phiên S001 |
-| `Tsudev.Audit.Windows` | ✅ Biên dịch được — ⚠️ **chưa chạy trên Windows thật** |
-| `Tsudev.Audit.Cli` | ✅ Có |
-| Project files, `.sln`, `Directory.Build.props` | ✅ Đã tạo |
-| Git repo | ✅ Đã init, 7 commit |
-| Pháp lý: LICENSE/NOTICE/EULA/PRIVACY/THIRD-PARTY | ✅ Đủ |
-| Installer Inno Setup + winget manifest | ✅ Viết xong — ⚠️ **chưa build thử** |
-| CI/CD workflows | ✅ Viết xong — ⚠️ **chưa chạy thật** |
-| Tài liệu | ✅ README/PLAN/DECISIONS/SIGNING/CONTINUITY/CHANGELOG |
+| Chạy bản 26.8.18 đã cài | Hộp thoại **một nút "Cập nhật"** → tải → đối chiếu SHA-256 → chạy installer |
+| `swico.exe --silent` | Mã thoát **30**, **KHÔNG** hiện hộp thoại |
+| `swico.exe --no-update-check` | Quét bình thường, không kết nối mạng |
+| Đo lại tốc độ cài | Setup nay 24,9 MB thay vì 29,8 MB |
 
-## 3b. Đã làm thêm sau Phase 3
+### 3.3 ⛔ Sau khi SignPath duyệt — **cần người dùng**
 
-| Việc | Trạng thái |
-|---|---|
-| Kho mã trên GitHub (private) | ✅ `tsudev-tsudev/swico` |
-| Tách luật phát hiện ra dữ liệu có phiên bản | ✅ `Core/Rules/` — điều kiện để công khai repo |
-| CLI `--rules`, `--version`; sửa `--help` sót tên cũ | ✅ |
-| Dọn 27 cảnh báo + bật `TreatWarningsAsErrors` | ✅ Lộ ra 1 lỗi thật ở `FileNaming` |
-| Ghim SDK bằng `global.json` | ✅ Lộ ra CI đang build bằng .NET 10 |
+1. Thêm secret `SIGNPATH_API_TOKEN` và variable `SIGNPATH_ORGANIZATION_ID`.
+2. Phía SignPath: `project-slug=swico`, `signing-policy-slug=release-signing`,
+   `artifact-configuration-slug` = `exe` và `installer`.
+3. Chạy lại `release.yml` — các bước ký **tự kích hoạt** nhờ điều kiện
+   `SIGNPATH_CONFIGURED`, gồm cả bước xác minh chữ ký **và dấu thời gian**.
+4. Nộp manifest winget mới cho bản đã ký.
 
-## 4. VIỆC TIẾP THEO — hai việc, cả hai đều cần người dùng
-
-### 4.1 ⛔ Chạy kịch bản kiểm chứng Windows
-
-Mở `docs/WINDOWS-VERIFICATION.md`, chạy từng mục, điền cột "Kết quả thật".
-
-**Đã chạy 18/08 và tìm ra HAI LỖI THẬT, cả hai đã sửa — cần thử lại:**
-
-| Mục | Kết quả | Trạng thái |
-|---|---|---|
-| Chạy exe, sinh báo cáo HTML | ✅ Được | xong |
-| **C3** mở `.xlsx` bằng Excel | ❌ Excel báo hỏng | ✅ **đã sửa và người dùng xác nhận mở bình thường** |
-| **B2** tên thuộc tính WMI | ✅ chạy được, đọc đúng SKU Windows + Office | ✅ xong |
-| **D1** đối chiếu PowerShell cũ | ❌ swico báo hợp lệ, PowerShell báo không | ✅ **đã sửa và người dùng xác nhận chuẩn xác** |
-| Mã thoát không phản ánh kết luận | ❌ luôn trả 0 | ✅ **đã sửa, xác nhận trả về 10** |
-| Terminal mất màu lịch sử cuộn | ❌ do gán `Console.OutputEncoding` | ✅ **đã sửa, xác nhận buffer nguyên vẹn** |
-
-**Phase 4 đã đóng hoàn toàn.** Còn lại duy nhất mục F (chạy thử installer) —
-file setup nay đã tồn tại trong bản nháp `v3.0.0` nhưng **chưa ai cài thử**.
-
-**Nguyên nhân thật của D1** (chẩn đoán đầu tiên đã sai): Windows *đúng là* hợp
-lệ (`LicenseStatus 1`); vấn đề nằm ở **Office `LicenseStatus 5` không hề tham
-gia vào kết luận**. Xem `docs/journal/` mục 20:30.
-
-**Ba mục còn lại, quan trọng nhất:**
-- **B2** — `MSFT_MpThreatDetection` có trường `ThreatName` không?
-- **C3** — mở file `.xlsx` bằng **Excel thật**, xem có báo "file hỏng" không
-- **D1** — đối chiếu kết quả với bộ PowerShell cũ trên cùng một máy
-
-Bản mới nhất để thử: `dist/swico-portable.zip` (đã kèm `detection-rules.json`).
-
-### 4.2 ⛔ Chuyển repo sang public rồi nộp hồ sơ SignPath Foundation
-
-Rào cản kỹ thuật đã gỡ: luật phát hiện nay là dữ liệu cập nhật độc lập
-(Phase 5a), nên công khai mã nguồn không còn đồng nghĩa "đóng băng" bộ luật.
-
-```bash
-gh repo edit tsudev-tsudev/swico --visibility public --accept-visibility-change-consequences
-```
-
-Duyệt mất vài ngày tới vài tuần → **nộp sớm, làm việc khác trong lúc chờ**.
-Cần trước: đưa repo lên GitHub công khai + bật xác thực đa yếu tố.
 Chi tiết: `docs/SIGNING.md`.
 
-## 5. Cạm bẫy đã biết — đọc để khỏi vấp lại
+### 3.4 ⬜ Việc kỹ thuật còn lại — làm được không cần người dùng
 
-- **Công cụ nay CÓ kết nối Internet** (kiểm tra cập nhật). `PRIVACY.md` và
-  `EULA.txt` đã sửa cho đúng — bản 26.8.18 từng hứa "không kết nối Internet".
-  Mọi mã chạm mạng nằm gọn trong `src/Tsudev.Audit.Windows/UpdateAdapters.cs`;
-  giữ nguyên tính chất "một file duy nhất" đó khi sửa về sau.
-- **Logo và các biến thể sinh bằng `packaging/tools/make-assets.py`.** Sửa
-  `assets/tsudev-logo.png` xong phải chạy lại script; icon, ảnh trình thuật sĩ
-  và bản nhúng vào HTML đều dẫn xuất từ file gốc đó.
-- **Bản ghi lịch sử (`docs/journal/`, `docs/DECISIONS.md`) vẫn dùng tên cũ
-  `tsuowlit`** — cố ý giữ, đừng "sửa cho đồng bộ".
-- **KHÔNG BAO GIỜ tải tệp từ `dist/` lên GitHub Release.** `dist/` là bản dựng
-  cục bộ để chuyển sang máy Windows lúc phát triển. Chỉ tệp do `release.yml`
-  sinh ra mới là bản phát hành, và chỉ chúng mới nằm trong `SHA256SUMS.txt`.
-  Đã từng xảy ra: một `swico-portable.zip` cục bộ (binary **cũ hơn**, không có
-  trong checksum) bị tải lên bản `v26.8.18`. Nay tệp cục bộ mang hậu tố
-  `-local` và có số phiên bản để không thể nhầm.
-- **Khi hai release cùng một tag** (bản nháp + bản đã phát hành), `gh release
-  delete <tag>` là **nguy hiểm** — nó có thể xoá nhầm bản đã phát hành. Phải
-  xoá theo **ID**: `gh api repos/OWNER/REPO/releases` để lấy id, rồi
-  `gh api -X DELETE .../releases/<id>`.
-- **`global.json` ghim SDK 8.0.424 — đừng xoá.** Runner GitHub có sẵn .NET 10
-  SDK và `dotnet build` luôn chọn bản mới nhất nếu không ghim, khiến CI và máy
-  dev dùng hai bộ phân tích khác nhau (đã từng làm CI đỏ với CA1859).
+Xếp theo giá trị giảm dần:
+
+1. **Chuyển bộ test sang xUnit.** Hiện là bộ tự chế đếm pass/fail thủ công
+   (`tests/unittests/Program.cs`, ~800 dòng top-level statements). 173 ca trong
+   một file là quá nhiều cho một file. xUnit cho báo lỗi tử tế, chạy song song,
+   tích hợp CI chuẩn.
+2. **Tách file gộp nhiều class thành file riêng** (`InventoryCollectors.cs` 4 class,
+   `LicenseCollectors.cs` 5 class). Đã hoãn từ Phase 1 vì lúc đó chưa có test;
+   nay có 173 test làm lưới an toàn.
+3. **Logging có cấu trúc** thay `Console.WriteLine` rải rác, kèm tuỳ chọn ghi log
+   ra file cho tình huống hỗ trợ từ xa.
+4. **`--json-only`** cho tích hợp máy-đọc-máy.
+5. **NativeAOT** — cân nhắc, nhưng đọc mục 4 trước: cắt tỉa đã hỏng, NativeAOT
+   gần như chắc chắn cũng hỏng vì cùng nguyên nhân (WMI qua COM + phản chiếu).
+
+---
+
+## 4. CẠM BẪY ĐÃ BIẾT — đọc để khỏi vấp lại
+
+### 4.1 Về đóng gói và hiệu năng
+
+- **KHÔNG bật `PublishTrimmed`.** Đã thử: file setup xuống 9,6 MB nhưng **làm mất
+  dữ liệu WMI âm thầm** (11 dòng + `0 CPU` thay vì 15 dòng + dữ liệu thật). Vẫn
+  hỏng dù đã đặt `TrimmerRootAssembly` cho `System.Management`. Báo cáo vẫn sinh
+  ra, nhìn bình thường, nhưng thiếu dữ liệu.
+- **NativeAOT gần như chắc chắn hỏng cùng lý do.** Nếu muốn thử, phải dùng cách
+  đã dùng cho cắt tỉa: thêm bước publish thứ hai vào `ci.yml` rồi **so sánh số
+  dòng và tóm tắt phần cứng của hai bản trên CÙNG một máy**. Đó là cách duy nhất
+  phát hiện được.
+- **`EnableCompressionInSingleFile` phải là `false`.** Bật lên làm file setup
+  **to hơn** (nén hai lần là phản tác dụng).
+- Đổi lại: `swico.exe` tải trực tiếp to hơn gấp đôi (75,8 MB). Có chủ đích, đã
+  ghi rõ trong README.
+
+### 4.2 Về môi trường dev
+
 - Máy dev là **Linux**. `dotnet` **không có trong PATH mặc định**:
-  `export PATH="$HOME/.dotnet:$PATH"` (SDK 8.0.424 đã cài ở `~/.dotnet`).
-- `net8.0-windows` **build được trên Linux**, `publish -r win-x64` cũng chạy.
-  Nhưng **không chạy thử được** file exe ở đây.
-- `System.Management` biên dịch được trên Linux nhưng ném exception khi chạy —
-  đây là lý do kiến trúc Ports & Adapters tồn tại, **đừng "sửa" nó**.
-- **Môi trường không có `pip`, `openpyxl`, LibreOffice, Excel.** File XLSX chỉ
-  kiểm được bằng phân tích XML thủ công. Ở Phase 2 đã có **một lỗi loại này lọt
-  lưới** (`<pane>` sai vị trí) — XML hợp lệ nhưng Excel từ chối.
-- Comment trong file XML/csproj **không được chứa `--`** (`dotnet run --project`
-  trong comment làm hỏng cả file).
-- Ngữ cảnh `secrets` của GitHub Actions **không dùng được trong `if:` cấp step**.
-- **`github.com/tsudev-tsudev/swico` CHƯA TỒN TẠI** — là URL điền tạm có mặt trong
-  README, `Directory.Build.props`, manifest winget, `swico.iss`, `EULA.txt`,
-  `PRIVACY.md`. Repo chưa có remote nào (`git remote -v` trống), 7 commit chỉ
-  nằm trên máy dev này. `git clone` URL đó sẽ báo không tìm thấy.
-- Máy dev Linux này **không phải WSL** — máy Windows là máy tách biệt, phải
-  chuyển file qua USB/mạng. Đã tạo sẵn `dist/swico-portable.zip` và
-  `dist/swico-repo.bundle` cho việc này.
-- Bộ test **khẳng định** báo cáo HTML phải chứa `https://tsudev.com`
-  (`tests/unittests/Program.cs:174`) — đổi tên miền là phải sửa test.
+  `export PATH="$HOME/.dotnet:$PATH"`.
+- **`global.json` ghim SDK 8.0.424 — đừng xoá.** Runner GitHub có sẵn .NET 10 và
+  `dotnet build` luôn chọn bản mới nhất nếu không ghim (đã từng làm CI đỏ).
+- **Không có `pip`, `openpyxl`, LibreOffice, Excel, `winget`, Inno Setup.** Mọi
+  thứ cần Windows phải kiểm chứng qua CI hoặc nhờ người dùng.
+- `--no-incremental` **không phải** tham số của `dotnet publish` (chỉ có ở `build`).
+
+### 4.3 Về kiến trúc
+
+- **Logic thuần phải nằm trong Core**, không phải lớp adapter — nếu không thì bộ
+  test chạy trên Linux không với tới được. Đã vấp **hai lần** trong phiên S001:
+  `CliOptions` (README từng tuyên bố "16/16 test" khi không có test nào), và
+  `GitHubReleaseParser`/`ChecksumFile`.
+- **Mọi mã chạm mạng nằm gọn trong `src/Tsudev.Audit.Windows/UpdateAdapters.cs`.**
+  Giữ nguyên tính chất "một file duy nhất" đó — `PRIVACY.md` mời người dùng tự
+  kiểm chứng bằng cách đọc đúng file đó.
+- **Mọi chỗ đọc/ghi JSON đi qua `Core/Serialization/AuditJson.cs`** (mã sinh lúc
+  biên dịch). Đừng gọi `JsonSerializer` trực tiếp ở nơi khác.
+- Bộ luật phát hiện là **dữ liệu có phiên bản** (`Core/Rules/`), không phải mã.
+  File ngoài **luôn thắng** bộ luật đóng kèm → có cảnh báo lệch phiên bản.
+
+### 4.4 Về phát hành
+
+- **KHÔNG BAO GIỜ tải tệp từ `dist/` lên GitHub Release.** Đã từng xảy ra: một
+  `swico-portable.zip` cục bộ chứa binary **cũ hơn** và không có trong
+  `SHA256SUMS.txt` bị tải lên bản `v26.8.18`.
+- **Hai release cùng một tag** thì `gh release delete <tag>` **nguy hiểm** — có
+  thể xoá nhầm bản đã phát hành. Phải xoá theo **ID**:
+  `gh api repos/OWNER/REPO/releases` lấy id rồi `gh api -X DELETE .../releases/<id>`.
+- **Manifest winget KHÔNG cam kết sẵn trong repo** — chỉ có template. Hash chỉ
+  biết sau khi đóng gói và ký, nên manifest cam kết sẵn luôn mang hash sai.
+- **Logo và biến thể** sinh bằng `packaging/tools/make-assets.py`. Sửa
+  `assets/tsudev-logo.png` xong phải chạy lại script.
+
+### 4.5 Về tính trung thực của tài liệu
+
+Trong phiên S001, **bốn lần** tài liệu hứa thứ chưa tồn tại — đây là lớp lỗi hay
+lặp lại nhất, cần chủ động chống:
+
+| Lần | Nội dung sai |
+|---|---|
+| 1 | README mô tả solution 4 project + "54 test xanh" khi dự án **không build được** |
+| 2 | Hướng dẫn `git clone` một URL repo **chưa tạo** |
+| 3 | "CLI parse tham số: 16/16 test" khi **không có test CLI nào** |
+| 4 | `winget install tsudev.SWICO` khi gói **chưa nộp** lên kho cộng đồng |
+
+Và một lần trong PR gửi ra ngoài: **tự tick các ô** "đã ký CLA", "đã chạy
+`winget validate`" trong PR gửi `microsoft/winget-pkgs` khi chưa làm. Đã sửa.
+
+**Quy tắc rút ra:** viết tài liệu theo trạng thái **thật**, không theo trạng thái
+mong muốn. Mọi ô tick trong mẫu PR là một lời khai — tick một ô chưa làm là nói
+dối với người sẽ đọc nó.
+
+### 4.6 Bản ghi lịch sử — cố ý KHÔNG sửa
+
+`docs/journal/` và `docs/DECISIONS.md` vẫn dùng tên cũ **`tsuowlit`** và URL cũ.
+Đó là bản ghi những gì đã diễn ra; sửa chúng là làm sai sự thật. **Đừng "sửa cho
+đồng bộ".**
+
+---
+
+## 5. Bản đồ tài liệu
+
+| File | Nội dung |
+|---|---|
+| `docs/STATE.md` | **File này** — đọc đầu tiên |
+| `docs/CONTINUITY.md` | Giao thức nối tiếp phiên, môi trường dev |
+| `docs/PLAN.md` | Lộ trình theo giai đoạn |
+| `docs/DECISIONS.md` | Đối chiếu với artifact kế hoạch, các quyết định đã chốt |
+| `docs/journal/S001-2026-08-18.md` | Toàn bộ diễn biến phiên S001, kèm **lý do** từng quyết định |
+| `docs/SIGNING.md` | Ký số qua SignPath |
+| `docs/WINGET.md` | Nộp winget + cách dùng ngay |
+| `docs/UPDATES.md` | Chức năng tự cập nhật |
+| `docs/DETECTION-RULES.md` | Bộ luật phát hiện |
+| `docs/WINDOWS-VERIFICATION.md` | Kịch bản kiểm chứng trên Windows |
