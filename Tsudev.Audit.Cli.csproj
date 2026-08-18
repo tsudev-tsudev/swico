@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+
+    <AssemblyName>tsudev-audit</AssemblyName>
+    <RootNamespace>Tsudev.Audit.Cli</RootNamespace>
+    <Version>3.0.0</Version>
+    <Company>tsudev</Company>
+    <Product>tsudev System Audit</Product>
+    <Description>Kiểm tra bản quyền Windows và thu thập cấu hình phần cứng</Description>
+
+    <!-- Xuat 1 FILE EXE DUY NHAT, khong can cai .NET Runtime tren may dich.
+         Build bang:
+           dotnet publish src/Tsudev.Audit.Cli -c Release -r win-x64
+         (cac thuoc tinh duoi day chi ap dung khi publish, khong anh huong build thuong) -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <InvariantGlobalization>false</InvariantGlobalization>
+
+    <!-- Yeu cau quyen Administrator ngay khi chay (hien hop UAC).
+         Can file app.manifest di kem - xem ben duoi. -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Tsudev.Audit.Windows/Tsudev.Audit.Windows.csproj" />
+  </ItemGroup>
+</Project>

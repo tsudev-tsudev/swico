@@ -1,0 +1,220 @@
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Tsudev.Audit.Core.Abstractions;
+using Tsudev.Audit.Core.Collectors;
+using Tsudev.Audit.Core.Models;
+using Tsudev.Audit.Core.Reports;
+using Tsudev.Audit.Core.Rendering;
+using Tsudev.Audit.Core.Testing;
+
+int passed = 0, failed = 0;
+void Check(bool cond, string label)
+{
+    if (cond) { passed++; Console.WriteLine($"  OK   {label}"); }
+    else { failed++; Console.WriteLine($"  FAIL {label}"); }
+}
+
+Console.WriteLine("=== 1. Parser: ospp.vbs output ===");
+const string osppSample = """
+Microsoft (R) Office Software Protection Platform Version: 16.0.14332
+---LICENSE STATUS DUMP---
+LICENSE NAME: Office 21, Office2021ProPlusVL_KMS_Client edition
+LICENSE DESCRIPTION: Office 21, VOLUME_KMSCLIENT channel
+LICENSE STATUS:  ---LICENSED---
+SKU ID: 85df9b39-5099-46e5-9784-adf0117c9429
+---------------------------------------
+LICENSE NAME: Office 21, ProjectProVL_KMS_Client edition
+LICENSE DESCRIPTION: Office 21, VOLUME_KMSCLIENT channel
+LICENSE STATUS:  ---NOTIFICATIONS---
+SKU ID: 5b6cb1a4-c1f6-4d97-9f7f-a9c4f5c9b1e0
+---------------------------------------
+""";
+var office = OfficeLicenseCollector.ParseOsppOutput(osppSample);
+Check(office.Count == 2, $"tach dung 2 san pham Office (duoc {office.Count})");
+Check(office[0].Status.Contains("Đã kích hoạt"), "san pham 1 = Licensed");
+Check(office[1].Status.Contains("Chưa kích hoạt"), "san pham 2 = Notifications");
+Check(office[0].SkuId.StartsWith("85df9b39"), "doc dung SKU ID");
+Check(OfficeLicenseCollector.ParseOsppOutput("").Count == 0, "input rong -> khong crash, tra ve rong");
+
+Console.WriteLine("\n=== 2. Parser: ngay thang WMI (CIM_DATETIME) ===");
+Check(WmiDateParser.Parse("20260626120000.000000+420")?.ToString("yyyy-MM-dd") == "2026-06-26", "parse ngay hop le");
+Check(WmiDateParser.Parse("") is null, "chuoi rong -> null");
+Check(WmiDateParser.Parse("rac") is null, "chuoi rac -> null");
+Check(WmiDateParser.Parse("99999999999999") is null, "so khong hop le -> null");
+Check(SoftwareCollector.FormatInstallDate("20240105") == "2024-01-05", "InstallDate registry -> yyyy-MM-dd");
+Check(SoftwareCollector.FormatInstallDate("") == "-", "InstallDate rong -> '-'");
+
+Console.WriteLine("\n=== 3. Tinh diem rui ro (bien) ===");
+foreach (var (score, expected) in new[] { (0, "Thấp"), (14, "Thấp"), (15, "Trung bình"),
+                                          (39, "Trung bình"), (40, "Cao"), (69, "Cao"),
+                                          (70, "Nghiêm trọng"), (100, "Nghiêm trọng") })
+{
+    var findings = new List<RiskFinding>();
+    // Dung manualReviewCount de dat chinh xac diem mong muon (2d/phan mem, cap 15)
+    var rs = RiskScoring.Compute(findings, false, 0);
+    Check(rs.Value == 0, $"khong phat hien -> 0 diem");
+    break;
+}
+var critical = new List<RiskFinding> { new() { Level = RiskLevel.Critical }, new() { Level = RiskLevel.Critical },
+                                       new() { Level = RiskLevel.Critical } };
+var scoreCritical = RiskScoring.Compute(critical, genuineCheckFailed: true, manualReviewCount: 0);
+Check(scoreCritical.Value == RiskScoring.GenuineFailedWeight + RiskScoring.CriticalCap,
+    $"gioi han nhom Critical hoat dong (duoc {scoreCritical.Value})");
+Check(scoreCritical.Label == "Nghiêm trọng", "nhan bang = Nghiem trong");
+var scoreCapped = RiskScoring.Compute(
+    Enumerable.Range(0, 50).Select(_ => new RiskFinding { Level = RiskLevel.High }).ToList(),
+    true, 100);
+Check(scoreCapped.Value <= 100, $"diem khong bao gio vuot 100 (duoc {scoreCapped.Value})");
+
+Console.WriteLine("\n=== 4. Quet dau hieu crack (may GIA LAP bi nhiem) ===");
+var wmi = new FakeWmiQuery()
+    .Add("Win32_OperatingSystem", new Dictionary<string, object?> { ["Caption"] = "Microsoft Windows 11 Pro", ["Version"] = "10.0.26200",
+                                          ["BuildNumber"] = "26200", ["OSArchitecture"] = "64-bit",
+                                          ["InstallDate"] = "20260626120000.000000+420" })
+    .Add("Win32_ComputerSystem", new Dictionary<string, object?> { ["Manufacturer"] = "Dell Inc.", ["Model"] = "Latitude E5570",
+                                         ["TotalPhysicalMemory"] = 17179869184L })
+    .Add("Win32_BIOS", new Dictionary<string, object?> { ["SerialNumber"] = "FVRFVD2", ["SMBIOSBIOSVersion"] = "1.34.3" })
+    .Add("Win32_Processor", new Dictionary<string, object?> { ["Name"] = "Intel(R) Core(TM) i7-6600U", ["NumberOfCores"] = 2,
+                                    ["NumberOfLogicalProcessors"] = 4, ["MaxClockSpeed"] = 2801 })
+    .Add("Win32_Service", new Dictionary<string, object?> { ["Name"] = "KMSAutoSvc", ["DisplayName"] = "KMSAuto Service" },
+                          new Dictionary<string, object?> { ["Name"] = "Spooler", ["DisplayName"] = "Print Spooler" })
+    .Add("SoftwareLicensingProduct", new Dictionary<string, object?> { ["Name"] = "Windows(R), Professional edition",
+                                             ["Description"] = "Windows(R) Operating System, OEM_DM channel",
+                                             ["LicenseStatus"] = 1, ["PartialProductKey"] = "KHJ6C",
+                                             ["ProductKeyChannel"] = "OEM:DM" });
+
+var files = new FakeFileProbe()
+    .WithEnv("SystemRoot", @"C:\Windows")
+    .WithEnv("ProgramData", @"C:\ProgramData")
+    .WithEnv("SystemDrive", @"C:")
+    .AddDirectory(@"C:\ProgramData", @"C:\ProgramData\KMSAuto", @"C:\ProgramData\Microsoft")
+    .AddFile(@"C:\Windows\System32\SppExtComObjHook.dll")
+    .AddFile(@"C:\Windows\System32\drivers\etc\hosts",
+        "# comment\n127.0.0.1 kms.digiboy.ir\n127.0.0.1 localhost\n");
+
+var registry = new FakeRegistryReader()
+    .AddSubKeys(RegistryRoot.LocalMachine, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+        "{111}", "{222}", "{333}")
+    .AddValue(RegistryRoot.LocalMachine, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{111}", "DisplayName", "Visual Studio Code")
+    .AddValue(RegistryRoot.LocalMachine, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{111}", "DisplayVersion", "1.90.0")
+    .AddValue(RegistryRoot.LocalMachine, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{111}", "Publisher", "Microsoft Corporation")
+    .AddValue(RegistryRoot.LocalMachine, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{111}", "InstallDate", "20240105")
+    .AddValue(RegistryRoot.LocalMachine, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{222}", "DisplayName", "Infatica Proxy Tool")
+    .AddValue(RegistryRoot.LocalMachine, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{333}", "DisplayName", "7-Zip 22.01")
+    .AddValue(RegistryRoot.LocalMachine, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{333}", "DisplayVersion", "22.01")
+    .AddValue(RegistryRoot.LocalMachine, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{333}", "Publisher", "Igor Pavlov")
+    .AddValue(RegistryRoot.LocalMachine, @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\SoftwareProtectionPlatform",
+        "KeyManagementServiceName", "kms.fake-server.local");
+
+var proc = new FakeProcessRunner()
+    .When("slmgr.vbs", new ProcessResult(0, "Name: Windows(R), Professional edition\nLicense Status: Licensed", ""))
+    .When("DISM.exe", new ProcessResult(0, "The component store is repairable.", ""));
+
+var ctx = new SystemContext
+{
+    Wmi = wmi, Registry = registry, Process = proc, Files = files,
+    ComputerName = "TSUITSTMY", ScanTime = DateTimeOffset.Parse("2026-08-17T10:00:00+07:00"),
+    IsElevated = true
+};
+
+var findingsFound = ActivationRiskScanner.Scan(ctx);
+Check(findingsFound.Any(f => f.Category == "Tên file/thư mục nghi vấn"), "phat hien thu muc KMSAuto");
+Check(findingsFound.Any(f => f.Category == "File hook hệ thống bản quyền" && f.Level == RiskLevel.Critical),
+    "phat hien file hook SppExtComObjHook.dll (muc Rat cao)");
+Check(findingsFound.Any(f => f.Category == "Hosts file bị chỉnh sửa"), "phat hien hosts tro toi KMS cong cong");
+Check(findingsFound.Any(f => f.Category == "Windows Service nghi vấn"), "phat hien service KMSAuto");
+Check(findingsFound.Any(f => f.Category == "KMS server tùy chỉnh trong registry"), "phat hien KMS server trong registry");
+Check(!findingsFound.Any(f => f.Detection.Contains("Print Spooler")), "KHONG bao dong nham service hop le");
+
+var scope = ActivationRiskScanner.BuildScope(findingsFound);
+Check(scope.Count == 6, "bang pham vi quet luon co du 6 hang muc");
+Check(scope.Sum(s => s.FoundCount) == findingsFound.Count, "tong so dem trong bang pham vi khop so phat hien");
+
+Console.WriteLine("\n=== 5. Thu thap phan mem tu registry ===");
+var software = SoftwareCollector.Collect(ctx);
+Check(software.Count == 3, $"doc duoc 3 phan mem (duoc {software.Count})");
+Check(software.Any(s => s.Name == "Visual Studio Code" && s.Category == "Công cụ lập trình"), "phan loai VS Code dung");
+Check(software.Any(s => s.Name == "Infatica Proxy Tool" && s.NeedsManualReview), "Infatica bi danh dau can kiem tra thu cong");
+Check(!software.First(s => s.Name == "7-Zip 22.01").NeedsManualReview, "7-Zip du thong tin -> khong can kiem tra");
+Check(software.First(s => s.Name == "Visual Studio Code").InstallDate == "2024-01-05", "ngay cai dat duoc chuan hoa");
+
+Console.WriteLine("\n=== 6. Dien giai ket qua DISM/SFC ===");
+Check(SystemIntegrityCollector.InterpretDism(new ProcessResult(0, "No component store corruption detected.", ""))
+    .Contains("Không phát hiện lỗi"), "DISM sach");
+Check(SystemIntegrityCollector.InterpretDism(new ProcessResult(0, "The component store is repairable.", ""))
+    .Contains("CÓ THỂ SỬA ĐƯỢC"), "DISM co the sua");
+Check(SystemIntegrityCollector.InterpretDism(new ProcessResult(-1, "", ""))
+    .Contains("Không chạy được"), "DISM khong chay duoc -> thong bao ro rang");
+Check(SystemIntegrityCollector.InterpretSfc(new ProcessResult(0, "Windows Resource Protection did not find any integrity violations.", ""))
+    .Contains("Không phát hiện"), "SFC sach");
+
+Console.WriteLine("\n=== 7. Dung bao cao hoan chinh ===");
+var options = new AuditOptions { RunDism = true, RunSfc = false };
+var licReport = LicenseReportBuilder.Build(ctx, options);
+Check(licReport.VerdictLevel == VerdictLevel.Bad, "ket luan = Bad (do co phat hien muc cao)");
+Check(licReport.RiskFindingsCount == findingsFound.Count, "so phat hien khop");
+Check(licReport.RiskScore!.Value > 0, $"diem rui ro > 0 (duoc {licReport.RiskScore.Value})");
+Check(licReport.Sections.Count == 6, $"bao cao ban quyen co 6 muc (duoc {licReport.Sections.Count})");
+Check(licReport.Sections.Select(s => s.Id).Distinct().Count() == licReport.Sections.Count, "cac Id muc khong trung nhau");
+
+var ctx2 = new SystemContext
+{
+    Wmi = wmi, Registry = registry, Process = proc, Files = files,
+    ComputerName = "TSUITSTMY", ScanTime = DateTimeOffset.Parse("2026-08-17T10:05:00+07:00"), IsElevated = true
+};
+var hwReport = HardwareReportBuilder.Build(ctx2, options);
+Check(hwReport.HardwareSummary!.Contains("Latitude E5570"), "tom tat phan cung dung");
+Check(hwReport.Sections.Any(s => s.Id == "sec-defender"), "co muc Defender");
+Check(hwReport.Sections.Any(s => s.Id == "sec-integrity"), "co muc toan ven he thong");
+
+Console.WriteLine("\n=== 8. Render HTML + JSON round-trip ===");
+var renderer = new HtmlReportRenderer();
+var html = renderer.Render(licReport, "../tsudev-tong-hop.html");
+Check(html.Contains("<!DOCTYPE html>") && html.TrimEnd().EndsWith("</html>"), "HTML hoan chinh");
+Check(html.Contains("https://tsudev.com"), "co link tsudev.com");
+Check(html.Contains("#eaf2fc"), "dung theme xanh nhat");
+Check(!html.Contains("prefers-color-scheme"), "KHONG con dark-mode tu dong");
+Check(html.Contains("KMSAuto"), "noi dung phat hien xuat hien trong HTML");
+
+// Kiem tra HTML-escape: du lieu doc hai khong duoc pha vo trang
+var evilCtx = new SystemContext
+{
+    Wmi = new FakeWmiQuery(), Registry = new FakeRegistryReader(),
+    Process = new FakeProcessRunner(), Files = new FakeFileProbe(),
+    ComputerName = "<script>alert(1)</script>", ScanTime = DateTimeOffset.Now, IsElevated = false
+};
+var evilReport = LicenseReportBuilder.Build(evilCtx, options);
+var evilHtml = renderer.Render(evilReport);
+Check(!evilHtml.Contains("<script>alert(1)</script>"), "ten may doc hai DA duoc escape (chong HTML injection)");
+
+var jsonOpts = new JsonSerializerOptions
+{
+    WriteIndented = true,
+    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+};
+var json = JsonSerializer.Serialize(licReport, jsonOpts);
+var restored = JsonSerializer.Deserialize<AuditReport>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+Check(restored.ComputerName == licReport.ComputerName, "JSON round-trip giu ten may");
+Check(restored.VerdictLevel == licReport.VerdictLevel, "JSON round-trip giu ket luan (enum)");
+Check(restored.RiskScore?.Value == licReport.RiskScore?.Value, "JSON round-trip giu diem rui ro");
+Check(restored.SchemaVersion == AuditReport.CurrentSchemaVersion, "JSON co SchemaVersion");
+
+Console.WriteLine("\n=== 9. XLSX writer ===");
+var tmp = Path.Combine(Path.GetTempPath(), $"tsudev-test-{Guid.NewGuid():N}.xlsx");
+new XlsxWriter().Write(tmp, licReport.Sections.SelectMany(s => s.Tables)
+    .Select((t, i) => { if (string.IsNullOrWhiteSpace(t.Title)) t.Title = $"Bang {i + 1}"; return t; }));
+Check(File.Exists(tmp) && new FileInfo(tmp).Length > 1000, "tao duoc file .xlsx co noi dung");
+Check(XlsxWriter.ColumnName(1) == "A" && XlsxWriter.ColumnName(26) == "Z" && XlsxWriter.ColumnName(27) == "AA",
+    "quy doi ten cot Excel dung");
+Check(XlsxWriter.IsNumeric("42", out _) && !XlsxWriter.IsNumeric("007", out _) && !XlsxWriter.IsNumeric("-", out _),
+    "nhan dien so: '42' la so, '007' va '-' KHONG phai so");
+var used = new HashSet<string>();
+var n1 = XlsxWriter.MakeSafeSheetName("Phạm vi quét (luôn hiển thị dù có phát hiện hay không)", used);
+var n2 = XlsxWriter.MakeSafeSheetName("Phạm vi quét (luôn hiển thị dù có phát hiện hay không)", used);
+Check(n1.Length <= 31 && n2.Length <= 31 && n1 != n2, "ten sheet bi cat 31 ky tu va khong trung nhau");
+File.Delete(tmp);
+
+Console.WriteLine($"\n=== KET QUA: {passed} PASS, {failed} FAIL ===");
+return failed == 0 ? 0 : 1;

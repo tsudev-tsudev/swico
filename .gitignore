@@ -1,0 +1,24 @@
+# Build
+bin/
+obj/
+publish/
+artifacts/
+*.user
+*.suo
+
+# Packaging output
+packaging/output/
+*.zip
+
+# IDE
+.vs/
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Ket qua chay tool (khong bao gio commit du lieu audit that)
+tsudev-bao-cao-ra-quet-*/
+tsudev-ket-qua-ra-quet-*/
