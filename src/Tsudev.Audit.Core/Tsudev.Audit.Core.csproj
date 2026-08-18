@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- net8.0 THUAN, KHONG phu thuoc Windows.
+         Toan bo logic nghiep vu nam o day va unit-test duoc tren moi nen tang.
+         Bat ky lenh goi he thong nao lot vao day deu la LOI KIEN TRUC -
+         phai di qua interface trong Abstractions/. -->
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Tsudev.Audit.Core</RootNamespace>
+  </PropertyGroup>
+</Project>

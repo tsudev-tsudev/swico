@@ -27,20 +27,20 @@ Chống mất việc khi máy sập / hết token / đứt context.
 - ✅ `docs/PLAN.md` — file này
 - ✅ `docs/journal/` — nhật ký theo phiên
 
-## Phase 1 — Khôi phục khả năng build 🔄
+## Phase 1 — Khôi phục khả năng build ✅
 
 **Đây là đường găng. Mọi Phase sau đều chờ Phase này.**
 
-- 🔄 `git init` + `.gitignore` — có điểm khôi phục trước khi động vào cấu trúc
-- ⬜ Tái cấu trúc `src/` + `tests/` đúng như csproj đang trỏ tới
-- ⬜ Tách file gộp nhiều class thành thư mục theo tầng (Models/Abstractions/…)
-- ⬜ Tạo `Tsudev.Audit.Core.csproj`, `tests/unittests/unittests.csproj`
-- ⬜ Tạo `Tsudev.SystemAudit.sln`, `Directory.Build.props`, `nuget.config`
-- ⬜ Cứu `tests/unittests/Program.cs` khỏi `mnt/user-data/outputs/…` rồi xoá `mnt/`
+- ✅ `git init` + `.gitignore` — có điểm khôi phục trước khi động vào cấu trúc
+- ✅ Tái cấu trúc `src/` + `tests/` đúng như csproj đang trỏ tới
+- ⏭️ Tách file gộp nhiều class thành file riêng → **dời sang Phase 4** (đổi chỗ file là đủ để build; tách nhỏ là việc chỉnh trang, làm khi đã có test xanh làm lưới an toàn)
+- ✅ Tạo `Tsudev.Audit.Core.csproj`, `tests/unittests/unittests.csproj`
+- ✅ Tạo `Tsudev.SystemAudit.sln`, `Directory.Build.props`, `nuget.config`
+- ✅ Cứu `tests/unittests/Program.cs` khỏi `mnt/user-data/outputs/…` rồi xoá `mnt/`
 
 **Tiêu chí hoàn thành:** `dotnet build` chạy được và chỉ còn lỗi *thiếu Rendering*.
 
-## Phase 2 — Viết mới lớp Rendering ⬜
+## Phase 2 — Viết mới lớp Rendering 🔄
 
 Phần bị thiếu hoàn toàn. Ba class, API phải khớp chính xác lời gọi đã có sẵn
 trong `Program.cs` và trong bộ test.

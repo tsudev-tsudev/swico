@@ -2,9 +2,6 @@
   <PropertyGroup>
     <!-- Lop DUY NHAT phu thuoc Windows. Moi logic nghiep vu nam trong Core. -->
     <TargetFramework>net8.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../Tsudev.Audit.Core/Tsudev.Audit.Core.csproj" />

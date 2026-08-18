@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Bo test tu che: in ket qua ra console, exit code khac 0 khi that bai.
+         Chay bang lenh: dotnet run  (kem tham so  project  tro toi thu muc nay)
+         Chay duoc tren Linux/macOS vi chi tham chieu Core (net8.0). -->
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Tsudev.Audit.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <!-- Bo test dung top-level statements, khong can phan tich CA o day. -->
+    <RunAnalyzers>false</RunAnalyzers>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Tsudev.Audit.Core/Tsudev.Audit.Core.csproj" />
+  </ItemGroup>
+</Project>

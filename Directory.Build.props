@@ -1,0 +1,25 @@
+<Project>
+  <!-- ============================================================
+       NGUON SU THAT DUY NHAT cho metadata cua toan bo giai phap.
+       Doi version O DAY -> exe, installer va winget manifest deu
+       lay theo. Khong khai bao Version trong tung .csproj nua.
+       ============================================================ -->
+  <PropertyGroup>
+    <VersionPrefix>3.0.0</VersionPrefix>
+    <Company>tsudev</Company>
+    <Authors>tsudev</Authors>
+    <Product>tsudev System Audit</Product>
+    <Copyright>Copyright (c) 2026 tsudev</Copyright>
+    <Description>Kiểm tra bản quyền Windows và thu thập cấu hình phần cứng</Description>
+    <RepositoryUrl>https://github.com/tsudev/tsudev-system-audit</RepositoryUrl>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+</Project>
