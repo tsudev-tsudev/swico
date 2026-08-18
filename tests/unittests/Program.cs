@@ -10,6 +10,7 @@ using Tsudev.Audit.Core.Reports;
 using Tsudev.Audit.Core.Rendering;
 using Tsudev.Audit.Core.Rules;
 using Tsudev.Audit.Core.Testing;
+using Tsudev.Audit.Core.Updates;
 
 int passed = 0, failed = 0;
 void Check(bool cond, string label)
@@ -431,6 +432,9 @@ Console.WriteLine("\n=== 9c. Thuong hieu trong bao cao ===");
 
 Check(html.Contains("data:image/png;base64,", StringComparison.Ordinal),
     "logo duoc NHUNG thang vao trang (khong phu thuoc file ngoai)");
+Check(html.Contains("<link rel=\"icon\"", StringComparison.Ordinal),
+    "trang co favicon");
+Check(html.Contains("theme-color", StringComparison.Ordinal), "co mau chu de cho trinh duyet");
 Check(!html.Contains("src=\"assets/", StringComparison.Ordinal)
    && !html.Contains(".png\"", StringComparison.Ordinal),
     "khong tro toi file anh ben ngoai - bao cao copy di van hien duoc logo");
@@ -449,8 +453,10 @@ Check(html.Contains("role=\"img\"", StringComparison.Ordinal)
 
 // Logo hien o nhieu cho nhung du lieu base64 chi duoc nhung MOT lan (nam trong
 // CSS). Nhung lap se cong them ~13 KB cho moi lan xuat hien.
-Check(html.Split("data:image/png;base64,").Length - 1 == 1,
-    "du lieu logo chi xuat hien DUNG MOT lan trong ca trang");
+// Dung 2: mot cho favicon, mot cho logo. Logo hien o nhieu cho nhung du lieu
+// nam trong CSS nen chi nhung mot lan.
+Check(html.Split("data:image/png;base64,").Length - 1 == 2,
+    "chi co dung 2 anh nhung: favicon + logo (logo khong bi nhung lap)");
 Check(html.Contains("rel=\"noopener noreferrer\"", StringComparison.Ordinal),
     "lien ket ra ngoai co rel=noopener noreferrer");
 
@@ -615,5 +621,131 @@ Check(ExitCodes.Combine(ExitCodes.Ok, ExitCodes.Ok) == ExitCodes.Ok, "moi thu bi
 Check(ExitCodes.Describe(ExitCodes.VerdictWarning).Contains("CẢNH BÁO", StringComparison.Ordinal),
     "mo ta ma thoat bang tieng Viet");
 
+Console.WriteLine("\n=== 13. So hieu phien ban (CalVer) ===");
+
+static VersionNumber V(string s) { VersionNumber.TryParse(s, out var v); return v; }
+Check(V("26.8.18") == new VersionNumber(26, 8, 18), "doc dung 26.8.18");
+Check(V("v26.8.18") == new VersionNumber(26, 8, 18), "chap nhan tien to 'v' cua tag GitHub");
+Check(V("26.8.18+9e1f2c") == new VersionNumber(26, 8, 18), "cat bam commit do SDK them");
+Check(V("26.8.20-rc1") == new VersionNumber(26, 8, 20), "cat hau to -rc1");
+Check(V("26.8.20") > V("26.8.18"), "cung thang: ngay lon hon la moi hon");
+Check(V("26.9.3") > V("26.8.20"), "sang thang moi: 26.9.3 moi hon 26.8.20");
+Check(V("27.1.1") > V("26.12.31"), "sang nam moi");
+Check(!V("linh tinh").IsValid && !V("").IsValid && !V("26.8").IsValid,
+    "chuoi la / rong / thieu thanh phan -> khong hop le");
+Check(!V("26.13.1").IsValid && !V("26.8.99").IsValid, "thang/ngay ngoai pham vi -> khong hop le");
+
+// Thanh phan thu tu cho truong hop phat hanh lai TRONG CUNG MOT NGAY.
+// Thieu no thi hai ban dung khac nhau se mang cung mot so hieu.
+Check(V("26.8.18.1") > V("26.8.18"), "26.8.18.1 moi hon 26.8.18");
+Check(V("26.8.18.2") > V("26.8.18.1"), "so lan phat hanh lai tang dan");
+Check(V("26.8.19") > V("26.8.18.5"), "sang ngay moi van thang moi lan phat hanh lai");
+Check(V("26.8.18.1").ToString() == "26.8.18.1" && V("26.8.18").ToString() == "26.8.18",
+    "chi hien thanh phan thu tu khi khac 0");
+
+Console.WriteLine("\n=== 14. Cong kiem tra cap nhat ===");
+
+static ReleaseInfo Rel(string tag, string? installer = "https://x/swico-setup.exe")
+    => new(V(tag), tag, "https://x/releases/" + tag, installer, "https://x/SHA256SUMS.txt", DateTimeOffset.Now);
+
+var newer = new UpdateChecker(new FakeFeed(Rel("v26.8.20"))).Check("26.8.18");
+Check(newer.Status == UpdateStatus.UpdateRequired && newer.MustUpdate,
+    "co ban moi hon -> BUOC cap nhat");
+Check(newer.Latest!.Version == V("26.8.20"), "giu thong tin ban moi de hien trong hop thoai");
+
+Check(new UpdateChecker(new FakeFeed(Rel("v26.8.18"))).Check("26.8.18").Status == UpdateStatus.UpToDate,
+    "cung phien ban -> da moi nhat");
+Check(new UpdateChecker(new FakeFeed(Rel("v26.8.10"))).Check("26.8.18").Status == UpdateStatus.UpToDate,
+    "ban tren GitHub CU hon (vi du bi rollback) -> khong bat ha cap");
+
+// QUYET DINH THIET KE QUAN TRONG NHAT: kiem tra that bai thi KHONG chan.
+// Cong cu duoc dung o may cach ly mang, may bi tuong lua chan - chan lai se
+// lam no vo dung chinh o noi can nhat.
+var noNetwork = new UpdateChecker(new FakeFeed(err: "Không kết nối được")).Check("26.8.18");
+Check(noNetwork.Status == UpdateStatus.CheckFailed && !noNetwork.MustUpdate,
+    "mat mang -> KHONG chan quet");
+var threw = new UpdateChecker(new FakeFeed(ex: new InvalidOperationException("sap"))).Check("26.8.18");
+Check(threw.Status == UpdateStatus.CheckFailed && !threw.MustUpdate,
+    "nguon nem exception -> KHONG chan quet, khong lam sap cong cu");
+Check(!new UpdateChecker(new FakeFeed(Rel("khong-phai-phien-ban"))).Check("26.8.18").MustUpdate,
+    "tag GitHub khong doc duoc -> KHONG chan quet");
+Check(!new UpdateChecker(new FakeFeed(Rel("v26.8.20"))).Check("khong-doc-duoc").MustUpdate,
+    "khong doc duoc phien ban CUA CHINH MINH -> KHONG chan quet");
+
+// Co ban moi nhung khong co file cai dat -> bao nhung khong chan
+var noInstaller = new UpdateChecker(new FakeFeed(Rel("v26.8.20", installer: null))).Check("26.8.18");
+Check(noInstaller.Status == UpdateStatus.CheckFailed && !noInstaller.MustUpdate
+   && noInstaller.Message!.Contains("thủ công", StringComparison.Ordinal),
+    "ban moi khong kem file cai dat -> huong dan cap nhat thu cong, khong chan");
+
+Check(ExitCodes.Combine(ExitCodes.UpdateRequired, ExitCodes.VerdictCritical) == ExitCodes.UpdateRequired,
+    "can cap nhat thang moi ket luan danh gia (chua quet thi chua co ket luan)");
+
+Console.WriteLine("\n=== 15. Doc du lieu ban phat hanh tu GitHub ===");
+
+const string releaseJson = """
+{
+  "tag_name": "v26.8.20",
+  "html_url": "https://github.com/tsudev-tsudev/swico/releases/tag/v26.8.20",
+  "published_at": "2026-08-20T10:00:00Z",
+  "assets": [
+    { "name": "swico-setup-26.8.20.exe", "browser_download_url": "https://x/swico-setup-26.8.20.exe" },
+    { "name": "swico-portable-26.8.20.zip", "browser_download_url": "https://x/portable.zip" },
+    { "name": "SHA256SUMS.txt", "browser_download_url": "https://x/SHA256SUMS.txt" },
+    { "name": "swico.exe", "browser_download_url": "https://x/swico.exe" }
+  ]
+}
+""";
+var parsed = GitHubReleaseParser.Parse(releaseJson, out var perr);
+Check(parsed is not null && perr is null, "doc duoc JSON ban phat hanh");
+Check(parsed!.Version == V("26.8.20"), "lay dung phien ban tu tag_name");
+Check(parsed.InstallerUrl == "https://x/swico-setup-26.8.20.exe",
+    "chon dung file cai dat, KHONG nham sang swico.exe hay ban portable");
+Check(parsed.ChecksumsUrl == "https://x/SHA256SUMS.txt", "tim thay file ma bam");
+Check(parsed.PublishedAt is not null, "doc duoc thoi diem phat hanh");
+
+Check(GitHubReleaseParser.Parse("{ khong phai json", out var badErr) is null && badErr is not null,
+    "JSON hong -> tra ve null kem ly do, khong nem exception");
+Check(GitHubReleaseParser.Parse("", out _) is null, "chuoi rong -> null");
+Check(GitHubReleaseParser.Parse("[]", out _) is null, "JSON khong phai doi tuong -> null");
+Check(GitHubReleaseParser.Parse("""{"tag_name":"v26.8.20"}""", out _)!.InstallerUrl is null,
+    "khong co danh sach tep dinh kem -> khong co file cai dat");
+
+Console.WriteLine("\n=== 16. Doi chieu ma bam truoc khi chay file tai ve ===");
+
+const string sums = """
+06a284ef82dc8b78c278e8053ffb028914e896b48d1b36505ecb13a24caa9c82  swico-portable-26.8.20.zip
+997bd2318999d0fd7fe82238cecfe51ab7ee7c08c0bcd4b9fe1910aa5e884abb  swico-setup-26.8.20.exe
+c23bb0ae0b7d02fe90736f762a7ecdd6a13a199c85f8243c344095f7488d80d7  swico.exe
+""";
+Check(ChecksumFile.Find(sums, "swico-setup-26.8.20.exe") == "997bd2318999d0fd7fe82238cecfe51ab7ee7c08c0bcd4b9fe1910aa5e884abb",
+    "tim dung ma bam theo ten tep");
+Check(ChecksumFile.Find(sums, "swico.exe") == "c23bb0ae0b7d02fe90736f762a7ecdd6a13a199c85f8243c344095f7488d80d7",
+    "khong khop nham dong khac co ten la tien to");
+Check(ChecksumFile.Find(sums, "khong-co-tep-nay.exe") is null,
+    "khong tim thay -> null (KHONG duoc coi la hop le)");
+Check(ChecksumFile.Find("", "x.exe") is null && ChecksumFile.Find(null, "x.exe") is null,
+    "noi dung rong -> null");
+Check(ChecksumFile.Find("khong-phai-ma-bam  swico.exe", "swico.exe") is null,
+    "ma bam sai dinh dang -> null, khong chay file khong xac minh duoc");
+Check(ChecksumFile.Find("997BD2318999D0FD7FE82238CECFE51AB7EE7C08C0BCD4B9FE1910AA5E884ABB  a.exe", "a.exe")
+        == "997bd2318999d0fd7fe82238cecfe51ab7ee7c08c0bcd4b9fe1910aa5e884abb",
+    "chap nhan ma bam viet hoa, chuan hoa ve chu thuong");
+Check(ChecksumFile.Find("997bd2318999d0fd7fe82238cecfe51ab7ee7c08c0bcd4b9fe1910aa5e884abb *a.exe", "a.exe") is not null,
+    "chap nhan tien to '*' cua che do nhi phan");
+
 Console.WriteLine($"\n=== KET QUA: {passed} PASS, {failed} FAIL ===");
 return failed == 0 ? 0 : 1;
+
+// Adapter gia lap cho nguon ban phat hanh
+sealed class FakeFeed : IUpdateFeed
+{
+    private readonly ReleaseInfo? _r; private readonly string? _err; private readonly Exception? _ex;
+    public FakeFeed(ReleaseInfo? r = null, string? err = null, Exception? ex = null)
+        { _r = r; _err = err; _ex = ex; }
+    public ReleaseInfo? GetLatest(out string? failureReason)
+    {
+        if (_ex is not null) throw _ex;
+        failureReason = _err; return _r;
+    }
+}

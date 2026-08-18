@@ -25,6 +25,47 @@ public sealed class HtmlReportRenderer
     public const string ThemeBackground = "#eaf2fc";
 
     /// <summary>
+    /// Favicon 32x32 nhung san. Bao cao thuong duoc mo tu file tren dia
+    /// (giao thuc file://) nen KHONG the tro toi mot file favicon ben ngoai -
+    /// trinh duyet se khong tim thay. Nhung thang la cach duy nhat de tab
+    /// trinh duyet co bieu tuong khi nguoi dung mo nhieu bao cao cung luc.
+    /// Dung ban 32px (~2,3 KB) chu khong dung logo day du.
+    /// </summary>
+    private const string FaviconDataUri = "data:image/png;base64," +
+        "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" +
+        "YII=";
+
+    /// <summary>
     /// Logo tsudev NHUNG THANG vao trang duoi dang data URI.
     ///
     /// Vi sao khong tro toi mot file anh ben ngoai: bao cao phai xem duoc khi
@@ -187,6 +228,9 @@ public sealed class HtmlReportRenderer
         sb.Append("<!DOCTYPE html>\n<html lang=\"vi\">\n<head>\n");
         sb.Append("<meta charset=\"utf-8\">\n");
         sb.Append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n");
+        sb.Append("<link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"")
+          .Append(FaviconDataUri).Append("\">\n");
+        sb.Append("<meta name=\"theme-color\" content=\"#14417F\">\n");
         sb.Append("<meta name=\"generator\" content=\"").Append(E(ProductName)).Append("\">\n");
         sb.Append("<title>").Append(E(report.Title)).Append(" - ").Append(E(report.ComputerName)).Append("</title>\n");
         sb.Append("<style>\n").Append(Css).Append("</style>\n</head>\n<body>\n");

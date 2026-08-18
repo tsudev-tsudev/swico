@@ -9,6 +9,7 @@ using Tsudev.Audit.Core.Models;
 using Tsudev.Audit.Core.Rendering;
 using Tsudev.Audit.Core.Reports;
 using Tsudev.Audit.Core.Rules;
+using Tsudev.Audit.Core.Updates;
 using Tsudev.Audit.Windows;
 
 namespace Tsudev.Audit.Cli;
@@ -64,6 +65,11 @@ public static class Program
             return ExitFatal;
         }
 
+        // Kiem tra cap nhat TRUOC khi quet. Dat o day, ngoai Run(), de ro rang
+        // day la mot cong doan rieng va de doc lai khi ra soat bao mat.
+        var gate = CheckForUpdate(opts);
+        if (gate is not null) return gate.Value;
+
         try
         {
             return Run(opts);
@@ -74,6 +80,104 @@ public static class Program
             if (opts.Verbose) Console.Error.WriteLine(ex.ToString());
             return ExitFatal;
         }
+    }
+
+    /// <summary>
+    /// Cong kiem tra phien ban. Tra ve ma thoat khi phai dung lai, null khi
+    /// duoc phep quet tiep.
+    ///
+    /// BA TINH HUONG, BA CACH XU LY KHAC NHAU:
+    ///
+    ///  1. Co ban moi + dang chay tuong tac -> hien hop thoai mot nut, cap nhat
+    ///     xong roi thoat. Nguoi dung se chay lai ban moi.
+    ///  2. Co ban moi + dang chay --silent  -> KHONG hien hop thoai (se treo
+    ///     cung tien trinh trien khai tu dong), thoat voi ma 30.
+    ///  3. Khong kiem tra duoc            -> QUET TIEP nhu binh thuong.
+    ///     Cong cu nay duoc dung dung o nhung noi mang bi han che nhat; chan
+    ///     lai se lam no vo dung chinh o do.
+    /// </summary>
+    [SupportedOSPlatform("windows")]
+    private static int? CheckForUpdate(CliOptions opts)
+    {
+        if (opts.NoUpdateCheck)
+        {
+            Info("Đã bỏ qua kiểm tra phiên bản mới (--no-update-check).");
+            return null;
+        }
+
+        var current = CurrentVersion();
+        Info("Đang kiểm tra phiên bản mới...");
+
+        var result = new UpdateChecker(new GitHubUpdateFeed(current)).Check(current);
+
+        switch (result.Status)
+        {
+            case UpdateStatus.UpToDate:
+                Info($"  {result.Message}");
+                return null;
+
+            case UpdateStatus.CheckFailed:
+                Warn($"  Không kiểm tra được bản cập nhật: {result.Message}");
+                Warn("  Vẫn tiếp tục quét. Hãy tự đối chiếu phiên bản mới nhất khi có mạng.");
+                return null;
+
+            case UpdateStatus.UpdateRequired:
+                return HandleUpdateRequired(opts, result);
+
+            default:
+                return null;
+        }
+    }
+
+    [SupportedOSPlatform("windows")]
+    private static int HandleUpdateRequired(CliOptions opts, UpdateCheckResult result)
+    {
+        Warn($"\n=== {result.Message} ===");
+
+        if (opts.Silent)
+        {
+            // Khong bao gio hien hop thoai o che do tu dong: khong ai ngoi do
+            // bam nut, va tien trinh trien khai se treo vo thoi han.
+            Warn($"Chế độ --silent: không hiện hộp thoại. Cập nhật rồi chạy lại.");
+            Warn($"Tải bản mới tại: {result.Latest?.PageUrl}");
+            Info($"\nMã thoát: {ExitCodes.UpdateRequired} ({ExitCodes.Describe(ExitCodes.UpdateRequired)})");
+            return ExitCodes.UpdateRequired;
+        }
+
+        if (!UpdatePrompt.AskToUpdate(result))
+        {
+            Warn("Bạn đã đóng hộp thoại mà không cập nhật. Không thể tiếp tục quét.");
+            Warn($"Tải bản mới tại: {result.Latest?.PageUrl}");
+            return ExitCodes.UpdateRequired;
+        }
+
+        var installer = UpdateInstaller.DownloadAndVerify(result.Latest!, Info, out var failure);
+        if (installer is null)
+        {
+            Warn($"Cập nhật KHÔNG thành công: {failure}");
+            Warn($"Vui lòng tải và cài thủ công tại: {result.Latest?.PageUrl}");
+            return ExitCodes.UpdateRequired;
+        }
+
+        if (!UpdateInstaller.Launch(installer, out var launchError))
+        {
+            Warn($"Không chạy được file cài đặt: {launchError}");
+            Warn($"File đã tải và đã xác minh nằm tại: {installer}");
+            return ExitCodes.UpdateRequired;
+        }
+
+        Info("\nĐã khởi động trình cài đặt. Sau khi cài xong, hãy chạy lại công cụ.");
+        return ExitCodes.UpdateRequired;
+    }
+
+    /// <summary>Phien ban hien tai, da cat phan bam commit do SDK them vao.</summary>
+    private static string CurrentVersion()
+    {
+        var asm = typeof(Program).Assembly;
+        var v = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+                ?? asm.GetName().Version?.ToString() ?? "";
+        var plus = v.IndexOf('+', StringComparison.Ordinal);
+        return plus > 0 ? v[..plus] : v;
     }
 
     [SupportedOSPlatform("windows")]

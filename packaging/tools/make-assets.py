@@ -191,6 +191,38 @@ if __name__ == "__main__":
     open("assets/swico.ico", "wb").write(bytes(ico))
     print(f"  assets/swico.ico: {len(ico_sizes)} kich thuoc, {len(ico)} byte")
 
+    # ---- Favicon -----------------------------------------------------------
+    # Bo favicon day du cho moi noi logo co the xuat hien: trinh duyet co,
+    # trinh duyet moi, man hinh Retina, va bieu tuong khi ghim trang tren
+    # dien thoai. Logo cao hon rong nen duoc dat GIUA tren khung vuong trong
+    # suot - cat vuong se lam mat phan tren hoac duoi cua con cu.
+    os.makedirs("assets/favicon", exist_ok=True)
+
+    def square(size):
+        lw = max(1, round(w * size / h))
+        return paste(size, size, lw, size, resize(w, h, px, lw, size), (size - lw)//2, 0)
+
+    # favicon.ico - dinh dang duy nhat moi trinh duyet deu hieu, ke ca ban cu.
+    ico_px = [16, 32, 48]
+    imgs = [encode_png(s2, s2, square(s2)) for s2 in ico_px]
+    ico = bytearray(struct.pack("<HHH", 0, 1, len(ico_px)))
+    off = 6 + 16*len(ico_px)
+    for s2, data in zip(ico_px, imgs):
+        ico += struct.pack("<BBBBHHII", s2, s2, 0, 0, 1, 32, len(data), off)
+        off += len(data)
+    for data in imgs:
+        ico += data
+    open("assets/favicon/favicon.ico", "wb").write(bytes(ico))
+    print(f"  assets/favicon/favicon.ico: {ico_px}, {len(ico)} byte")
+
+    for size, name in [(16, "favicon-16x16.png"), (32, "favicon-32x32.png"),
+                       (180, "apple-touch-icon.png"),
+                       (192, "android-chrome-192x192.png"),
+                       (512, "android-chrome-512x512.png")]:
+        data = encode_png(size, size, square(size))
+        open(f"assets/favicon/{name}", "wb").write(data)
+        print(f"  assets/favicon/{name}: {size}x{size}, {len(data)} byte")
+
     lw2 = round(w * 50 / h)
     tiny = resize(w, h, px, lw2, 50)
     smallbmp = encode_bmp(55, 58, paste(55, 58, lw2, 50, tiny, (55-lw2)//2, 4))

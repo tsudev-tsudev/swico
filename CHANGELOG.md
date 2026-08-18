@@ -3,6 +3,39 @@
 Định dạng theo [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/);
 đánh số phiên bản theo [SemVer](https://semver.org/lang/vi/).
 
+## [26.8.18.1] — 18/08/2026
+
+### Thêm
+
+- **Chức năng tự động cập nhật.** Khi khởi động, công cụ hỏi GitHub xem đã có
+  phiên bản mới chưa. Nếu có, hiện hộp thoại **một nút "Cập nhật"** → tải,
+  **đối chiếu SHA-256**, rồi chạy trình cài đặt. Phải cập nhật xong mới quét tiếp.
+  - **Không kiểm tra được thì KHÔNG chặn** — công cụ vẫn quét bình thường kèm
+    ghi chú. Chặn ở đây sẽ làm công cụ vô dụng đúng ở nơi cần nhất: máy trong
+    mạng cách ly, máy bị tường lửa chặn GitHub.
+  - **`--silent` không hiện hộp thoại** mà thoát với mã `30`. Hộp thoại trong
+    một tiến trình triển khai tự động sẽ treo vô thời hạn.
+  - **`--no-update-check`** tắt hẳn — khi đó công cụ không thực hiện kết nối nào.
+  - Hộp thoại dùng **TaskDialog** của Windows thay vì WinForms: cho phép đặt tên
+    nút tuỳ ý, và không kéo cả bộ thư viện giao diện vào bản self-contained.
+- **Bộ favicon đầy đủ** sinh từ logo: `.ico` đa kích thước, PNG 16/32/180/192/512,
+  `site.webmanifest`. Favicon 32px được **nhúng thẳng** vào mỗi báo cáo HTML —
+  báo cáo thường mở từ đĩa qua `file://` nên không thể trỏ tới file bên ngoài.
+- **Thành phần thứ tư trong số hiệu phiên bản** cho trường hợp phát hành lại
+  trong cùng một ngày (`26.8.18.1`). Không có nó, hai bản dựng khác nhau trong
+  cùng ngày sẽ mang cùng một số hiệu.
+
+### Thay đổi
+
+- ⚠️ **`PRIVACY.md` và `EULA.txt` đã sửa cho trung thực.** Bản 26.8.18 tuyên bố
+  *"KHÔNG kết nối Internet vì bất kỳ mục đích nào"* — tuyên bố đó **không còn
+  đúng** từ bản này. Tài liệu nay mô tả chính xác: đúng một yêu cầu GET tới
+  GitHub, chỉ để lộ địa chỉ IP và số hiệu phiên bản, **không mang theo bất kỳ
+  dữ liệu nào** của máy được quét, và tắt được bằng một tham số.
+- `GitHubReleaseParser` và `ChecksumFile` đặt trong **Core** chứ không phải lớp
+  adapter — đây là logic thuần, và để trong project `net8.0-windows` thì bộ test
+  chạy trên Linux không với tới được.
+
 ## [26.8.18] — 18/08/2026
 
 ### Thay đổi

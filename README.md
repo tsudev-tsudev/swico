@@ -81,6 +81,7 @@ thiếu dữ liệu"* với *"máy này có vấn đề bản quyền"*.
 |----|---------|
 | 10 | Kết luận mức **cảnh báo** (ví dụ: Office chưa kích hoạt) |
 | 20 | Kết luận mức **nghiêm trọng** (dấu hiệu kích hoạt trái phép) |
+| 30 | **Cần cập nhật** trước khi quét (chỉ ở chế độ `--silent`) |
 
 Thứ tự ưu tiên khi nhiều điều kiện cùng xảy ra: `2 > 3 > 20 > 10 > 1 > 0`.
 Kết luận đánh giá thắng "thiếu dữ liệu" vì nó cần hành động hơn.
@@ -123,10 +124,29 @@ hỏng lần quét**. Chi tiết: [`docs/DETECTION-RULES.md`](docs/DETECTION-RUL
 > Đây **không phải** bảo mật bằng che giấu — mã nguồn công khai nên luật cũng
 > công khai. Thứ thay đổi là **tốc độ cập nhật**.
 
+## Tự động cập nhật
+
+Khi khởi động, công cụ hỏi GitHub xem đã có phiên bản mới chưa. Nếu có, hiện hộp
+thoại một nút **"Cập nhật"** — tải, **đối chiếu SHA-256**, rồi chạy trình cài đặt.
+Phải cập nhật xong mới quét tiếp, vì kết luận dựa trên bộ luật phát hiện và một
+bộ luật lỗi thời có thể bỏ sót dấu hiệu mới.
+
+**Nếu không kiểm tra được** (mất mạng, tường lửa chặn) thì công cụ **vẫn quét
+bình thường** kèm ghi chú. Chặn ở đây sẽ làm công cụ vô dụng đúng ở nơi cần nhất.
+
+Ở chế độ `--silent` không hiện hộp thoại — thoát với mã `30` để hệ thống triển
+khai tự xử lý. Tắt hẳn bằng `--no-update-check`.
+
+Chi tiết: [`docs/UPDATES.md`](docs/UPDATES.md).
+
 ## Quyền riêng tư
 
-Công cụ **không kết nối Internet** và **không gửi dữ liệu đi đâu**. Mọi thứ chỉ
-ghi ra đĩa của chính máy đó. Chi tiết: [`PRIVACY.md`](PRIVACY.md).
+**Không dữ liệu nào của máy được quét rời khỏi máy.** Công cụ thực hiện đúng
+**một** kết nối mạng — kiểm tra phiên bản mới — và kết nối đó chỉ để lộ địa chỉ
+IP cùng số hiệu phiên bản, như mọi yêu cầu HTTP. Tắt bằng `--no-update-check`.
+
+Toàn bộ mã chạm tới mạng nằm gọn trong một file để bạn tự kiểm chứng:
+`src/Tsudev.Audit.Windows/UpdateAdapters.cs`. Chi tiết: [`PRIVACY.md`](PRIVACY.md).
 
 ## Kiến trúc
 
@@ -137,17 +157,19 @@ src/
     Abstractions/                              Các "cổng" (port): IWmiQuery, IRegistryReader...
     Collectors/                                TOÀN BỘ logic nghiệp vụ
     Cli/                                       Phân tích tham số + mã thoát (logic thuần, test được)
+    Updates/                                   So sánh phiên bản + quyết định cập nhật
     Rules/                                     Luật phát hiện dạng dữ liệu có phiên bản
     Reports/                                   Lắp ráp collector thành báo cáo
     Rendering/                                 HTML + XLSX + Dashboard
     Testing/                                   Adapter giả lập cho unit test
   Tsudev.Audit.Windows/     net8.0-windows  ← Adapter mỏng: WMI, Registry, Process
   Tsudev.Audit.Cli/         net8.0-windows  ← 1 file exe
-assets/                     Logo gốc + các biến thể sinh tự động (icon, ảnh trình thuật sĩ)
+assets/                     Logo gốc + biến thể sinh tự động (icon, favicon, ảnh trình thuật sĩ)
+  favicon/                  Bộ favicon đầy đủ: .ico, PNG 16/32/180/192/512, webmanifest
 packaging/
   tools/make-assets.py      Sinh mọi biến thể của logo từ file gốc
 tests/
-  unittests/                net8.0          ← 129 test, chạy được trên mọi nền tảng
+  unittests/                net8.0          ← 173 test, chạy được trên mọi nền tảng
 ```
 
 ### Vì sao tách `Core` khỏi Windows?
@@ -156,7 +178,7 @@ tests/
 
 1. **Kiểm thử được** — toàn bộ logic nghiệp vụ (quét dấu hiệu crack, tính điểm
    rủi ro, phân loại phần mềm, dựng HTML/XLSX) unit-test được **không cần máy
-   Windows**. 129 test chạy trên Linux.
+   Windows**. 173 test chạy trên Linux.
 2. **Dễ audit** — mọi lệnh gọi hệ thống tập trung trong đúng một file
    (`WindowsAdapters.cs`). Với một công cụ đọc dữ liệu nhạy cảm và đòi quyền
    Administrator, việc rà soát bảo mật làm được nhanh là điều thiết yếu.
@@ -193,7 +215,10 @@ trên máy không có mạng. Chi tiết: [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY
 | Chống HTML injection | ✅ Đã test |
 | XLSX: quy đổi tên cột, nhận diện số, tên sheet | ✅ Đã test |
 | Dashboard đọc sâu đa máy | ✅ Đã test |
-| Logo & chữ ký thương hiệu trong báo cáo | ✅ 9 test |
+| Logo, favicon & chữ ký thương hiệu | ✅ 11 test |
+| So sánh phiên bản CalVer | ✅ 13 test |
+| Cổng kiểm tra cập nhật | ✅ 10 test |
+| Đọc bản phát hành GitHub + đối chiếu mã băm | ✅ 16 test |
 | Bộ luật tách rời (nạp, kiểm tra, quay về mặc định) | ✅ Đã test |
 | CLI parse tham số | ✅ 21 test |
 | Mã thoát (gồm ca hồi quy Office chưa kích hoạt) | ✅ 11 test |
@@ -208,7 +233,7 @@ thật**. Cần xác nhận tên thuộc tính WMI, đặc biệt `MSFT_MpComput
 `MSFT_MpThreat`) và `MSFT_ScheduledTask`.
 
 Nếu có lỗi, hầu hết sẽ nằm gọn trong `WindowsAdapters.cs` — logic nghiệp vụ đã
-được 129 test kiểm chứng nên không cần đụng tới.
+được 173 test kiểm chứng nên không cần đụng tới.
 
 Kịch bản kiểm chứng đầy đủ: [`docs/WINDOWS-VERIFICATION.md`](docs/WINDOWS-VERIFICATION.md).
 
@@ -222,6 +247,7 @@ Kịch bản kiểm chứng đầy đủ: [`docs/WINDOWS-VERIFICATION.md`](docs/
 | [`docs/CONTINUITY.md`](docs/CONTINUITY.md) | Giao thức nối tiếp giữa các phiên làm việc |
 | [`docs/SIGNING.md`](docs/SIGNING.md) | Ký số qua SignPath Foundation |
 | [`docs/WINGET.md`](docs/WINGET.md) | Đưa gói lên winget và vì sao chưa dùng được |
+| [`docs/UPDATES.md`](docs/UPDATES.md) | Chức năng tự cập nhật và các quyết định thiết kế |
 | [`docs/DETECTION-RULES.md`](docs/DETECTION-RULES.md) | Bộ luật phát hiện và cách cập nhật |
 | [`docs/WINDOWS-VERIFICATION.md`](docs/WINDOWS-VERIFICATION.md) | Kịch bản kiểm chứng trên Windows |
 | [`CHANGELOG.md`](CHANGELOG.md) | Nhật ký thay đổi |

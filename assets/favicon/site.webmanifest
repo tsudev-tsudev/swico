@@ -1,0 +1,12 @@
+{
+  "name": "tsudev SWICO",
+  "short_name": "SWICO",
+  "description": "Kiểm tra bản quyền Windows và thu thập cấu hình phần cứng",
+  "icons": [
+    { "src": "android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "theme_color": "#14417F",
+  "background_color": "#eaf2fc",
+  "display": "standalone"
+}

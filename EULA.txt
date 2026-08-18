@@ -55,30 +55,47 @@ Phần mềm đọc các thông tin sau từ máy được quét:
 
 Đây là dữ liệu nhạy cảm. Vì vậy, phần mềm cam kết:
 
-  - KHÔNG gửi bất kỳ dữ liệu nào ra khỏi máy tính của bạn;
-  - KHÔNG kết nối Internet vì bất kỳ mục đích nào;
+  - KHÔNG gửi bất kỳ dữ liệu nào nêu trên ra khỏi máy tính của bạn;
   - KHÔNG thu thập số liệu sử dụng hay dữ liệu đo lường từ xa;
   - chỉ ghi kết quả ra thư mục do bạn chỉ định trên chính máy đó.
+
+Phần mềm thực hiện đúng MỘT kết nối Internet: hỏi GitHub xem đã có phiên bản
+mới chưa. Kết nối đó chỉ để lộ địa chỉ IP và số hiệu phiên bản đang dùng - như
+mọi yêu cầu HTTP - và KHÔNG mang theo bất kỳ dữ liệu nào của máy được quét.
+Tắt bằng tham số --no-update-check. Chi tiết tại PRIVACY.md.
 
 Việc kết quả đi đâu sau khi được ghi ra đĩa hoàn toàn do bạn quyết định. Nếu bạn
 gửi báo cáo cho bên khác, bạn có trách nhiệm với dữ liệu trong đó.
 
 
-5. YÊU CẦU QUYỀN QUẢN TRỊ
+5. CẬP NHẬT BẮT BUỘC
+
+Khi phát hiện có phiên bản mới, phần mềm yêu cầu cập nhật trước khi cho phép
+tiếp tục rà quét. Lý do: kết luận về bản quyền dựa trên bộ luật phát hiện, và
+một bộ luật lỗi thời có thể bỏ sót dấu hiệu mới.
+
+Nếu không kiểm tra được phiên bản (mất mạng, tường lửa chặn), phần mềm VẪN quét
+bình thường và ghi chú điều đó vào báo cáo - việc chặn trong trường hợp này sẽ
+làm phần mềm vô dụng đúng ở nơi cần nó nhất.
+
+File cài đặt tải về luôn được đối chiếu mã băm SHA-256 trước khi chạy.
+
+
+6. YÊU CẦU QUYỀN QUẢN TRỊ
 
 Phần mềm yêu cầu quyền Administrator vì cần đọc trạng thái bản quyền, thông tin
 Defender và chạy các công cụ kiểm tra toàn vẹn của hệ thống. Phần mềm chỉ ĐỌC và
 không thay đổi cấu hình máy, ngoài việc ghi file kết quả.
 
 
-6. MIỄN TRỪ BẢO ĐẢM
+7. MIỄN TRỪ BẢO ĐẢM
 
 Phần mềm được cung cấp "NGUYÊN TRẠNG", không kèm bảo đảm dưới bất kỳ hình thức
 nào, dù rõ ràng hay ngụ ý, theo đúng quy định tại mục 7 và 8 của Apache License
 2.0.
 
 
-7. MÃ NGUỒN
+8. MÃ NGUỒN
 
 Toàn bộ mã nguồn được công khai. Bạn có thể tự kiểm chứng mọi điều nêu trên -
 đặc biệt là cam kết ở mục 4 - bằng cách đọc mã nguồn tại:

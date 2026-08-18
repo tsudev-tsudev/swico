@@ -17,7 +17,7 @@ lúc nhận bàn giao (khi đó **không build được**).
 
 ```
 Build:    ✅ Build succeeded
-Test:     ✅ 129 PASS, 0 FAIL
+Test:     ✅ 173 PASS, 0 FAIL
 Publish:  ✅ publish/swico.exe — 34 MB, PE32+ x86-64
 Repo:     ✅ github.com/tsudev-tsudev/swico (PUBLIC)
 Release:  ✅ v26.8.18 DA PHAT HANH CHINH THUC (khong con ban nhap)
@@ -43,7 +43,7 @@ chạy thử trên Windows thật, và nộp hồ sơ SignPath Foundation.
 | Tên miền thương hiệu | `https://tsudev.com` — **giữ nguyên** (bộ test khẳng định điều này) |
 | Giấy phép | Apache-2.0 |
 | Ký số | SignPath Foundation |
-| Phiên bản | **26.8.18** — CalVer `yy.M.d` (`Directory.Build.props`) |
+| Phiên bản | **26.8.18.1** — CalVer `yy.M.d[.N]` (`Directory.Build.props`) |
 
 ## 3. Cái gì đã có
 
@@ -116,6 +116,10 @@ Chi tiết: `docs/SIGNING.md`.
 
 ## 5. Cạm bẫy đã biết — đọc để khỏi vấp lại
 
+- **Công cụ nay CÓ kết nối Internet** (kiểm tra cập nhật). `PRIVACY.md` và
+  `EULA.txt` đã sửa cho đúng — bản 26.8.18 từng hứa "không kết nối Internet".
+  Mọi mã chạm mạng nằm gọn trong `src/Tsudev.Audit.Windows/UpdateAdapters.cs`;
+  giữ nguyên tính chất "một file duy nhất" đó khi sửa về sau.
 - **Logo và các biến thể sinh bằng `packaging/tools/make-assets.py`.** Sửa
   `assets/tsudev-logo.png` xong phải chạy lại script; icon, ảnh trình thuật sĩ
   và bản nhúng vào HTML đều dẫn xuất từ file gốc đó.

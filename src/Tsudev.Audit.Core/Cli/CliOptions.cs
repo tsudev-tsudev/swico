@@ -23,6 +23,14 @@ public static class ExitCodes
     public const int VerdictWarning = 10;
     public const int VerdictCritical = 20;
 
+    /// <summary>
+    /// Can cap nhat truoc khi quet. Chi dung o che do khong tuong tac
+    /// (--silent): khi do KHONG hien hop thoai ma tra ve ma nay, de he thong
+    /// trien khai tu xu ly. Hien hop thoai trong mot tien trinh tu dong se
+    /// treo cung ca lan trien khai - khong ai ngoi do bam nut.
+    /// </summary>
+    public const int UpdateRequired = 30;
+
     /// <summary>Ma thoat suy ra tu ket luan XAU NHAT trong cac bao cao da tao.</summary>
     public static int FromVerdicts(IEnumerable<VerdictLevel> verdicts)
     {
@@ -43,7 +51,7 @@ public static class ExitCodes
     /// </summary>
     public static int Combine(int toolHealth, int verdict)
     {
-        if (toolHealth is Fatal or BadArgs) return toolHealth;
+        if (toolHealth is Fatal or BadArgs or UpdateRequired) return toolHealth;
         return verdict != Ok ? verdict : toolHealth;
     }
 
@@ -53,6 +61,7 @@ public static class ExitCodes
         Partial => "hoàn tất nhưng thiếu dữ liệu ở một số mục",
         Fatal => "lỗi nghiêm trọng, không tạo được báo cáo",
         BadArgs => "tham số dòng lệnh không hợp lệ",
+        UpdateRequired => "cần cập nhật trước khi quét",
         VerdictWarning => "kết luận mức CẢNH BÁO",
         VerdictCritical => "kết luận mức NGHIÊM TRỌNG",
         _ => "không xác định"
@@ -80,6 +89,14 @@ public sealed class CliOptions
     /// </summary>
     public bool NoVerdictExit { get; private set; }
 
+    /// <summary>
+    /// Bo qua hoan toan viec kiem tra phien ban moi.
+    ///
+    /// Danh cho: may khong noi mang, mang cam ra ngoai, va cac doi ngu tu quan
+    /// ly viec cap nhat qua he thong trien khai rieng.
+    /// </summary>
+    public bool NoUpdateCheck { get; private set; }
+
     /// <summary>Duong dan file bo luat phat hien ben ngoai (tuy chon).</summary>
     public string? RulesPath { get; private set; }
 
@@ -94,6 +111,7 @@ public sealed class CliOptions
                 case "-h" or "--help" or "/?": o.ShowHelp = true; break;
                 case "--version": o.ShowVersion = true; break;
                 case "--no-verdict-exit": o.NoVerdictExit = true; break;
+                case "--no-update-check": o.NoUpdateCheck = true; break;
                 case "--silent" or "-s": o.Silent = true; break;
                 case "--sfc": o.RunSfc = true; break;
                 case "--no-dism": o.RunDism = false; break;
@@ -146,6 +164,7 @@ THAM SỐ:
       --no-csv                    Không xuất file .csv
       --rules <file.json>         Dùng bộ luật phát hiện từ file ngoài
       --no-verdict-exit           Kết luận đánh giá KHÔNG ảnh hưởng mã thoát
+      --no-update-check           Bỏ qua kiểm tra phiên bản mới
   -v, --verbose                   Hiện chi tiết lỗi
       --version                   Hiện phiên bản rồi thoát
   -h, --help                      Hiện trợ giúp này
@@ -159,6 +178,19 @@ BỘ LUẬT PHÁT HIỆN:
   File hỏng hoặc thiếu sẽ tự quay về bộ luật đóng kèm kèm một cảnh báo,
   KHÔNG làm hỏng lần quét.
 
+KIỂM TRA CẬP NHẬT:
+  Khi khởi động, công cụ hỏi GitHub xem đã có phiên bản mới chưa. Nếu có, phải
+  cập nhật trước khi quét - để kết quả dựa trên bộ luật phát hiện mới nhất.
+
+  Đây là lần DUY NHẤT công cụ kết nối Internet. Không có dữ liệu nào của máy
+  được gửi đi. Xem PRIVACY.md.
+
+  Nếu KHÔNG kiểm tra được (mất mạng, tường lửa chặn), công cụ vẫn quét bình
+  thường và ghi một ghi chú vào báo cáo. Chặn ở đây sẽ làm công cụ vô dụng
+  đúng ở nơi cần nó nhất.
+
+  Ở chế độ --silent, công cụ KHÔNG hiện hộp thoại mà thoát với mã 30.
+
 MÃ THOÁT: chia hai nhóm, KHÔNG gộp chung
 
   Sức khoẻ công cụ - công cụ chạy có trọn vẹn không:
@@ -170,6 +202,7 @@ MÃ THOÁT: chia hai nhóm, KHÔNG gộp chung
   Kết luận đánh giá - máy được quét có vấn đề không:
     10  Kết luận mức CẢNH BÁO (ví dụ: Office chưa kích hoạt)
     20  Kết luận mức NGHIÊM TRỌNG (dấu hiệu kích hoạt trái phép)
+    30  Cần cập nhật trước khi quét (chỉ ở chế độ --silent)
 
   Thứ tự ưu tiên khi nhiều điều kiện cùng xảy ra: 2 > 3 > 20 > 10 > 1 > 0
 

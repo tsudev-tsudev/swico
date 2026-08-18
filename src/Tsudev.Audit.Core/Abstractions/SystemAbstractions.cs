@@ -132,6 +132,24 @@ public static class WmiExtensions
 }
 
 /// <summary>
+/// Nguon thong tin ban phat hanh moi nhat.
+///
+/// Tach thanh cong (port) vi hai ly do:
+///  (1) toan bo logic quyet dinh "co phai cap nhat khong" nam trong Core va
+///      unit-test duoc ma KHONG can mang;
+///  (2) day la lan DUY NHAT cong cu cham toi Internet - go gon vao mot giao
+///      dien de nguoi ra soat bao mat kiem chung duoc dieu do trong vai giay.
+/// </summary>
+public interface IUpdateFeed
+{
+    /// <summary>
+    /// Lay ban phat hanh moi nhat. KHONG BAO GIO nem exception - ly do that bai
+    /// duoc dat vao <paramref name="failureReason"/> va tra ve null.
+    /// </summary>
+    Tsudev.Audit.Core.Updates.ReleaseInfo? GetLatest(out string? failureReason);
+}
+
+/// <summary>
 /// Ham tien ich cho ket qua truy van WMI.
 /// </summary>
 public static class WmiResultExtensions
