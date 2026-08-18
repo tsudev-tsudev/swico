@@ -1,0 +1,189 @@
+name: Release
+
+# Kich hoat bang tag v*. Toan bo quy trinh phat hanh chay o day - khong co
+# buoc thu cong nao, vi buoc thu cong la buoc se bi quen.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Phien ban (vi du 3.0.0)'
+        required: true
+
+permissions:
+  contents: write
+  id-token: write
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    env:
+      # Ngu canh `secrets` KHONG dung duoc trong `if:` o cap step. Vi vay phai
+      # quy doi thanh bien moi truong o cap job roi moi kiem tra. Nho vay repo
+      # van phat hanh duoc (kem chu ky) trong luc cho SignPath duyet ho so.
+      SIGNPATH_CONFIGURED: ${{ secrets.SIGNPATH_API_TOKEN != '' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Xac dinh phien ban
+        id: ver
+        shell: pwsh
+        run: |
+          $v = if ($env:GITHUB_REF -like 'refs/tags/v*') {
+                  $env:GITHUB_REF -replace '^refs/tags/v',''
+               } else { '${{ github.event.inputs.version }}' }
+          if ([string]::IsNullOrWhiteSpace($v)) { throw 'Khong xac dinh duoc phien ban.' }
+          "version=$v" >> $env:GITHUB_OUTPUT
+          Write-Host "Phien ban: $v"
+
+      # Bo test PHAI chay truoc khi dong goi. Phat hanh mot ban chua qua test
+      # la cach nhanh nhat de mat long tin vao ca quy trinh.
+      - name: Unit tests
+        run: dotnet run --project tests/unittests -c Release
+
+      - name: Publish exe
+        shell: pwsh
+        run: |
+          dotnet publish src/Tsudev.Audit.Cli -c Release -r win-x64 -o publish `
+            -p:Version=${{ steps.ver.outputs.version }}
+          if ($LASTEXITCODE -ne 0) { throw 'Publish THAT BAI' }
+
+      # --- Ky exe qua SignPath Foundation -----------------------------------
+      # SignPath doc file can ky TU GitHub artifact, nen phai upload truoc va
+      # truyen dung artifact-id do upload-artifact tra ve (KHONG phai run_id).
+      - name: Upload exe cho SignPath
+        id: exe_artifact
+        if: env.SIGNPATH_CONFIGURED == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: swico-exe-unsigned
+          path: publish/swico.exe
+
+      - name: Ky exe (SignPath)
+        if: env.SIGNPATH_CONFIGURED == 'true'
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: swico
+          signing-policy-slug: release-signing
+          artifact-configuration-slug: exe
+          github-artifact-id: ${{ steps.exe_artifact.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: publish
+
+      # Installer phai duoc dong goi SAU khi exe da ky, de file exe ben trong
+      # ban cai dat la file DA co chu ky.
+      - name: Dong goi installer (Inno Setup)
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { throw "Khong tim thay Inno Setup 6 tai $iscc" }
+          & $iscc "/DAppVersion=${{ steps.ver.outputs.version }}" packaging\innosetup\swico.iss
+          if ($LASTEXITCODE -ne 0) { throw 'Dong goi installer THAT BAI' }
+
+      - name: Upload installer cho SignPath
+        id: setup_artifact
+        if: env.SIGNPATH_CONFIGURED == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: swico-setup-unsigned
+          path: packaging/output/swico-setup-*.exe
+
+      - name: Ky installer (SignPath)
+        if: env.SIGNPATH_CONFIGURED == 'true'
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: swico
+          signing-policy-slug: release-signing
+          artifact-configuration-slug: installer
+          github-artifact-id: ${{ steps.setup_artifact.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: packaging/output
+
+      - name: Xac minh chu ky
+        if: env.SIGNPATH_CONFIGURED == 'true'
+        shell: pwsh
+        run: |
+          # Kiem tra CA chu ky LAN dau thoi gian. Chu ky khong co dau thoi gian
+          # se het hieu luc khi chung chi het han - loi nay chi lo ra sau nhieu
+          # thang, nen phai chan ngay tai day.
+          foreach ($f in @('publish/swico.exe') + (Get-ChildItem packaging/output/swico-setup-*.exe).FullName) {
+            $sig = Get-AuthenticodeSignature $f
+            Write-Host "$f -> $($sig.Status)"
+            if ($sig.Status -ne 'Valid')     { throw "Chu ky KHONG hop le: $f ($($sig.Status))" }
+            if ($null -eq $sig.TimeStamperCertificate) { throw "Thieu dau thoi gian: $f" }
+          }
+
+      - name: Ban portable (zip)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path packaging/output, packaging/portable | Out-Null
+          Copy-Item publish/swico.exe, LICENSE, NOTICE, EULA.txt, PRIVACY.md,
+                    THIRD-PARTY-NOTICES.md, README.md packaging/portable
+          Compress-Archive -Path 'packaging/portable/*' `
+            -DestinationPath "packaging/output/swico-portable-${{ steps.ver.outputs.version }}.zip" -Force
+
+      # SBOM: bat buoc cho phat hanh nghiem tuc, va la mot phan ho so minh bach
+      # ma SignPath Foundation danh gia cao.
+      - name: Sinh SBOM (CycloneDX)
+        shell: pwsh
+        run: |
+          dotnet tool install --global CycloneDX
+          dotnet CycloneDX Tsudev.SystemAudit.sln -o packaging/output -f swico-sbom.json -j
+
+      # Checksum la bien phap bu dap khi CHUA co chu ky so, va van huu ich sau
+      # khi da co: nguoi dung tu doi chieu duoc file tai ve.
+      - name: Tinh SHA-256
+        shell: pwsh
+        run: |
+          Copy-Item publish/swico.exe packaging/output/
+          Get-ChildItem packaging/output -File |
+            Where-Object { $_.Name -ne 'SHA256SUMS.txt' } |
+            ForEach-Object {
+              $h = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower()
+              "$h  $($_.Name)"
+            } | Set-Content packaging/output/SHA256SUMS.txt -Encoding ascii
+          Get-Content packaging/output/SHA256SUMS.txt
+
+      - name: Tao GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: packaging/output/*
+          generate_release_notes: true
+          draft: true
+          body: |
+            ## Cài đặt
+
+            ```
+            winget install tsuowlit.SWICO
+            ```
+
+            Hoặc tải file setup bên dưới. Bản portable là file `.zip`, giải nén
+            và chạy trực tiếp, không cần cài đặt.
+
+            ## Xác minh file tải về
+
+            Đối chiếu với `SHA256SUMS.txt`:
+
+            ```powershell
+            Get-FileHash .\swico-setup-${{ steps.ver.outputs.version }}.exe -Algorithm SHA256
+            ```
+
+            ## Lưu ý
+
+            Báo cáo do công cụ tạo ra là **dữ liệu kỹ thuật để tham khảo**,
+            không phải kết luận pháp lý. Xem `EULA.txt` mục 3.

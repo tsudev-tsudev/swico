@@ -1,0 +1,63 @@
+name: CI
+
+# Build va test tren ubuntu vi day la phan re va nhanh nhat: toan bo logic
+# nghiep vu nam trong Core (net8.0) va khong can Windows. Job windows chi de
+# xac nhan lop adapter bien dich duoc va exe chay len duoc.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  test:
+    name: Build & test (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore Tsudev.SystemAudit.sln
+
+      - name: Build
+        run: dotnet build Tsudev.SystemAudit.sln -c Release --no-restore
+
+      - name: Unit tests
+        run: dotnet run --project tests/unittests -c Release --no-build
+
+  smoke-windows:
+    name: Smoke test (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Publish single-file exe
+        run: dotnet publish src/Tsudev.Audit.Cli -c Release -r win-x64 -o publish
+
+      # --help chay duoc nghia la exe khoi dong duoc va bo phan tich tham so
+      # hoat dong. Day KHONG phai kiem thu day du - viec do can may that voi
+      # cau hinh that, xem docs/WINDOWS-VERIFICATION.md
+      - name: Run --help
+        run: ./publish/swico.exe --help
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: swico-unsigned-${{ github.sha }}
+          path: publish/swico.exe
+          retention-days: 14

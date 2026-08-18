@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+PackageIdentifier: tsuowlit.SWICO
+PackageVersion: 3.0.0
+PackageLocale: vi-VN
+Publisher: tsuowlit
+PublisherUrl: https://github.com/tsuowlit
+PublisherSupportUrl: https://github.com/tsuowlit/swico/issues
+PackageName: tsuowlit SWICO
+PackageUrl: https://github.com/tsuowlit/swico
+License: Apache-2.0
+LicenseUrl: https://github.com/tsuowlit/swico/blob/main/LICENSE
+Copyright: Copyright (c) 2026 tsuowlit
+CopyrightUrl: https://github.com/tsuowlit/swico/blob/main/NOTICE
+ShortDescription: Kiểm tra bản quyền Windows và thu thập cấu hình phần cứng
+Description: |-
+  tsuowlit SWICO kiểm tra tình trạng kích hoạt bản quyền Windows và Office, thu
+  thập cấu hình phần cứng, và rà soát các dấu hiệu kích hoạt bất thường trên máy.
+
+  Kết quả xuất ra bốn định dạng cùng lúc: HTML để đọc, JSON để tích hợp, XLSX và
+  CSV để xử lý tiếp. Quét nhiều máy thì copy các thư mục kết quả về cùng một chỗ,
+  công cụ tự gom thành một trang tổng hợp.
+
+  Toàn bộ dữ liệu chỉ ghi ra đĩa của chính máy đó. Công cụ không kết nối Internet
+  và không gửi bất kỳ thông tin nào đi.
+
+  Lưu ý: báo cáo là dữ liệu kỹ thuật để tham khảo, không phải kết luận pháp lý.
+Moniker: swico
+Tags:
+  - audit
+  - hardware
+  - inventory
+  - license
+  - windows
+ReleaseNotesUrl: https://github.com/tsuowlit/swico/releases/tag/v3.0.0
+Documentations:
+  - DocumentLabel: Hướng dẫn sử dụng
+    DocumentUrl: https://github.com/tsuowlit/swico/blob/main/README.md
+  - DocumentLabel: Tuyên bố quyền riêng tư
+    DocumentUrl: https://github.com/tsuowlit/swico/blob/main/PRIVACY.md
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

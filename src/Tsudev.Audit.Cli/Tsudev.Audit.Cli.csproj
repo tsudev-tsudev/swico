@@ -3,7 +3,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
 
-    <AssemblyName>tsudev-audit</AssemblyName>
+    <AssemblyName>swico</AssemblyName>
     <RootNamespace>Tsudev.Audit.Cli</RootNamespace>
 
     <!-- Xuat 1 FILE EXE DUY NHAT, khong can cai .NET Runtime tren may dich.

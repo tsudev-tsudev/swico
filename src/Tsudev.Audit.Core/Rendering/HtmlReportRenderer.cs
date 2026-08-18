@@ -16,7 +16,10 @@ namespace Tsudev.Audit.Core.Rendering;
 public sealed class HtmlReportRenderer
 {
     public const string BrandUrl = "https://tsudev.com";
-    public const string BrandName = "tsudev";
+    public const string BrandName = "tsuowlit";
+
+    /// <summary>Ten san pham day du, hien o chan trang va the &lt;meta generator&gt;.</summary>
+    public const string ProductName = "tsuowlit SWICO";
 
     /// <summary>Mau nen chu dao - theme xanh nhat, dung THONG NHAT ca bao cao lan dashboard.</summary>
     public const string ThemeBackground = "#eaf2fc";
@@ -35,7 +38,7 @@ public sealed class HtmlReportRenderer
         sb.Append("<!DOCTYPE html>\n<html lang=\"vi\">\n<head>\n");
         sb.Append("<meta charset=\"utf-8\">\n");
         sb.Append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n");
-        sb.Append("<meta name=\"generator\" content=\"").Append(E(BrandName)).Append(" System Audit\">\n");
+        sb.Append("<meta name=\"generator\" content=\"").Append(E(ProductName)).Append("\">\n");
         sb.Append("<title>").Append(E(report.Title)).Append(" - ").Append(E(report.ComputerName)).Append("</title>\n");
         sb.Append("<style>\n").Append(Css).Append("</style>\n</head>\n<body>\n");
 
@@ -188,8 +191,8 @@ public sealed class HtmlReportRenderer
     {
         sb.Append("<footer class=\"foot\"><div class=\"wrap\">\n");
         sb.Append("<p>Báo cáo sinh tự động bởi <a href=\"").Append(BrandUrl)
-          .Append("\" target=\"_blank\" rel=\"noopener noreferrer\">").Append(E(BrandName))
-          .Append(" System Audit</a> &middot; lược đồ dữ liệu ").Append(E(report.SchemaVersion)).Append("</p>\n");
+          .Append("\" target=\"_blank\" rel=\"noopener noreferrer\">").Append(E(ProductName))
+          .Append("</a> &middot; lược đồ dữ liệu ").Append(E(report.SchemaVersion)).Append("</p>\n");
         sb.Append("<p class=\"muted\">Số liệu phản ánh trạng thái máy tại thời điểm quét. ")
           .Append("Đây là dữ liệu kỹ thuật để tham khảo, không phải kết luận pháp lý.</p>\n");
         sb.Append("</div></footer>\n");

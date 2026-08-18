@@ -1,0 +1,86 @@
+ĐIỀU KHOẢN SỬ DỤNG PHẦN MỀM
+tsuowlit SWICO
+
+Vui lòng đọc kỹ trước khi cài đặt. Bằng việc cài đặt hoặc sử dụng phần mềm này,
+bạn xác nhận đã đọc, hiểu và đồng ý với các điều khoản dưới đây.
+
+
+1. CẤP PHÉP
+
+Phần mềm này là mã nguồn mở, phát hành theo giấy phép Apache License 2.0.
+Toàn văn giấy phép được cài kèm trong file LICENSE và có tại:
+http://www.apache.org/licenses/LICENSE-2.0
+
+Bạn được sử dụng miễn phí, không giới hạn số lượng máy, cho cả mục đích cá nhân
+lẫn thương mại.
+
+
+2. NHÃN HIỆU
+
+Giấy phép Apache 2.0 cấp cho bạn quyền đối với mã nguồn. Giấy phép đó KHÔNG cấp
+quyền sử dụng tên "tsuowlit" hay "SWICO" để đặt tên cho sản phẩm phái sinh của
+bạn. Bạn được tự do fork và phân phối bản sửa đổi, nhưng phải dưới một tên khác.
+
+
+3. BẢN CHẤT CỦA KẾT QUẢ - ĐIỀU KHOẢN QUAN TRỌNG NHẤT
+
+Phần mềm này thu thập thông tin kỹ thuật và đưa ra đánh giá về tình trạng kích
+hoạt bản quyền Windows, Office cùng các dấu hiệu bất thường trên máy tính.
+
+Kết quả đó là DỮ LIỆU KỸ THUẬT ĐỂ THAM KHẢO. Nó KHÔNG PHẢI là:
+
+  - kết luận pháp lý về tính hợp pháp của bản quyền phần mềm;
+  - chứng cứ đủ để kết luận một cá nhân hay tổ chức vi phạm bản quyền;
+  - căn cứ duy nhất cho bất kỳ quyết định kỷ luật, chấm dứt hợp đồng lao động,
+    xử phạt, hay khiếu kiện nào.
+
+Đánh giá của phần mềm dựa trên dấu hiệu quan sát được tại thời điểm quét và có
+thể sai theo cả hai chiều: bỏ sót vi phạm thật, hoặc báo động nhầm với hệ thống
+hoàn toàn hợp lệ. Việc kích hoạt qua máy chủ KMS trong doanh nghiệp, chẳng hạn,
+là hợp pháp nhưng có thể trùng dấu hiệu với kích hoạt trái phép.
+
+Mọi quyết định dựa trên báo cáo này thuộc trách nhiệm của người sử dụng. Tác giả
+từ chối mọi trách nhiệm đối với hậu quả của các quyết định đó.
+
+
+4. QUYỀN RIÊNG TƯ VÀ DỮ LIỆU
+
+Phần mềm đọc các thông tin sau từ máy được quét:
+
+  - trạng thái kích hoạt Windows và Office, một phần mã sản phẩm;
+  - cấu hình phần cứng, gồm số sê-ri của máy, bo mạch chủ và ổ đĩa;
+  - danh sách phần mềm đã cài đặt;
+  - trạng thái Microsoft Defender và tính toàn vẹn hệ thống;
+  - tên máy, tên miền và tên người dùng đang đăng nhập.
+
+Đây là dữ liệu nhạy cảm. Vì vậy, phần mềm cam kết:
+
+  - KHÔNG gửi bất kỳ dữ liệu nào ra khỏi máy tính của bạn;
+  - KHÔNG kết nối Internet vì bất kỳ mục đích nào;
+  - KHÔNG thu thập số liệu sử dụng hay dữ liệu đo lường từ xa;
+  - chỉ ghi kết quả ra thư mục do bạn chỉ định trên chính máy đó.
+
+Việc kết quả đi đâu sau khi được ghi ra đĩa hoàn toàn do bạn quyết định. Nếu bạn
+gửi báo cáo cho bên khác, bạn có trách nhiệm với dữ liệu trong đó.
+
+
+5. YÊU CẦU QUYỀN QUẢN TRỊ
+
+Phần mềm yêu cầu quyền Administrator vì cần đọc trạng thái bản quyền, thông tin
+Defender và chạy các công cụ kiểm tra toàn vẹn của hệ thống. Phần mềm chỉ ĐỌC và
+không thay đổi cấu hình máy, ngoài việc ghi file kết quả.
+
+
+6. MIỄN TRỪ BẢO ĐẢM
+
+Phần mềm được cung cấp "NGUYÊN TRẠNG", không kèm bảo đảm dưới bất kỳ hình thức
+nào, dù rõ ràng hay ngụ ý, theo đúng quy định tại mục 7 và 8 của Apache License
+2.0.
+
+
+7. MÃ NGUỒN
+
+Toàn bộ mã nguồn được công khai. Bạn có thể tự kiểm chứng mọi điều nêu trên -
+đặc biệt là cam kết ở mục 4 - bằng cách đọc mã nguồn tại:
+
+https://github.com/tsuowlit/swico
