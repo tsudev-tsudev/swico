@@ -100,8 +100,8 @@ và tự chạy thử được. Kịch bản đầy đủ: `docs/WINDOWS-VERIFIC
 
 Làm khi đã có kết quả từ Phase 4 — sửa theo dữ liệu thật, không theo phỏng đoán.
 
-- ⬜ Dọn ~25 cảnh báo CA1305/CA1826 còn tồn
-- ⬜ `.editorconfig` + cân nhắc `TreatWarningsAsErrors`
+- ✅ Dọn sạch 27 cảnh báo CA — trong đó CA1305 ở `FileNaming` là **lỗi thật**
+- ✅ `.editorconfig` + bật `TreatWarningsAsErrors`
 - ⬜ Chuyển bộ test tự chế sang **xUnit** — báo lỗi tử tế, chạy song song
 - ⬜ Tách file gộp nhiều class thành file riêng
 - ⬜ Logging có cấu trúc thay `Console.WriteLine` rải rác

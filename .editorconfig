@@ -1,0 +1,45 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+[*.{cs,csproj,props,targets}]
+indent_size = 4
+
+[*.{json,yml,yaml,md}]
+indent_size = 2
+
+[*.{ps1,iss}]
+indent_size = 4
+end_of_line = crlf
+
+[*.cs]
+# --- Quy uoc dat ten & viet ma ---
+csharp_style_namespace_declarations = file_scoped:suggestion
+csharp_using_directive_placement = outside_namespace:suggestion
+csharp_prefer_braces = when_multiline:suggestion
+dotnet_sort_system_directives_first = true
+csharp_style_var_when_type_is_apparent = true:suggestion
+
+# --- Cac quy tac phan tich duoc TAT CO LY DO ---
+
+# CA1822: "co the chuyen thanh static".
+# Bi tat cho HtmlReportRenderer.Render, XlsxWriter.Write va DashboardBuilder.Scan.
+# Ba ham nay la API THUC THE CO CHU DICH: Program.cs va bo test deu goi qua
+# doi tuong (new HtmlReportRenderer().Render(...)), va DashboardBuilder nhan
+# renderer qua ham dung. Chuyen sang static se pha API ma khong doi lai loi
+# ich nao - day la ham chay mot lan moi bao cao, khong nam trong vong lap nong.
+dotnet_diagnostic.CA1822.severity = none
+
+# --- Cac quy tac duoc NANG len muc loi ---
+
+# CA1305: dinh dang phu thuoc ngon ngu may.
+# Day KHONG phai quy tac hinh thuc: ten thu muc ket qua dung dinh dang "yyyyMMdd",
+# ma tren may dat ngon ngu Thai hoac A Rap thi lich mac dinh khong phai Gregorian
+# nen "yyyy" cho ra nam hoan toan khac (2569 thay vi 2026). Da tung la lo hong
+# that trong FileNaming - giu o muc loi de khong tai dien.
+dotnet_diagnostic.CA1305.severity = error

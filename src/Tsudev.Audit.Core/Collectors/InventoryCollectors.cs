@@ -1,3 +1,4 @@
+using System.Globalization;
 using Tsudev.Audit.Core.Abstractions;
 using Tsudev.Audit.Core.Models;
 
@@ -145,10 +146,10 @@ public static class HardwareCollector
         var t = DataTable.Create("", "Tên máy", "Loại thiết bị", "Hãng sản xuất", "Model",
             "Số Serial (Chassis)", "BIOS Version", "Mainboard - Model", "Tổng RAM");
 
-        var cs = ctx.Wmi.Query("Win32_ComputerSystem").FirstOrDefault();
-        var bios = ctx.Wmi.Query("Win32_BIOS").FirstOrDefault();
-        var board = ctx.Wmi.Query("Win32_BaseBoard").FirstOrDefault();
-        var chassis = ctx.Wmi.Query("Win32_SystemEnclosure").FirstOrDefault();
+        var cs = ctx.Wmi.Query("Win32_ComputerSystem").FirstRowOrNull();
+        var bios = ctx.Wmi.Query("Win32_BIOS").FirstRowOrNull();
+        var board = ctx.Wmi.Query("Win32_BaseBoard").FirstRowOrNull();
+        var chassis = ctx.Wmi.Query("Win32_SystemEnclosure").FirstRowOrNull();
 
         var ram = FormatBytes(cs?.Num("TotalPhysicalMemory"));
         var deviceType = DescribeChassis(chassis?.Num("ChassisTypes"));
@@ -197,8 +198,8 @@ public static class HardwareCollector
                 m.Str("Manufacturer"), m.Str("SerialNumber"));
         t.AddEmptyNotice("Không đọc được thông tin RAM");
 
-        var array = ctx.Wmi.Query("Win32_PhysicalMemoryArray").FirstOrDefault();
-        var totalSlots = array?.Num("MemoryDevices")?.ToString() ?? "-";
+        var array = ctx.Wmi.Query("Win32_PhysicalMemoryArray").FirstRowOrNull();
+        var totalSlots = array?.Num("MemoryDevices")?.ToString(CultureInfo.InvariantCulture) ?? "-";
         return (t, sticks.Count, totalSlots);
     }
 
@@ -229,7 +230,7 @@ public static class HardwareCollector
             var size = v.Num("Size");
             var free = v.Num("FreeSpace");
             var pct = (size is > 0 && free is not null)
-                ? Math.Round(free.Value * 100.0 / size.Value, 1).ToString("0.0")
+                ? Math.Round(free.Value * 100.0 / size.Value, 1).ToString("0.0", CultureInfo.InvariantCulture)
                 : "-";
             t.AddRow(v.Str("DeviceID"), v.Str("VolumeName"), v.Str("FileSystem"),
                 FormatBytes(size), FormatBytes(free), pct);
@@ -314,7 +315,7 @@ public static class DefenderCollector
         var status = DataTable.Create("Trạng thái bảo vệ hiện tại",
             "Bảo vệ thời gian thực", "Chống virus bật", "Phiên bản chữ ký", "Tuổi chữ ký (ngày)", "Quét nhanh gần nhất");
 
-        var s = ctx.Wmi.Query("MSFT_MpComputerStatus", null, "root\\Microsoft\\Windows\\Defender").FirstOrDefault();
+        var s = ctx.Wmi.Query("MSFT_MpComputerStatus", null, "root\\Microsoft\\Windows\\Defender").FirstRowOrNull();
         if (s is null)
         {
             ctx.Warn("Không đọc được trạng thái Windows Defender (có thể đã bị thay bằng AV khác, hoặc thiếu quyền Administrator).");
@@ -328,7 +329,7 @@ public static class DefenderCollector
                 s.Bool("AntivirusEnabled") == true ? "Có" : "Không",
                 s.Str("AntivirusSignatureVersion"),
                 s.Num("AntivirusSignatureAge"),
-                quick?.ToString("yyyy-MM-dd HH:mm:ss") ?? "Chưa từng quét");
+                quick?.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) ?? "Chưa từng quét");
         }
 
         var threats = DataTable.Create("Lịch sử phát hiện mối đe dọa (file .exe, .doc, ... đã bị Defender gắn cờ)",
@@ -345,7 +346,7 @@ public static class DefenderCollector
             threats.AddRow(
                 d.Str("ThreatName", d.Str("ThreatID")),
                 resources,
-                WmiDateParser.Parse(d.Str("InitialDetectionTime", ""))?.ToString("yyyy-MM-dd HH:mm:ss") ?? "-",
+                WmiDateParser.Parse(d.Str("InitialDetectionTime", ""))?.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) ?? "-",
                 d.Bool("ActionSuccess") == true ? "Có" : "Chưa/Không rõ");
         }
         threats.AddEmptyNotice("Không phát hiện mối đe dọa nào trong lịch sử quét của Windows Defender");

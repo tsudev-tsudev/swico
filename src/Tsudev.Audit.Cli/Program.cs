@@ -27,6 +27,17 @@ public static class Program
     /// </summary>
     public const int ExitOk = 0, ExitPartial = 1, ExitFatal = 2, ExitBadArgs = 3;
 
+    /// <summary>
+    /// Dung lai mot the hien duy nhat: JsonSerializerOptions xay bo dem noi tai
+    /// khi dung lan dau, nen tao moi moi lan goi la vut bo bo dem do.
+    /// </summary>
+    private static readonly JsonSerializerOptions ReportJsonOptions = new()
+    {
+        WriteIndented = true,
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+
     [SupportedOSPlatform("windows")]
     public static int Main(string[] args)
     {
@@ -175,15 +186,9 @@ public static class Program
 
         try
         {
-            var jsonOpts = new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            };
             var jsonName = Path.ChangeExtension(report.HtmlReportFile, ".json");
             File.WriteAllText(Path.Combine(dir, jsonName),
-                JsonSerializer.Serialize(report, jsonOpts), utf8NoBom);
+                JsonSerializer.Serialize(report, ReportJsonOptions), utf8NoBom);
         }
         catch (Exception ex) { Warn($"Không ghi được JSON: {ex.Message}"); allOk = false; }
 

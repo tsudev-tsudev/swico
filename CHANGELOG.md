@@ -23,6 +23,8 @@
   Việt–Anh, hỗ trợ `/VERYSILENT`, tuỳ chọn thêm vào PATH) và manifest winget.
 - CI/CD: `.github/workflows/ci.yml` và `release.yml` — build, test, đóng gói,
   ký số qua SignPath Foundation, sinh SBOM, tính checksum, tạo release.
+- `.editorconfig` — quy ước định dạng, kèm lý do cụ thể cho từng quy tắc được
+  tắt hoặc nâng lên mức lỗi.
 - Hạ tầng nối tiếp phiên: `docs/STATE.md`, `docs/CONTINUITY.md`, `docs/PLAN.md`,
   `docs/DECISIONS.md`, `docs/journal/`.
 - `docs/WINDOWS-VERIFICATION.md` — kịch bản kiểm chứng trên máy Windows thật.
@@ -39,6 +41,13 @@
 
 ### Sửa
 
+- **Lỗi định dạng phụ thuộc ngôn ngữ máy trong `FileNaming`.** Tên thư mục kết
+  quả dùng `ToString("yyyyMMdd")` không truyền `IFormatProvider`. Trên máy đặt
+  ngôn ngữ Thái hoặc Ả Rập, lịch mặc định không phải Gregorian nên năm cho ra
+  hoàn toàn khác (2569 thay vì 2026) — sai tên thư mục, vô hiệu quy ước 3 cấp,
+  và trang tổng hợp không gom được kết quả giữa các máy khác ngôn ngữ.
+- Dọn sạch 27 cảnh báo trình phân tích (CA1305/CA1826/CA1822/CA1869/CA1716) và
+  bật `TreatWarningsAsErrors` để chúng không tích tụ trở lại.
 - **Dự án không build được.** Thiếu `Tsudev.Audit.Core.csproj` (cả hai csproj
   còn lại đều tham chiếu tới nó) và thiếu toàn bộ namespace `Core.Rendering`
   mà `Program.cs` gọi ở 3 chỗ.

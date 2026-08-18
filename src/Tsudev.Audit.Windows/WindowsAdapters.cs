@@ -20,7 +20,7 @@ public sealed class WmiQuery : IWmiQuery
     public WmiQuery(Action<string>? warn = null) => _warn = warn ?? (_ => { });
 
     public IReadOnlyList<IReadOnlyDictionary<string, object?>> Query(
-        string className, string? whereClause = null, string @namespace = "root\\cimv2")
+        string className, string? whereClause = null, string wmiNamespace = "root\\cimv2")
     {
         var result = new List<IReadOnlyDictionary<string, object?>>();
         var query = string.IsNullOrWhiteSpace(whereClause)
@@ -29,7 +29,7 @@ public sealed class WmiQuery : IWmiQuery
 
         try
         {
-            var scope = new ManagementScope(@namespace);
+            var scope = new ManagementScope(wmiNamespace);
             using var searcher = new ManagementObjectSearcher(scope, new ObjectQuery(query));
             using var collection = searcher.Get();
 
@@ -49,7 +49,7 @@ public sealed class WmiQuery : IWmiQuery
         }
         catch (ManagementException ex)
         {
-            _warn($"Không truy vấn được WMI '{className}' ({@namespace}): {ex.Message}");
+            _warn($"Không truy vấn được WMI '{className}' ({wmiNamespace}): {ex.Message}");
         }
         catch (UnauthorizedAccessException)
         {

@@ -21,7 +21,7 @@ public sealed class FakeWmiQuery : IWmiQuery
     }
 
     public IReadOnlyList<IReadOnlyDictionary<string, object?>> Query(
-        string className, string? whereClause = null, string @namespace = "root\\cimv2")
+        string className, string? whereClause = null, string wmiNamespace = "root\\cimv2")
         => _data.TryGetValue(className, out var rows)
             ? rows.Cast<IReadOnlyDictionary<string, object?>>().ToList()
             : Array.Empty<IReadOnlyDictionary<string, object?>>();

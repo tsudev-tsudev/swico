@@ -21,6 +21,11 @@
     <LangVersion>latest</LangVersion>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+
+    <!-- Canh bao = loi. Bat duoc sau khi da don sach 27 canh bao ton dong;
+         de mo lai thi chung tich tu tro lai va khong ai doc nua.
+         Cac quy tac duoc tat co ly do cu the nam trong .editorconfig. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
 </Project>

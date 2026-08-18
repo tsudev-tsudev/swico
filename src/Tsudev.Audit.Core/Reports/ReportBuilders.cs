@@ -1,3 +1,4 @@
+using System.Globalization;
 using Tsudev.Audit.Core.Abstractions;
 using Tsudev.Audit.Core.Collectors;
 using Tsudev.Audit.Core.Models;
@@ -150,9 +151,9 @@ public static class LicenseReportBuilder
             Tables = { SoftwareCollector.ToManualReviewTable(software) }
         });
 
-        report.SummaryCards.Add(new SummaryCard { Value = software.Count.ToString(), Label = "Tổng số phần mềm đã cài" });
-        report.SummaryCards.Add(new SummaryCard { Value = licensedCount.ToString(), Label = "Sản phẩm Windows có license" });
-        report.SummaryCards.Add(new SummaryCard { Value = findings.Count.ToString(), Label = "Dấu hiệu kích hoạt trái phép" });
+        report.SummaryCards.Add(new SummaryCard { Value = software.Count.ToString(CultureInfo.InvariantCulture), Label = "Tổng số phần mềm đã cài" });
+        report.SummaryCards.Add(new SummaryCard { Value = licensedCount.ToString(CultureInfo.InvariantCulture), Label = "Sản phẩm Windows có license" });
+        report.SummaryCards.Add(new SummaryCard { Value = findings.Count.ToString(CultureInfo.InvariantCulture), Label = "Dấu hiệu kích hoạt trái phép" });
         report.SummaryCards.Add(new SummaryCard { Value = $"{score.Value}/100", Label = $"Điểm rủi ro ({score.Label})" });
 
         report.Warnings.AddRange(ctx.Warnings);
@@ -257,9 +258,9 @@ public static class HardwareReportBuilder
         });
         report.Sections.Add(defSection);
 
-        report.SummaryCards.Add(new SummaryCard { Value = ctx.Wmi.Query("Win32_Processor").Count.ToString(), Label = "CPU vật lý" });
+        report.SummaryCards.Add(new SummaryCard { Value = ctx.Wmi.Query("Win32_Processor").Count.ToString(CultureInfo.InvariantCulture), Label = "CPU vật lý" });
         report.SummaryCards.Add(new SummaryCard { Value = $"{usedSlots} / {totalSlots}", Label = "Khe RAM đang dùng / tổng khe" });
-        report.SummaryCards.Add(new SummaryCard { Value = threatCount.ToString(), Label = "Mối đe dọa Defender đã ghi nhận" });
+        report.SummaryCards.Add(new SummaryCard { Value = threatCount.ToString(CultureInfo.InvariantCulture), Label = "Mối đe dọa Defender đã ghi nhận" });
 
         report.Warnings.AddRange(ctx.Warnings);
         return report;
@@ -282,8 +283,15 @@ public static class RiskLabels
 /// <summary>Quy tac dat ten file va thu muc dau ra (cau truc 3 cap).</summary>
 public static class FileNaming
 {
-    public static string Stamp(SystemContext ctx) => ctx.ScanTime.LocalDateTime.ToString("yyyyMMdd_HHmmss");
-    public static string DateOnly(DateTimeOffset t) => t.LocalDateTime.ToString("yyyyMMdd");
+    // BAT BUOC dung CultureInfo.InvariantCulture. Tren may dat ngon ngu Thai
+    // hoac A Rap, lich mac dinh KHONG phai Gregorian nen "yyyy" cho ra nam khac
+    // han (vi du 2569 thay vi 2026). Ten thu muc se sai, quy uoc 3 cap vo hieu,
+    // va trang tong hop khong gom duoc ket qua giua cac may khac ngon ngu.
+    public static string Stamp(SystemContext ctx)
+        => ctx.ScanTime.LocalDateTime.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
+
+    public static string DateOnly(DateTimeOffset t)
+        => t.LocalDateTime.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
 
     public static string Html(string prefix, SystemContext ctx)
         => $"{prefix}_{ctx.ComputerName}_{Stamp(ctx)}.html";

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Tsudev.Audit.Core.Abstractions;
 using Tsudev.Audit.Core.Models;
@@ -12,9 +13,9 @@ public static class OsInfoCollector
         var t = DataTable.Create("", "Tên máy", "Hệ điều hành", "Phiên bản (Build)", "Kiến trúc",
             "Nhà sản xuất máy", "Model", "BIOS Serial", "Ngày cài đặt OS", "Thời gian quét");
 
-        var os = ctx.Wmi.Query("Win32_OperatingSystem").FirstOrDefault();
-        var cs = ctx.Wmi.Query("Win32_ComputerSystem").FirstOrDefault();
-        var bios = ctx.Wmi.Query("Win32_BIOS").FirstOrDefault();
+        var os = ctx.Wmi.Query("Win32_OperatingSystem").FirstRowOrNull();
+        var cs = ctx.Wmi.Query("Win32_ComputerSystem").FirstRowOrNull();
+        var bios = ctx.Wmi.Query("Win32_BIOS").FirstRowOrNull();
 
         if (os is null) ctx.Warn("Không đọc được Win32_OperatingSystem (thông tin hệ điều hành có thể thiếu).");
 
@@ -23,7 +24,7 @@ public static class OsInfoCollector
         {
             var raw = os.Str("InstallDate", "");
             var parsed = WmiDateParser.Parse(raw);
-            if (parsed.HasValue) installDate = parsed.Value.ToString("yyyy-MM-dd");
+            if (parsed.HasValue) installDate = parsed.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         }
 
         t.AddRow(
@@ -35,7 +36,7 @@ public static class OsInfoCollector
             cs?.Str("Model") ?? "-",
             bios?.Str("SerialNumber") ?? "-",
             installDate,
-            ctx.ScanTime.LocalDateTime.ToString("yyyy-MM-dd HH:mm:ss"));
+            ctx.ScanTime.LocalDateTime.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
 
         return t;
     }

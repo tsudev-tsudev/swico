@@ -31,7 +31,7 @@ public interface IWmiQuery
     IReadOnlyList<IReadOnlyDictionary<string, object?>> Query(
         string className,
         string? whereClause = null,
-        string @namespace = "root\\cimv2");
+        string wmiNamespace = "root\\cimv2");
 }
 
 /// <summary>Doc registry (chi doc, khong bao gio ghi).</summary>
@@ -128,5 +128,25 @@ public static class WmiExtensions
         if (!row.TryGetValue(key, out var v) || v is null) return null;
         if (v is bool b) return b;
         return bool.TryParse(v.ToString(), out var parsed) ? parsed : null;
+    }
+}
+
+/// <summary>
+/// Ham tien ich cho ket qua truy van WMI.
+/// </summary>
+public static class WmiResultExtensions
+{
+    /// <summary>
+    /// Lay dong dau tien, hoac null neu khong co dong nao.
+    ///
+    /// Dung ham nay thay cho <c>FirstOrDefault()</c> cua LINQ: ket qua truy van
+    /// la <see cref="IReadOnlyList{T}"/> nen truy cap theo chi so truc tiep
+    /// duoc, khong can dung toi bo dem lap.
+    /// </summary>
+    public static IReadOnlyDictionary<string, object?>? FirstRowOrNull(
+        this IReadOnlyList<IReadOnlyDictionary<string, object?>> rows)
+    {
+        ArgumentNullException.ThrowIfNull(rows);
+        return rows.Count > 0 ? rows[0] : null;
     }
 }
