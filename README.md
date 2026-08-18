@@ -44,15 +44,25 @@ trong. Nghe ngược trực giác, nhưng nén hai lần là phản tác dụng 
 thì trình cài đặt không nén thêm được nữa, nên **file setup lại to hơn**. Bỏ nén
 cũng xoá luôn bước giải nén runtime mỗi lần khởi động.
 
-| Tệp | 26.8.18 | 26.8.18.2 |
-|---|---|---|
-| `swico-setup-*.exe` | 31,2 MB | **26,1 MB** |
-| `swico-portable-*.zip` | 30,5 MB | ~32 MB |
-| `swico.exe` (tải trực tiếp) | 35,7 MB | 79,5 MB |
+| Tệp | 26.8.18 | 26.8.18.2 | |
+|---|---|---|---|
+| `swico-setup-*.exe` | 29,8 MB | **24,9 MB** | giảm 16,4% |
+| `swico-portable-*.zip` | 29,1 MB | 30,3 MB | tăng 4,2% |
+| `swico.exe` tải trực tiếp | 34,0 MB | 75,8 MB | **tăng 123%** |
 
-Bản portable và file exe trực tiếp **to hơn** vì `.zip` dùng Deflate, yếu hơn
-LZMA2 của trình cài đặt. Đổi lại: khởi động nhanh hơn ở cả ba dạng. Nếu bạn ưu
-tiên dung lượng tải, dùng **file setup**.
+Trình cài đặt nén bằng LZMA2 nên hưởng lợi trọn vẹn. `.zip` chỉ có Deflate nên
+gần như hoà. Còn `swico.exe` tải trực tiếp thì **to hơn gấp đôi** — vì trước đây
+nó tự nén bên trong, giờ thì không.
+
+**Nên chọn gì:**
+
+- **File setup** — nhỏ nhất, và là cách hầu hết người dùng nên dùng
+- **Bản portable** — khi không muốn cài đặt
+- **`swico.exe` trực tiếp** — chỉ khi thật cần một file đơn cho script; hãy biết
+  rằng bạn đang tải nhiều hơn gấp đôi
+
+Đổi lại ở cả ba dạng: không còn bước giải nén runtime ở lần chạy đầu, và mã máy
+đã biên dịch sẵn (ReadyToRun) nên không phải đợi JIT lúc khởi động.
 
 > ⚠️ **`winget install tsudev.SWICO` chưa dùng được.** Gói chưa được nộp lên kho
 > cộng đồng `microsoft/winget-pkgs`, nên lệnh này sẽ báo *"No package found

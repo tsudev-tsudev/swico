@@ -3,6 +3,40 @@
 Định dạng theo [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/);
 đánh số phiên bản theo [SemVer](https://semver.org/lang/vi/).
 
+## [26.8.18.2] — 18/08/2026
+
+### Hiệu năng
+
+- **File cài đặt nhỏ hơn 16,4%** (29,8 → 24,9 MB) và khởi động nhanh hơn.
+  - **Bỏ nén trong single-file.** Nghe ngược trực giác nhưng nén hai lần là phản
+    tác dụng: payload đã nén thì trình cài đặt không nén thêm được nữa, nên file
+    setup lại **to hơn** (đo được: 29,1 so với 22,2 MB ở bước mô phỏng). Bỏ nén
+    cũng xoá luôn bước giải nén runtime ở lần chạy đầu.
+  - **ReadyToRun** — mã máy biên dịch sẵn, không phải đợi JIT lúc khởi động.
+  - Bản portable nén bằng 7-Zip `-mx=9` thay vì `Compress-Archive`.
+  - ⚠️ Đánh đổi: `swico.exe` tải trực tiếp **to hơn gấp đôi** (34,0 → 75,8 MB).
+    Bản portable tăng nhẹ 4,2%. Xem bảng trong README.
+- **Đã thử và PHẢI BỎ cắt tỉa (`PublishTrimmed`).** Nó đưa file setup xuống
+  9,6 MB — rất hấp dẫn — nhưng thí nghiệm đối chiếu trên Windows thật cho thấy
+  nó **làm mất dữ liệu WMI một cách âm thầm**: bản cắt tỉa thu được 11 dòng và
+  tóm tắt `- - · 0 CPU · -`, bản đầy đủ thu được 15 dòng và
+  `Microsoft Corporation Virtual Machine · 1 CPU · 16.0 GB`. Vẫn hỏng dù đã
+  bảo toàn `System.Management`. Báo cáo vẫn sinh ra, nhìn bình thường, nhưng
+  thiếu dữ liệu — kiểu sai tệ nhất mà công cụ này có thể mắc.
+
+### Thêm
+
+- **JSON dùng mã sinh lúc biên dịch** (`Core/Serialization/AuditJson.cs`) thay
+  vì phản chiếu — nhanh hơn, và tập trung mọi chỗ đọc/ghi JSON vào một nơi.
+- **`packaging/tools/winget-local-install.ps1`** — cài bằng winget **ngay**, từ
+  manifest cục bộ, không cần chờ Microsoft duyệt. winget vẫn tự đối chiếu
+  `InstallerSha256` nên không kém an toàn hơn kho công khai.
+- **CI có hàng rào chất lượng dữ liệu.** Job Windows nay **chạy thật một lần
+  quét** và kiểm tra số dòng thu thập được, tóm tắt phần cứng không được báo
+  `0 CPU` hay hãng/model rỗng, và `.xlsx` là gói OPC hợp lệ. Chính hàng rào này
+  đã phát hiện ra sự cố cắt tỉa — kiểm tra "có sinh ra file không" hoàn toàn
+  không bắt được lớp lỗi đó.
+
 ## [26.8.18.1] — 18/08/2026
 
 ### Thêm

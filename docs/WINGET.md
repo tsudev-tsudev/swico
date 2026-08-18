@@ -41,6 +41,36 @@ python3 packaging/tools/make-winget-manifest.py \
     --out packaging/winget-out
 ```
 
+## Dùng winget NGAY BÂY GIỜ, không cần chờ duyệt
+
+winget có sẵn khả năng cài từ **manifest cục bộ**. Mỗi bản phát hành đã đính kèm
+manifest sinh tự động, nên đường này chạy được ngay:
+
+```powershell
+# PowerShell với quyền Administrator
+irm https://raw.githubusercontent.com/tsudev-tsudev/swico/main/packaging/tools/winget-local-install.ps1 -OutFile wg.ps1
+.\wg.ps1
+```
+
+Script tự: bật chế độ cho phép manifest cục bộ → tải manifest từ bản phát hành
+mới nhất → `winget validate` → `winget install --manifest`.
+
+**winget vẫn tự đối chiếu `InstallerSha256`** trong manifest với file tải về, nên
+đường này không kém an toàn hơn kho công khai.
+
+Hoặc làm tay:
+
+```powershell
+winget settings --enable LocalManifestFiles
+# giải nén winget-manifest-<phiên-bản>.zip từ Releases
+winget validate --manifest .\manifests\t\tsudev\SWICO\<phiên-bản>
+winget install  --manifest .\manifests\t\tsudev\SWICO\<phiên-bản>
+```
+
+> Khác biệt duy nhất so với kho công khai: người dùng phải bật một thiết lập và
+> chỉ ra thư mục manifest. Sau khi PR được hợp nhất, `winget install tsudev.SWICO`
+> sẽ chạy mà không cần gì thêm.
+
 ## Điều kiện trước khi nộp
 
 | Điều kiện | Trạng thái |
@@ -50,9 +80,9 @@ python3 packaging/tools/make-winget-manifest.py \
 | Giấy phép rõ ràng | ✅ Apache-2.0 |
 | **Installer đã được ký số** | ⚠️ **chưa** — chờ SignPath |
 
-Chưa ký **không phải** điều kiện bắt buộc của winget, nhưng gói chưa ký sẽ khiến
-người dùng gặp cảnh báo SmartScreen ngay sau khi winget tải về. Nên **nộp sau khi
-có chữ ký** để lần tiếp xúc đầu tiên của người dùng không phải là một cảnh báo bảo mật.
+Chưa ký **không phải** điều kiện bắt buộc của winget. Chủ dự án đã quyết định nộp
+ngay ở giai đoạn dùng nội bộ, chấp nhận cảnh báo SmartScreen; khi SignPath duyệt
+và có bản đã ký sẽ nộp bản cập nhật để phổ biến rộng.
 
 ## Cách nộp
 
