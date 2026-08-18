@@ -128,3 +128,46 @@ Những mục dưới đây **cần bổ sung vào `PLAN.md`**:
 4. **Phạm vi:** có giữ Agent (GĐ 06) và Server + dashboard (GĐ 07) không?
 5. **Tên sản phẩm chính thức là gì?** "SWICO" viết tắt của gì?
 6. **Có máy Windows thật để kiểm chứng không?** Quyết định thứ tự các Phase.
+
+---
+
+## 7. ✅ Chốt tại phiên S001 (sau khi đối chiếu artifact)
+
+Bốn quyết định dưới đây **đã được người dùng xác nhận**, thay thế mọi lựa chọn
+trước đó. Phiên sau **không hỏi lại**.
+
+| # | Quyết định | Thay thế cho | Hệ quả kéo theo |
+|---|---|---|---|
+| D1 | **Ký số qua SignPath Foundation** | ~~Azure Trusted Signing~~ (không dùng được từ VN) | **Repo BẮT BUỘC công khai + giấy phép OSS được công nhận.** Nộp hồ sơ sớm, duyệt mất vài ngày–vài tuần. |
+| D2 | **Phạm vi: chỉ CLI** — hoàn thiện + đóng gói | Artifact GĐ 06 (Agent) và GĐ 07 (Server + dashboard) | **Bỏ** Agent và Server khỏi kế hoạch. Ước lượng còn ~2–4 tuần thay vì 3–4 tháng. Có thể mở rộng sau. |
+| D3 | **Có máy Windows thật, người dùng tự chạy thử** | — | **Đẩy kiểm chứng Windows lên sớm** theo thứ tự của artifact. Tôi soạn kịch bản kiểm thử từng bước để người dùng chạy và báo kết quả về. |
+| D4 | **Tên sản phẩm: `tsuowlit SWICO`** | ~~tsudev-swico~~ / ~~tsudev-audit~~ / ~~tsudev.SystemAudit~~ | Tên mới hoàn toàn, không nằm trong ba phương án đã nêu. Cần làm rõ mức độ đổi tên (xem mục 8). |
+
+### Hệ quả của D1 — mã nguồn mở là điều kiện, không phải tuỳ chọn
+
+Chọn SignPath Foundation nghĩa là **chấp nhận công khai mã nguồn**, gồm cả
+`ActivationRiskScanner.cs` với 6 hạng mục dấu hiệu và các ngưỡng tính điểm rủi ro.
+Đây chính là đánh đổi mà artifact đã nêu ở "Điều chỉnh 02".
+
+Biện pháp bù trừ (theo artifact, nay thành việc bắt buộc):
+**tách luật phát hiện ra file dữ liệu có phiên bản** (`Core/Rules/`), cập nhật
+độc lập với bản exe, để việc né luật cũ không có giá trị lâu dài.
+
+### Hệ quả của D2 — những gì bị loại khỏi phạm vi
+
+Ghi rõ để phiên sau không vô tình làm lại: **không** xây `Tsudev.Audit.Agent`,
+**không** xây `Tsudev.Audit.Server`, **không** dựng dashboard web/docker compose.
+Trang tổng hợp vẫn là `tsudev-tong-hop.html` tĩnh như hiện tại.
+
+## 8. ⬜ Còn phải làm rõ: đổi tên sâu tới đâu
+
+Tên `tsuowlit SWICO` là tên **mới hoàn toàn**. Cần chốt phạm vi ảnh hưởng trước
+khi làm installer, vì mọi thứ phía sau neo vào đây:
+
+- Namespace `Tsudev.Audit.*` — đổi hay giữ? (đổi = sửa toàn bộ file + test)
+- Tên assembly `tsudev-audit.exe` — đổi hay giữ?
+- Tên miền: bộ test hiện **khẳng định** báo cáo HTML phải chứa `https://tsudev.com`
+  (`tests/unittests/Program.cs:174`). Nếu đổi sang tên miền khác thì phải sửa test.
+- Giấy phép mã nguồn: chưa chốt. Đề xuất **Apache-2.0** theo artifact — có điều
+  khoản bảo vệ nhãn hiệu, nghĩa là người khác fork được mã nhưng **không được
+  phát hành dưới tên của bạn**. Với một tên thương hiệu mới toanh, điều đó đáng giá.
