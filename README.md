@@ -12,6 +12,10 @@ Kiểm tra tình trạng bản quyền Windows/Office và thu thập cấu hình
 
 ## Cài đặt
 
+> ⚠️ **Chưa phát hành.** Repo GitHub và các lệnh dưới đây **chưa hoạt động** —
+> mọi URL `github.com/tsuowlit/swico` trong tài liệu này là chỗ điền tạm. Mã
+> nguồn hiện chỉ tồn tại cục bộ. Xem `docs/STATE.md` để biết trạng thái thật.
+
 ```powershell
 winget install tsuowlit.SWICO
 ```

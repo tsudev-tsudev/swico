@@ -84,5 +84,12 @@ Chi tiết: `docs/SIGNING.md`.
 - Comment trong file XML/csproj **không được chứa `--`** (`dotnet run --project`
   trong comment làm hỏng cả file).
 - Ngữ cảnh `secrets` của GitHub Actions **không dùng được trong `if:` cấp step**.
+- **`github.com/tsuowlit/swico` CHƯA TỒN TẠI** — là URL điền tạm có mặt trong
+  README, `Directory.Build.props`, manifest winget, `swico.iss`, `EULA.txt`,
+  `PRIVACY.md`. Repo chưa có remote nào (`git remote -v` trống), 7 commit chỉ
+  nằm trên máy dev này. `git clone` URL đó sẽ báo không tìm thấy.
+- Máy dev Linux này **không phải WSL** — máy Windows là máy tách biệt, phải
+  chuyển file qua USB/mạng. Đã tạo sẵn `dist/swico-portable.zip` và
+  `dist/swico-repo.bundle` cho việc này.
 - Bộ test **khẳng định** báo cáo HTML phải chứa `https://tsudev.com`
   (`tests/unittests/Program.cs:174`) — đổi tên miền là phải sửa test.

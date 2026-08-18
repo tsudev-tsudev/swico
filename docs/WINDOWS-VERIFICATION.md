@@ -12,17 +12,76 @@ như chắc chắn lỗi nằm gọn trong `src/Tsudev.Audit.Windows/WindowsAdap
 
 ---
 
-## Chuẩn bị
+## Chuẩn bị — đọc kỹ mục này trước
 
-Cần: Windows 10 hoặc 11, quyền Administrator, .NET 8 SDK.
+> ⚠️ **Repo `github.com/tsuowlit/swico` CHƯA TỒN TẠI.** Đó là URL điền tạm,
+> dùng trước cho tài liệu và manifest. Mã nguồn hiện **chỉ nằm trên máy dev
+> Linux**, chưa từng được đẩy lên GitHub. `git clone` sẽ báo không tìm thấy.
+
+### Phần lớn kịch bản này KHÔNG cần mã nguồn
+
+Chỉ mục **A1** và **A2** cần build trên Windows. Mọi mục còn lại — gồm cả ba
+mục then chốt **B2, C3, D1** — chỉ cần **một file `swico.exe`**.
+
+### Cách 1 (nhanh nhất) — chỉ copy file exe
+
+Trên máy dev, file đã publish sẵn tại `dist/swico-portable.zip` (~29 MB).
+Copy sang Windows bằng USB hoặc chia sẻ mạng, giải nén, rồi:
 
 ```powershell
-git clone https://github.com/tsuowlit/swico
+cd <thư mục đã giải nén>
+.\swico.exe --help
+```
+
+Không cần cài .NET Runtime — bản publish là self-contained.
+
+**Đối chiếu sau khi copy** (phòng file hỏng trên đường truyền):
+
+```powershell
+Get-FileHash .\swico.exe -Algorithm SHA256
+```
+
+So với giá trị trong `dist/SHA256SUMS.txt` trên máy dev.
+
+Bỏ qua A1, A2. Làm được toàn bộ phần còn lại.
+
+### Cách 2 — chuyển cả kho mã kèm lịch sử git
+
+Nếu muốn làm cả A1/A2, hoặc muốn sửa mã trên Windows. Cần **.NET 8 SDK**.
+
+Trên máy dev đã tạo sẵn `dist/swico-repo.bundle` (116 KB) — một file duy nhất
+chứa **nguyên vẹn cả 7 commit và toàn bộ lịch sử**. Copy sang Windows rồi:
+
+```powershell
+git clone swico-repo.bundle swico
 cd swico
 .\build.ps1
 ```
 
 Kỳ vọng: test báo `54 PASS, 0 FAIL`, rồi sinh ra `publish\swico.exe`.
+
+> Dùng `git bundle` thay vì zip thư mục vì nó giữ nguyên lịch sử git. Nếu sau
+> này bạn tạo repo GitHub thật, chỉ cần `git remote add` rồi `git push` là toàn
+> bộ 7 commit lên đúng như cũ — không mất mốc lùi nào.
+
+### Cách 3 — tạo repo GitHub thật
+
+Sớm muộn cũng phải làm, vì **SignPath Foundation bắt buộc repo công khai**
+(xem `docs/SIGNING.md`). Tôi không tạo repo thay bạn được — cần tài khoản của
+bạn. Sau khi bạn tạo repo rỗng trên GitHub:
+
+```bash
+# chạy trên máy dev Linux
+git remote add origin https://github.com/<tài-khoản>/<tên-repo>.git
+git branch -M main
+git push -u origin main
+```
+
+Rồi trên Windows `git clone` như bình thường.
+
+> Nếu tên repo khác `tsuowlit/swico`, phải sửa lại URL ở: `README.md`,
+> `Directory.Build.props` (`RepositoryUrl`), `packaging/winget/...` (3 file),
+> `packaging/innosetup/swico.iss` (`AppUrl`), `EULA.txt` mục 7, `PRIVACY.md`.
 
 ---
 
