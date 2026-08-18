@@ -1,79 +1,88 @@
 # STATE — Trạng thái sống của dự án
 
 > **File này là nguồn sự thật DUY NHẤT về "đang làm tới đâu".**
-> Phiên Claude Code mới **BẮT BUỘC đọc file này đầu tiên**, trước cả README.
+> Phiên Claude Code mới **BẮT BUỘC đọc file này đầu tiên**.
 > Quy ước cập nhật: xem `docs/CONTINUITY.md`.
 
 - **Cập nhật lần cuối:** 2026-08-18
-- **Phiên hiện tại:** S001
-- **Giai đoạn:** Phase 1 — Khôi phục khả năng build
+- **Phiên gần nhất:** S001
+- **Giai đoạn:** Phase 3 xong ✅ · **Phase 4 đang chờ người dùng** ⛔
 
 ---
 
 ## 1. Kết luận ngắn gọn về hiện trạng
 
-Dự án **chưa build được**. Đây là sự thật quan trọng nhất và nó **mâu thuẫn với
-README gốc** (README mô tả một solution hoàn chỉnh với 54 test đang xanh — điều
-đó không đúng với nội dung thư mục thực tế).
+Dự án **đã build được, test xanh, đóng gói được**. Đây là thay đổi lớn so với
+lúc nhận bàn giao (khi đó **không build được**).
 
-Nguyên nhân gốc: mã nguồn đã bị "làm phẳng" — 9 file `.cs` nằm chung thư mục gốc
-thay vì trong layout `src/` mà các `.csproj` đang trỏ tới, đồng thời **thiếu hẳn**
-một số thành phần bắt buộc.
+```
+Build:    ✅ Build succeeded
+Test:     ✅ 54 PASS, 0 FAIL
+Publish:  ✅ publish/swico.exe — 34 MB, PE32+ x86-64
+```
 
-## 2. Bảng chốt: cái gì có, cái gì thiếu
+**Việc còn lại KHÔNG nằm ở mã nguồn mà ở kiểm chứng thực tế và thủ tục:**
+chạy thử trên Windows thật, và nộp hồ sơ SignPath Foundation.
 
-| Thành phần | Trạng thái | Ghi chú |
-|---|---|---|
-| `AuditModels.cs` (Core.Models) | ✅ Có | 222 dòng |
-| `SystemAbstractions.cs` (Core.Abstractions) | ✅ Có | 132 dòng, các port IWmiQuery/IRegistryReader/... |
-| `LicenseCollectors.cs` (Core.Collectors) | ✅ Có | 225 dòng |
-| `InventoryCollectors.cs` (Core.Collectors) | ✅ Có | 405 dòng |
-| `ActivationRiskScanner.cs` (Core.Collectors) | ✅ Có | 320 dòng |
-| `ReportBuilders.cs` (Core.Reports) | ✅ Có | 289 dòng |
-| `FakeAdapters.cs` (Core.Testing) | ✅ Có | 118 dòng |
-| `WindowsAdapters.cs` (Windows) | ✅ Có | 193 dòng, chưa từng chạy trên Windows thật |
-| `Program.cs` (Cli) | ✅ Có | 311 dòng |
-| **`Core.Rendering`** | ❌ **THIẾU HOÀN TOÀN** | `HtmlReportRenderer`, `XlsxWriter`, `DashboardBuilder` — Program.cs:86,87,118 gọi cả ba |
-| **`Tsudev.Audit.Core.csproj`** | ❌ **THIẾU** | 2 csproj còn lại đều ProjectReference tới nó |
-| **`tests/unittests/unittests.csproj`** | ❌ **THIẾU** | file test `Program.cs` bị lạc ở `mnt/user-data/outputs/...` |
-| **`.sln`** | ❌ Thiếu | |
-| **git repo** | ❌ Chưa init | |
-| `Tsudev.Audit.Cli.csproj` | ✅ Có | |
-| `Tsudev.Audit.Windows.csproj` | ✅ Có | |
-| `app.manifest` | ✅ Có | requireAdministrator |
-| `build.ps1` | ✅ Có | sẽ cần viết lại sau tái cấu trúc |
+## 2. Sản phẩm: `tsuowlit SWICO`
 
-## 3. Quyết định đã chốt với người dùng (phiên S001)
+| Hạng mục | Giá trị |
+|---|---|
+| Tên sản phẩm | `tsuowlit SWICO` |
+| Assembly | `swico.exe` |
+| Winget ID | `tsuowlit.SWICO` |
+| Namespace | `Tsudev.Audit.*` — **giữ nguyên**, chi tiết nội bộ |
+| Solution | `Tsudev.SystemAudit.sln` — giữ nguyên |
+| Tên miền thương hiệu | `https://tsudev.com` — **giữ nguyên** (bộ test khẳng định điều này) |
+| Giấy phép | Apache-2.0 |
+| Ký số | SignPath Foundation |
+| Phiên bản | 3.0.0 (`Directory.Build.props`) |
 
-Bốn quyết định này **đã được người dùng xác nhận**, không hỏi lại ở phiên sau:
+## 3. Cái gì đã có
 
-1. **Lớp Rendering:** viết mới hoàn toàn từ đầu, khớp API mà `Program.cs` và
-   `tests/unittests/Program.cs` đang gọi. XLSX **tự ghi OpenXML**, không thêm
-   phụ thuộc NuGet (ClosedXML/EPPlus) — tránh vấn đề giấy phép thư viện.
-2. **Đóng gói:** hai kênh song song —
-   (a) **Installer EXE bằng Inno Setup 6**, và
-   (b) **portable single-exe + publish lên winget**.
-   *Không* làm MSI/WiX. *Không* làm MSIX (xung đột với `requireAdministrator`).
-3. **Ký số:** **Azure Trusted Signing** (dịch vụ đám mây của Microsoft), tích hợp
-   thẳng vào GitHub Actions, không giữ token vật lý.
-4. **License:** **KHÔNG** làm hệ thống bản quyền/kích hoạt cho bản thân tool.
-   Chữ "license" trong yêu cầu chỉ có nghĩa là **tính năng kiểm tra bản quyền
-   Windows/Office** vốn đã có. Vẫn bổ sung file LICENSE mã nguồn + EULA cho installer.
+| Thành phần | Trạng thái |
+|---|---|
+| `Core/Models`, `Abstractions`, `Collectors`, `Reports`, `Testing` | ✅ Có từ đầu |
+| **`Core/Rendering`** | ✅ **Đã viết mới ~840 dòng** ở phiên S001 |
+| `Tsudev.Audit.Windows` | ✅ Biên dịch được — ⚠️ **chưa chạy trên Windows thật** |
+| `Tsudev.Audit.Cli` | ✅ Có |
+| Project files, `.sln`, `Directory.Build.props` | ✅ Đã tạo |
+| Git repo | ✅ Đã init, 7 commit |
+| Pháp lý: LICENSE/NOTICE/EULA/PRIVACY/THIRD-PARTY | ✅ Đủ |
+| Installer Inno Setup + winget manifest | ✅ Viết xong — ⚠️ **chưa build thử** |
+| CI/CD workflows | ✅ Viết xong — ⚠️ **chưa chạy thật** |
+| Tài liệu | ✅ README/PLAN/DECISIONS/SIGNING/CONTINUITY/CHANGELOG |
 
-## 4. Việc đang làm dở NGAY LÚC NÀY
+## 4. VIỆC TIẾP THEO — hai việc, cả hai đều cần người dùng
 
-Xem `docs/PLAN.md` để biết toàn bộ lộ trình, và danh sách task của phiên.
-Trạng thái từng Phase được đánh dấu trong `docs/PLAN.md`.
+### 4.1 ⛔ Chạy kịch bản kiểm chứng Windows
+
+Mở `docs/WINDOWS-VERIFICATION.md`, chạy từng mục, điền cột "Kết quả thật".
+
+**Ba mục quan trọng nhất:**
+- **B2** — `MSFT_MpThreatDetection` có trường `ThreatName` không?
+- **C3** — mở file `.xlsx` bằng **Excel thật**, xem có báo "file hỏng" không
+- **D1** — đối chiếu kết quả với bộ PowerShell cũ trên cùng một máy
+
+### 4.2 ⛔ Nộp hồ sơ SignPath Foundation
+
+Duyệt mất vài ngày tới vài tuần → **nộp sớm, làm việc khác trong lúc chờ**.
+Cần trước: đưa repo lên GitHub công khai + bật xác thực đa yếu tố.
+Chi tiết: `docs/SIGNING.md`.
 
 ## 5. Cạm bẫy đã biết — đọc để khỏi vấp lại
 
-- Máy dev là **Linux**, không phải Windows. `dotnet` **không có sẵn trong PATH**;
-  SDK được cài riêng vào `~/.dotnet` (xem `docs/CONTINUITY.md` mục "Môi trường").
-- `net8.0-windows` **vẫn build được trên Linux** (không dùng WinForms/WPF), và
-  `dotnet publish -r win-x64 --self-contained` cross-compile từ Linux cũng chạy.
-  Nhưng **không thể chạy thử** file exe kết quả ở đây.
-- `System.Management` (NuGet) biên dịch được trên Linux nhưng ném exception khi
-  chạy — đây là lý do kiến trúc Ports & Adapters tồn tại, đừng "sửa" nó.
-- README gốc **không đáng tin**; đối chiếu với file thật trước khi dựa vào nó.
-- Thư mục `mnt/user-data/outputs/...` là rác từ môi trường cũ, chỉ chứa file test
-  bị lạc. Lấy file ra rồi xoá cả cây thư mục `mnt/`.
+- Máy dev là **Linux**. `dotnet` **không có trong PATH mặc định**:
+  `export PATH="$HOME/.dotnet:$PATH"` (SDK 8.0.424 đã cài ở `~/.dotnet`).
+- `net8.0-windows` **build được trên Linux**, `publish -r win-x64` cũng chạy.
+  Nhưng **không chạy thử được** file exe ở đây.
+- `System.Management` biên dịch được trên Linux nhưng ném exception khi chạy —
+  đây là lý do kiến trúc Ports & Adapters tồn tại, **đừng "sửa" nó**.
+- **Môi trường không có `pip`, `openpyxl`, LibreOffice, Excel.** File XLSX chỉ
+  kiểm được bằng phân tích XML thủ công. Ở Phase 2 đã có **một lỗi loại này lọt
+  lưới** (`<pane>` sai vị trí) — XML hợp lệ nhưng Excel từ chối.
+- Comment trong file XML/csproj **không được chứa `--`** (`dotnet run --project`
+  trong comment làm hỏng cả file).
+- Ngữ cảnh `secrets` của GitHub Actions **không dùng được trong `if:` cấp step**.
+- Bộ test **khẳng định** báo cáo HTML phải chứa `https://tsudev.com`
+  (`tests/unittests/Program.cs:174`) — đổi tên miền là phải sửa test.
