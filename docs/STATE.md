@@ -20,7 +20,7 @@ Build:    ✅ Build succeeded
 Test:     ✅ 129 PASS, 0 FAIL
 Publish:  ✅ publish/swico.exe — 34 MB, PE32+ x86-64
 Repo:     ✅ github.com/tsudev-tsudev/swico (PUBLIC)
-Release:  ✅ ban nhap v26.8.18 du 5 tep (chua cong khai)
+Release:  ✅ v26.8.18 DA PHAT HANH CHINH THUC (khong con ban nhap)
 Installer:✅ Inno Setup BIEN DICH DUOC (truoc do co 4 loi dung han)
 CI:       ✅ xanh ca hai job, gom smoke test tren Windows runner
 Windows:  ✅ DA CHAY THAT - sinh duoc bao cao HTML
@@ -121,6 +121,16 @@ Chi tiết: `docs/SIGNING.md`.
   và bản nhúng vào HTML đều dẫn xuất từ file gốc đó.
 - **Bản ghi lịch sử (`docs/journal/`, `docs/DECISIONS.md`) vẫn dùng tên cũ
   `tsuowlit`** — cố ý giữ, đừng "sửa cho đồng bộ".
+- **KHÔNG BAO GIỜ tải tệp từ `dist/` lên GitHub Release.** `dist/` là bản dựng
+  cục bộ để chuyển sang máy Windows lúc phát triển. Chỉ tệp do `release.yml`
+  sinh ra mới là bản phát hành, và chỉ chúng mới nằm trong `SHA256SUMS.txt`.
+  Đã từng xảy ra: một `swico-portable.zip` cục bộ (binary **cũ hơn**, không có
+  trong checksum) bị tải lên bản `v26.8.18`. Nay tệp cục bộ mang hậu tố
+  `-local` và có số phiên bản để không thể nhầm.
+- **Khi hai release cùng một tag** (bản nháp + bản đã phát hành), `gh release
+  delete <tag>` là **nguy hiểm** — nó có thể xoá nhầm bản đã phát hành. Phải
+  xoá theo **ID**: `gh api repos/OWNER/REPO/releases` để lấy id, rồi
+  `gh api -X DELETE .../releases/<id>`.
 - **`global.json` ghim SDK 8.0.424 — đừng xoá.** Runner GitHub có sẵn .NET 10
   SDK và `dotnet build` luôn chọn bản mới nhất nếu không ghim, khiến CI và máy
   dev dùng hai bộ phân tích khác nhau (đã từng làm CI đỏ với CA1859).
