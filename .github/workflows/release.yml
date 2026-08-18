@@ -138,6 +138,10 @@ jobs:
           New-Item -ItemType Directory -Force -Path packaging/output, packaging/portable | Out-Null
           Copy-Item publish/swico.exe, LICENSE, NOTICE, EULA.txt, PRIVACY.md,
                     THIRD-PARTY-NOTICES.md, README.md packaging/portable
+          # Kem bo luat va tai lieu cua no: ban portable la ban danh cho ky
+          # thuat vien cam USB di tung may, ho can sua duoc luat tai cho.
+          Copy-Item src/Tsudev.Audit.Core/Rules/detection-rules.json packaging/portable
+          Copy-Item docs/DETECTION-RULES.md packaging/portable
           Compress-Archive -Path 'packaging/portable/*' `
             -DestinationPath "packaging/output/swico-portable-${{ steps.ver.outputs.version }}.zip" -Force
 

@@ -16,6 +16,13 @@
 
 ### Thêm
 
+- **Cảnh báo khi bộ luật ngoài lệch phiên bản với bộ luật đóng kèm.** File
+  `detection-rules.json` cạnh exe luôn được ưu tiên, nên một file cũ sót lại sau
+  khi nâng cấp sẽ âm thầm vô hiệu hoá bộ luật mới. Nay chênh lệch được nêu rõ
+  cả hai số hiệu phiên bản, trên màn hình lẫn trong báo cáo.
+- **Bản portable trong release nay kèm `detection-rules.json` và
+  `DETECTION-RULES.md`** — trước đó thiếu, nên người tải từ release không có
+  file để cập nhật luật.
 - **Logo tsudev trong báo cáo HTML**, kèm chữ ký thương hiệu "tsu" (xanh) +
   "dev" (cam), cả khối là một liên kết tới tsudev.com. Hiện ở cả đầu trang lẫn
   chân trang. Logo được **nhúng thẳng** dưới dạng data URI đặt trong CSS: báo

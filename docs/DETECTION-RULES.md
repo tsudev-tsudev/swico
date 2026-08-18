@@ -36,6 +36,20 @@ Riêng **bộ luật rỗng bị từ chối** dù về mặt cú pháp là hợ
 rỗng khiến mọi máy đều "sạch". Đó nguy hiểm hơn một bộ luật sai, vì nó tạo cảm
 giác an toàn giả mà không có dấu hiệu nào cho thấy có gì bất thường.
 
+## ⚠️ Cạm bẫy: file ngoài luôn thắng bộ luật đóng kèm
+
+File `detection-rules.json` đặt cạnh `swico.exe` **luôn được ưu tiên** hơn bộ
+luật bên trong chương trình. Điều đó có mặt trái:
+
+> Sau khi nâng cấp lên bản `swico.exe` mới, một file `detection-rules.json` **cũ**
+> còn sót lại sẽ **âm thầm vô hiệu hoá** bộ luật mới trong bản nâng cấp.
+
+Vì vậy công cụ **so phiên bản và cảnh báo** mỗi khi bộ luật ngoài khác bộ luật
+đóng kèm — cảnh báo hiện cả trên màn hình lẫn trong báo cáo, nêu rõ cả hai số
+hiệu phiên bản. Nếu bạn vừa nâng cấp, hãy xoá file cũ hoặc cập nhật nó.
+
+Cùng phiên bản thì không cảnh báo, để không làm nhiễu mỗi lần quét.
+
 ## Cấu trúc file
 
 | Trường | Ý nghĩa |

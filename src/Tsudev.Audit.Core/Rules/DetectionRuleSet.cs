@@ -117,6 +117,19 @@ public sealed class DetectionRuleSet
                 return Embedded;
             }
 
+            // CAM BAY DA NHAN DIEN: file luat ben ngoai LUON thang bo luat dong
+            // kem. Sau khi nang cap len ban exe moi, mot file .json CU nam canh
+            // exe se am tham VO HIEU HOA bo luat moi - va khong co dau hieu nao
+            // cho thay dieu do. Vi vay moi lech phien ban deu phai duoc noi ro
+            // trong bao cao, khong chi ghi ra man hinh.
+            if (!string.Equals(loaded.Version, Embedded.Version, StringComparison.Ordinal))
+            {
+                warning = $"Đang dùng bộ luật từ file ngoài '{path}' (phiên bản {loaded.Version}), " +
+                          $"KHÁC với bộ luật đóng kèm trong chương trình (phiên bản {Embedded.Version}). " +
+                          "File ngoài luôn được ưu tiên. Nếu bạn vừa nâng cấp chương trình, " +
+                          "hãy xoá hoặc cập nhật file này để dùng bộ luật mới.";
+            }
+
             return loaded;
         }
         catch (JsonException ex)

@@ -513,6 +513,29 @@ File.Delete(emptyPath);
 Check(licReport.DetectionRulesVersion == embedded.Version,
     "bao cao ghi lai phien ban bo luat da dung");
 
+// CAM BAY: file luat ben ngoai LUON thang bo luat dong kem. Sau khi nang cap
+// exe, mot file .json CU nam canh exe se am tham vo hieu hoa bo luat moi.
+// Phai co canh bao ro rang, neu khong khong ai biet dieu do dang xay ra.
+var stalePath = Path.Combine(Path.GetTempPath(), $"stale-rules-{Guid.NewGuid():N}.json");
+File.WriteAllText(stalePath, customJson);          // phien ban "test-9.9", khac ban dong kem
+var stale = DetectionRuleSet.LoadOrEmbedded(stalePath, out var staleWarn);
+Check(stale.Version == "test-9.9", "file luat ngoai duoc uu tien hon ban dong kem");
+Check(staleWarn is not null
+   && staleWarn.Contains("test-9.9", StringComparison.Ordinal)
+   && staleWarn.Contains(embedded.Version, StringComparison.Ordinal),
+    "lech phien ban giua file ngoai va ban dong kem -> canh bao neu RO ca hai phien ban");
+File.Delete(stalePath);
+
+// Cung phien ban thi KHONG canh bao - tranh lam nhieu bao cao moi lan quet.
+// Dung lai chinh bo luat dong kem thay vi doc file theo duong dan tuong doi:
+// duong dan tuong doi phu thuoc thu muc chay va se hong khi doi cach chay test.
+var samePath = Path.Combine(Path.GetTempPath(), $"same-rules-{Guid.NewGuid():N}.json");
+File.WriteAllText(samePath, JsonSerializer.Serialize(embedded));
+var same = DetectionRuleSet.LoadOrEmbedded(samePath, out var sameWarn);
+Check(same.Version == embedded.Version && sameWarn is null,
+    "file luat ngoai CUNG phien ban -> khong canh bao thua");
+File.Delete(samePath);
+
 Console.WriteLine("\n=== 11. CLI: phan tich tham so ===");
 
 // README tung tuyen bo "CLI parse tham so: 16/16 test" trong khi KHONG co
