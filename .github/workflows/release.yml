@@ -164,6 +164,20 @@ jobs:
             --set-version ${{ steps.ver.outputs.version }}
           if ($LASTEXITCODE -ne 0) { throw 'Sinh SBOM THAT BAI' }
 
+      # Sinh SAU khi ky: manifest phai chua SHA256 cua file setup DA KY, neu
+      # khong winget se tu choi vi hash khong khop file tai ve.
+      - name: Sinh manifest winget
+        shell: pwsh
+        run: |
+          $setup = (Get-ChildItem packaging/output/swico-setup-*.exe)[0].FullName
+          python packaging/tools/make-winget-manifest.py `
+            --version ${{ steps.ver.outputs.version }} `
+            --installer $setup `
+            --out packaging/winget-out
+          if ($LASTEXITCODE -ne 0) { throw 'Sinh manifest winget THAT BAI' }
+          Compress-Archive -Path packaging/winget-out/manifests `
+            -DestinationPath "packaging/output/winget-manifest-${{ steps.ver.outputs.version }}.zip" -Force
+
       # Checksum la bien phap bu dap khi CHUA co chu ky so, va van huu ich sau
       # khi da co: nguoi dung tu doi chieu duoc file tai ve.
       - name: Tinh SHA-256
@@ -193,12 +207,16 @@ jobs:
           body: |
             ## Cài đặt
 
-            ```
-            winget install tsudev.SWICO
-            ```
+            Tải **`swico-setup-${{ steps.ver.outputs.version }}.exe`** bên dưới rồi chạy.
 
-            Hoặc tải file setup bên dưới. Bản portable là file `.zip`, giải nén
-            và chạy trực tiếp, không cần cài đặt.
+            Hoặc dùng bản **portable** (`.zip`): giải nén và chạy trực tiếp,
+            không cần cài đặt, không đụng tới registry.
+
+            > **winget chưa dùng được.** Gói chưa được nộp lên kho cộng đồng
+            > `microsoft/winget-pkgs`, nên `winget install tsudev.SWICO` sẽ báo
+            > *"No package found matching input criteria"*. Manifest đã sẵn sàng
+            > trong `winget-manifest-${{ steps.ver.outputs.version }}.zip` đính kèm;
+            > xem `docs/WINGET.md` để biết cách nộp.
 
             ## Xác minh file tải về
 

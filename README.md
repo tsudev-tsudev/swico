@@ -28,16 +28,21 @@ Inno Setup diễn giải số hiệu phiên bản. Ưu điểm: nhìn tên file
 
 ## Cài đặt
 
-> ⚠️ **Chưa phát hành.** Repo GitHub và các lệnh dưới đây **chưa hoạt động** —
-> mọi URL `github.com/tsudev-tsudev/swico` trong tài liệu này là chỗ điền tạm. Mã
-> nguồn hiện chỉ tồn tại cục bộ. Xem `docs/STATE.md` để biết trạng thái thật.
+Tải từ [Releases](https://github.com/tsudev-tsudev/swico/releases):
 
-```powershell
-winget install tsudev.SWICO
-```
+| Cách | Tệp | Dùng khi |
+|---|---|---|
+| **Cài đặt** | `swico-setup-<phiên-bản>.exe` | Cài cố định, có mục gỡ cài đặt, hỗ trợ `/VERYSILENT` để triển khai hàng loạt |
+| **Portable** | `swico-portable-<phiên-bản>.zip` | Cắm USB đi từng máy — giải nén chạy thẳng, không đụng registry |
+| **Chỉ file exe** | `swico.exe` | Nhúng vào script hoặc RMM |
 
-Hoặc tải từ [Releases](https://github.com/tsudev-tsudev/swico/releases): file setup,
-hoặc bản portable `.zip` giải nén chạy thẳng.
+Cả ba chứa **cùng một chương trình**; chỉ khác cách giao đến máy đích. Đối chiếu
+tệp tải về với `SHA256SUMS.txt` đính kèm mỗi bản phát hành.
+
+> ⚠️ **`winget install tsudev.SWICO` chưa dùng được.** Gói chưa được nộp lên kho
+> cộng đồng `microsoft/winget-pkgs`, nên lệnh này sẽ báo *"No package found
+> matching input criteria"*. Manifest đã sẵn sàng và đính kèm mỗi bản phát hành;
+> quy trình nộp ở [`docs/WINGET.md`](docs/WINGET.md).
 
 ## Cách dùng
 
@@ -216,6 +221,7 @@ Kịch bản kiểm chứng đầy đủ: [`docs/WINDOWS-VERIFICATION.md`](docs/
 | [`docs/DECISIONS.md`](docs/DECISIONS.md) | Các quyết định đã chốt và lý do |
 | [`docs/CONTINUITY.md`](docs/CONTINUITY.md) | Giao thức nối tiếp giữa các phiên làm việc |
 | [`docs/SIGNING.md`](docs/SIGNING.md) | Ký số qua SignPath Foundation |
+| [`docs/WINGET.md`](docs/WINGET.md) | Đưa gói lên winget và vì sao chưa dùng được |
 | [`docs/DETECTION-RULES.md`](docs/DETECTION-RULES.md) | Bộ luật phát hiện và cách cập nhật |
 | [`docs/WINDOWS-VERIFICATION.md`](docs/WINDOWS-VERIFICATION.md) | Kịch bản kiểm chứng trên Windows |
 | [`CHANGELOG.md`](CHANGELOG.md) | Nhật ký thay đổi |

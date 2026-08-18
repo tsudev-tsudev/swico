@@ -72,6 +72,13 @@
 
 ### Sửa
 
+- **Tài liệu hứa `winget install tsudev.SWICO` trong khi gói chưa được nộp** lên
+  kho cộng đồng `microsoft/winget-pkgs`, nên lệnh báo *"No package found matching
+  input criteria"*. README và nội dung bản phát hành nay nói rõ điều này.
+- **Manifest winget mang `InstallerSha256` giả `0000…0000`.** Hash chỉ biết được
+  sau khi đóng gói và ký, nên manifest cam kết sẵn trong repo luôn sai. Nay repo
+  chỉ giữ **template**; manifest thật sinh trong quy trình phát hành với hash
+  đúng của file setup **đã ký**, và đính kèm mỗi bản phát hành.
 - **Kịch bản Inno Setup có 4 lỗi khiến `ISCC` dừng hẳn** — nó chưa từng được
   biên dịch lần nào: thiếu `swico.ico`; `Vietnamese.isl` là bản dịch cộng đồng
   không có trong bản cài Inno Setup mặc định; `x64compatible` chỉ hợp lệ từ

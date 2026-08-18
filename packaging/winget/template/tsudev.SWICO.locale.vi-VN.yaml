@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
 PackageIdentifier: tsudev.SWICO
-PackageVersion: 26.8.18
+PackageVersion: {{VERSION}}
 PackageLocale: vi-VN
 Publisher: tsudev
 PublisherUrl: https://github.com/tsudev-tsudev
@@ -31,7 +31,7 @@ Tags:
   - inventory
   - license
   - windows
-ReleaseNotesUrl: https://github.com/tsudev-tsudev/swico/releases/tag/v26.8.18
+ReleaseNotesUrl: https://github.com/tsudev-tsudev/swico/releases/tag/v{{VERSION}}
 Documentations:
   - DocumentLabel: Hướng dẫn sử dụng
     DocumentUrl: https://github.com/tsudev-tsudev/swico/blob/main/README.md

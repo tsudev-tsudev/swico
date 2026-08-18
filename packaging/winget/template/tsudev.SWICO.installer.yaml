@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
 PackageIdentifier: tsudev.SWICO
-PackageVersion: 26.8.18
+PackageVersion: {{VERSION}}
 MinimumOSVersion: 10.0.0.0
 InstallerType: inno
 Scope: machine
@@ -9,15 +9,13 @@ InstallModes:
   - silent
   - silentWithProgress
 UpgradeBehavior: install
-ReleaseDate: 2026-08-18
+ReleaseDate: {{DATE}}
 # Cong cu doc ban quyen, Defender va chay DISM/SFC nen bat buoc can quyen
 # Administrator. Khai bao o day de winget xin nang quyen truoc khi chay setup.
 ElevationRequirement: elevatesSelf
 Installers:
   - Architecture: x64
-    InstallerUrl: https://github.com/tsudev-tsudev/swico/releases/download/v26.8.18/swico-setup-26.8.18.exe
-    # TODO(phat hanh): thay bang SHA256 that cua file setup. Script phat hanh
-    # tinh lai gia tri nay - khong dien tay.
-    InstallerSha256: 0000000000000000000000000000000000000000000000000000000000000000
+    InstallerUrl: https://github.com/tsudev-tsudev/swico/releases/download/v{{VERSION}}/swico-setup-{{VERSION}}.exe
+    InstallerSha256: {{SHA256}}
 ManifestType: installer
 ManifestVersion: 1.6.0
