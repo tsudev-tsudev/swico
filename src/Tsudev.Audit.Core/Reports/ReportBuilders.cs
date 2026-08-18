@@ -1,6 +1,7 @@
 using Tsudev.Audit.Core.Abstractions;
 using Tsudev.Audit.Core.Collectors;
 using Tsudev.Audit.Core.Models;
+using Tsudev.Audit.Core.Rules;
 
 namespace Tsudev.Audit.Core.Reports;
 
@@ -15,6 +16,12 @@ public sealed class AuditOptions
 
     /// <summary>Duong dan file CSV whitelist phan mem da duoc duyet.</summary>
     public string? WhitelistCsvPath { get; set; }
+
+    /// <summary>
+    /// Bo luat phat hien. De null = dung bo luat dong kem trong exe.
+    /// Cho phep cap nhat luat ma khong phai bien dich va ky lai ban exe.
+    /// </summary>
+    public DetectionRuleSet? Rules { get; set; }
 }
 
 /// <summary>Dung bao cao kiem tra ban quyen Windows + phan mem.</summary>
@@ -66,8 +73,10 @@ public static class LicenseReportBuilder
         var manualReview = software.Where(s => s.NeedsManualReview).ToList();
 
         // --- 3. Danh gia tinh hop phap ---
-        var findings = ActivationRiskScanner.Scan(ctx);
-        var scope = ActivationRiskScanner.BuildScope(findings);
+        var rules = options.Rules ?? DetectionRuleSet.Embedded;
+        var findings = ActivationRiskScanner.Scan(ctx, rules);
+        var scope = ActivationRiskScanner.BuildScope(findings, rules);
+        report.DetectionRulesVersion = rules.Version;
 
         // Trang thai Genuine: suy ra tu LicenseStatus cua Windows.
         bool genuineKnown = licensedCount > 0 || licTable.Rows.Count > 0;

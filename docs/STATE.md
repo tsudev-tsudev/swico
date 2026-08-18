@@ -6,7 +6,7 @@
 
 - **Cập nhật lần cuối:** 2026-08-18
 - **Phiên gần nhất:** S001
-- **Giai đoạn:** Phase 3 xong ✅ · **Phase 4 đang chờ người dùng** ⛔
+- **Giai đoạn:** Phase 1–3 + 5a xong ✅ · **Phase 4 đang chờ người dùng** 🔄
 
 ---
 
@@ -17,8 +17,11 @@ lúc nhận bàn giao (khi đó **không build được**).
 
 ```
 Build:    ✅ Build succeeded
-Test:     ✅ 54 PASS, 0 FAIL
+Test:     ✅ 64 PASS, 0 FAIL
 Publish:  ✅ publish/swico.exe — 34 MB, PE32+ x86-64
+Repo:     ✅ github.com/tsudev-tsudev/swico (PRIVATE)
+CI:       ✅ xanh ca hai job, gom smoke test tren Windows runner
+Windows:  ✅ DA CHAY THAT - sinh duoc bao cao HTML
 ```
 
 **Việc còn lại KHÔNG nằm ở mã nguồn mà ở kiểm chứng thực tế và thủ tục:**

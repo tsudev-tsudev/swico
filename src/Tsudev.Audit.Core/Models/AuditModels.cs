@@ -170,6 +170,13 @@ public sealed class AuditReport
     /// <summary>Tom tat cau hinh phan cung 1 dong (Dashboard hien o cot rieng).</summary>
     public string? HardwareSummary { get; set; }
 
+    /// <summary>
+    /// Phien ban bo luat phat hien da dung. Ghi lai de sau nay truy nguoc duoc
+    /// mot ket luan la do bo luat nao sinh ra - luat cap nhat doc lap voi exe
+    /// nen chi biet phien ban exe la khong du.
+    /// </summary>
+    public string? DetectionRulesVersion { get; set; }
+
     /// <summary>Canh bao/loi khong nghiem trong gap khi thu thap (de minh bach).</summary>
     public List<string> Warnings { get; set; } = new();
 }

@@ -1,0 +1,60 @@
+{
+  "version": "2026.08.1",
+  "updatedUtc": "2026-08-18T00:00:00Z",
+  "notes": "Luat phat hien dau hieu kich hoat trai phep. Tach khoi ma nguon de cap nhat doc lap voi ban exe - xem docs/DETECTION-RULES.md.",
+
+  "scanRoots": [
+    "%ProgramFiles%",
+    "%ProgramFiles(x86)%",
+    "%ProgramData%",
+    "%SystemDrive%\\",
+    "%TEMP%",
+    "%USERPROFILE%\\Desktop",
+    "%USERPROFILE%\\Downloads"
+  ],
+
+  "suspiciousNames": [
+    "KMSpico",
+    "KMSAuto",
+    "KMSAuto Net",
+    "Microsoft Toolkit",
+    "Re-Loader",
+    "HWIDGen",
+    "MAS",
+    "AutoKMS",
+    "KMSELDI",
+    "KMS_VL_ALL",
+    "Ratiborus",
+    "W10Digital",
+    "ActivationTool"
+  ],
+
+  "legitimateTaskNames": [
+    "SoftwareProtectionPlatform"
+  ],
+
+  "hookDirectories": [
+    "%SystemRoot%\\System32",
+    "%SystemRoot%\\SysWOW64"
+  ],
+
+  "hookFiles": [
+    "SppExtComObjHook.dll",
+    "SppExtComObjPatcher.exe"
+  ],
+
+  "knownKmsHosts": [
+    "kms.digiboy.ir",
+    "kms8.msguides.com",
+    "kms.msguides.com",
+    "kms.lotro.cc",
+    "zh.na.bz",
+    "kms.03k.org",
+    "kms.chinancce.com"
+  ],
+
+  "hostsInterferenceKeywords": [
+    "microsoft.com",
+    "activation"
+  ]
+}

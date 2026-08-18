@@ -1,5 +1,6 @@
 using Tsudev.Audit.Core.Abstractions;
 using Tsudev.Audit.Core.Models;
+using Tsudev.Audit.Core.Rules;
 
 namespace Tsudev.Audit.Core.Collectors;
 
@@ -14,50 +15,33 @@ namespace Tsudev.Audit.Core.Collectors;
 /// </summary>
 public static class ActivationRiskScanner
 {
-    /// <summary>Ten thu muc/file dac trung cua cac cong cu crack pho bien.</summary>
-    private static readonly string[] SuspiciousNames =
-    {
-        "KMSpico", "KMSAuto", "KMSAuto Net", "Microsoft Toolkit", "Re-Loader",
-        "HWIDGen", "MAS", "AutoKMS", "KMSELDI", "KMS_VL_ALL", "Ratiborus",
-        "W10Digital", "ActivationTool"
-    };
-
-    /// <summary>File hook truc tiep thay the thanh phan loi bao ve ban quyen.</summary>
-    private static readonly string[] HookFiles =
-    {
-        "SppExtComObjHook.dll", "SppExtComObjPatcher.exe"
-    };
-
-    /// <summary>Ten may chu KMS cong cong da biet (xuat hien trong hosts file).</summary>
-    private static readonly string[] KnownKmsHosts =
-    {
-        "kms.digiboy.ir", "kms8.msguides.com", "kms.msguides.com",
-        "kms.lotro.cc", "zh.na.bz", "kms.03k.org", "kms.chinancce.com"
-    };
-
+    /// <summary>
+    /// Quet bang bo luat dong kem trong file exe.
+    /// Giu chu ky nay de moi noi goi cu khong phai sua.
+    /// </summary>
     public static List<RiskFinding> Scan(SystemContext ctx)
+        => Scan(ctx, DetectionRuleSet.Embedded);
+
+    /// <summary>Quet bang mot bo luat cu the (cho phep nap luat tu file ngoai).</summary>
+    public static List<RiskFinding> Scan(SystemContext ctx, DetectionRuleSet rules)
     {
+        ArgumentNullException.ThrowIfNull(rules);
+
         var findings = new List<RiskFinding>();
 
-        ScanFileSystem(ctx, findings);
-        ScanScheduledTasks(ctx, findings);
-        ScanServices(ctx, findings);
-        ScanHostsFile(ctx, findings);
-        ScanHookFiles(ctx, findings);
+        ScanFileSystem(ctx, rules, findings);
+        ScanScheduledTasks(ctx, rules, findings);
+        ScanServices(ctx, rules, findings);
+        ScanHostsFile(ctx, rules, findings);
+        ScanHookFiles(ctx, rules, findings);
         ScanKmsRegistry(ctx, findings);
 
         return findings;
     }
 
-    private static void ScanFileSystem(SystemContext ctx, List<RiskFinding> findings)
+    private static void ScanFileSystem(SystemContext ctx, DetectionRuleSet rules, List<RiskFinding> findings)
     {
-        string[] roots =
-        {
-            @"%ProgramFiles%", @"%ProgramFiles(x86)%", @"%ProgramData%",
-            @"%SystemDrive%\", @"%TEMP%", @"%USERPROFILE%\Desktop", @"%USERPROFILE%\Downloads"
-        };
-
-        foreach (var root in roots)
+        foreach (var root in rules.ScanRoots)
         {
             var expanded = ctx.Files.ExpandEnvironment(root);
             if (!ctx.Files.DirectoryExists(expanded)) continue;
@@ -65,7 +49,7 @@ public static class ActivationRiskScanner
             foreach (var dir in ctx.Files.GetDirectories(expanded))
             {
                 var name = Path.GetFileName(dir.TrimEnd('\\', '/'));
-                var hit = SuspiciousNames.FirstOrDefault(s =>
+                var hit = rules.SuspiciousNames.FirstOrDefault(s =>
                     name.Contains(s, StringComparison.OrdinalIgnoreCase));
                 if (hit is not null)
                 {
@@ -81,20 +65,19 @@ public static class ActivationRiskScanner
         }
     }
 
-    private static void ScanScheduledTasks(SystemContext ctx, List<RiskFinding> findings)
+    private static void ScanScheduledTasks(SystemContext ctx, DetectionRuleSet rules, List<RiskFinding> findings)
     {
-        // Task hop le cua Windows dung de gia han license KMS doanh nghiep -
-        // KHONG duoc bao dong nham cho task nay.
-        const string legitimate = "SoftwareProtectionPlatform";
-
         var tasks = ctx.Wmi.Query("MSFT_ScheduledTask", null, "root\\Microsoft\\Windows\\TaskScheduler");
         foreach (var task in tasks)
         {
             var name = task.Str("TaskName", "");
             if (string.IsNullOrWhiteSpace(name)) continue;
-            if (name.Contains(legitimate, StringComparison.OrdinalIgnoreCase)) continue;
+            // Task hop le cua Windows dung de gia han license KMS doanh nghiep -
+            // KHONG duoc bao dong nham cho task nay.
+            if (rules.LegitimateTaskNames.Any(l => name.Contains(l, StringComparison.OrdinalIgnoreCase)))
+                continue;
 
-            var hit = SuspiciousNames.FirstOrDefault(s => name.Contains(s, StringComparison.OrdinalIgnoreCase));
+            var hit = rules.SuspiciousNames.FirstOrDefault(s => name.Contains(s, StringComparison.OrdinalIgnoreCase));
             if (hit is not null)
             {
                 findings.Add(new RiskFinding
@@ -108,13 +91,13 @@ public static class ActivationRiskScanner
         }
     }
 
-    private static void ScanServices(SystemContext ctx, List<RiskFinding> findings)
+    private static void ScanServices(SystemContext ctx, DetectionRuleSet rules, List<RiskFinding> findings)
     {
         foreach (var svc in ctx.Wmi.Query("Win32_Service"))
         {
             var name = svc.Str("Name", "");
             var display = svc.Str("DisplayName", "");
-            var hit = SuspiciousNames.FirstOrDefault(s =>
+            var hit = rules.SuspiciousNames.FirstOrDefault(s =>
                 name.Contains(s, StringComparison.OrdinalIgnoreCase) ||
                 display.Contains(s, StringComparison.OrdinalIgnoreCase));
             if (hit is not null)
@@ -130,7 +113,7 @@ public static class ActivationRiskScanner
         }
     }
 
-    private static void ScanHostsFile(SystemContext ctx, List<RiskFinding> findings)
+    private static void ScanHostsFile(SystemContext ctx, DetectionRuleSet rules, List<RiskFinding> findings)
     {
         var hostsPath = ctx.Files.ExpandEnvironment(@"%SystemRoot%\System32\drivers\etc\hosts");
         var content = ctx.Files.ReadAllTextOrNull(hostsPath);
@@ -141,7 +124,7 @@ public static class ActivationRiskScanner
             var trimmed = line.Trim();
             if (trimmed.Length == 0 || trimmed.StartsWith('#')) continue;
 
-            var hit = KnownKmsHosts.FirstOrDefault(h =>
+            var hit = rules.KnownKmsHosts.FirstOrDefault(h =>
                 trimmed.Contains(h, StringComparison.OrdinalIgnoreCase));
             if (hit is not null)
             {
@@ -153,8 +136,8 @@ public static class ActivationRiskScanner
                     Explanation = $"Dòng hosts trỏ tới máy chủ KMS công cộng đã biết ({hit})."
                 });
             }
-            else if (trimmed.Contains("microsoft.com", StringComparison.OrdinalIgnoreCase) ||
-                     trimmed.Contains("activation", StringComparison.OrdinalIgnoreCase))
+            else if (rules.HostsInterferenceKeywords.Any(k =>
+                         trimmed.Contains(k, StringComparison.OrdinalIgnoreCase)))
             {
                 findings.Add(new RiskFinding
                 {
@@ -167,13 +150,12 @@ public static class ActivationRiskScanner
         }
     }
 
-    private static void ScanHookFiles(SystemContext ctx, List<RiskFinding> findings)
+    private static void ScanHookFiles(SystemContext ctx, DetectionRuleSet rules, List<RiskFinding> findings)
     {
-        string[] dirs = { @"%SystemRoot%\System32", @"%SystemRoot%\SysWOW64" };
-        foreach (var dir in dirs)
+        foreach (var dir in rules.HookDirectories)
         {
             var expanded = ctx.Files.ExpandEnvironment(dir);
-            foreach (var file in HookFiles)
+            foreach (var file in rules.HookFiles)
             {
                 var full = Path.Combine(expanded, file);
                 if (ctx.Files.FileExists(full))
@@ -211,14 +193,24 @@ public static class ActivationRiskScanner
     /// de nguoi doc bao cao biet chinh xac script da kiem tra nhung gi.
     /// </summary>
     public static List<DetectionScope> BuildScope(IReadOnlyList<RiskFinding> findings)
+        => BuildScope(findings, DetectionRuleSet.Embedded);
+
+    public static List<DetectionScope> BuildScope(
+        IReadOnlyList<RiskFinding> findings, DetectionRuleSet rules)
     {
+        ArgumentNullException.ThrowIfNull(rules);
+
+        var legit = rules.LegitimateTaskNames.Count > 0
+            ? $" (trừ task hệ thống hợp lệ {string.Join(", ", rules.LegitimateTaskNames)})"
+            : "";
+
         (string Cat, string Src, RiskLevel Lvl)[] defs =
         {
-            ("Tên file/thư mục nghi vấn", "Program Files, ProgramData, ổ hệ thống, Temp, Desktop, Downloads", RiskLevel.High),
-            ("Scheduled Task nghi vấn", "Task Scheduler (trừ task hệ thống hợp lệ SoftwareProtectionPlatform)", RiskLevel.High),
+            ("Tên file/thư mục nghi vấn", string.Join(", ", rules.ScanRoots), RiskLevel.High),
+            ("Scheduled Task nghi vấn", $"Task Scheduler{legit}", RiskLevel.High),
             ("Windows Service nghi vấn", "Danh sách toàn bộ Windows Service (Win32_Service)", RiskLevel.High),
             ("Hosts file bị chỉnh sửa", @"%SystemRoot%\System32\drivers\etc\hosts", RiskLevel.Medium),
-            ("File hook hệ thống bản quyền", "System32 / SysWOW64 (SppExtComObjHook.dll, SppExtComObjPatcher.exe)", RiskLevel.Critical),
+            ("File hook hệ thống bản quyền", $"{string.Join(" / ", rules.HookDirectories)} ({string.Join(", ", rules.HookFiles)})", RiskLevel.Critical),
             ("KMS server tùy chỉnh trong registry", @"HKLM\...\SoftwareProtectionPlatform", RiskLevel.High),
         };
 

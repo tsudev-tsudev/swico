@@ -7,6 +7,13 @@
 
 ### Thêm
 
+- **Bộ luật phát hiện tách khỏi mã nguồn** (`Core/Rules/`) — dạng dữ liệu JSON
+  có phiên bản, nạp theo thứ tự `--rules` → file cạnh exe → bộ luật đóng kèm.
+  File hỏng/thiếu/rỗng đều quay về bộ luật đóng kèm kèm cảnh báo. Cho phép cập
+  nhật dấu hiệu mà không phải biên dịch, ký và phát hành lại.
+- Tham số CLI `--rules <file.json>` và `--version`.
+- Trường `DetectionRulesVersion` trong báo cáo — truy ngược được kết luận do bộ
+  luật nào sinh ra.
 - Lớp `Core.Rendering` — **viết mới hoàn toàn** sau khi bản gốc bị mất:
   `HtmlReportRenderer`, `XlsxWriter` (tự ghi OOXML, không phụ thuộc NuGet),
   `DashboardBuilder` (quét đệ quy không giới hạn độ sâu).
@@ -38,12 +45,15 @@
 - `<pane>` trong file XLSX đặt sai vị trí theo lược đồ SpreadsheetML — phải nằm
   trong `<sheetViews>` **trước** `<sheetData>`. File vẫn là XML hợp lệ nên lỗi
   này lọt lưới khi chỉ thử trên Linux, nhưng Excel sẽ báo file hỏng.
-- Khôi phục bộ test bị lạc trong `mnt/user-data/outputs/`; nay `54 PASS, 0 FAIL`.
+- Khôi phục bộ test bị lạc trong `mnt/user-data/outputs/`; nay `64 PASS, 0 FAIL`.
+- Phần trợ giúp `--help` còn sót tên cũ `tsudev System Audit` / `tsudev-audit.exe`
+  sau khi đổi tên sản phẩm.
 
 ### Đã biết còn tồn đọng
 
-- `WindowsAdapters.cs` **chưa từng chạy trên Windows thật**. Xem
-  `docs/WINDOWS-VERIFICATION.md`.
+- `WindowsAdapters.cs` đã chạy được trên Windows thật (sinh ra báo cáo HTML),
+  nhưng **chưa đối chiếu tên thuộc tính WMI** và chưa so với bản PowerShell cũ.
+  Xem `docs/WINDOWS-VERIFICATION.md`.
 - File `.xlsx` chưa từng được Excel thật mở (môi trường phát triển không có).
 - Còn khoảng 25 cảnh báo CA1305/CA1826 chưa dọn.
 

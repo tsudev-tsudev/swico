@@ -31,6 +31,8 @@ swico.exe --scope license          Chỉ kiểm tra bản quyền
 swico.exe --scope hardware         Chỉ thu thập phần cứng
 swico.exe --silent --sfc           Quét sâu, không mở trình duyệt (GPO/RMM)
 swico.exe -o D:\BaoCao --silent    Lưu vào thư mục chỉ định
+swico.exe --rules .\luat-moi.json  Quét bằng bộ luật cập nhật
+swico.exe --version                Xem phiên bản
 swico.exe --help                   Xem toàn bộ tham số
 ```
 
@@ -63,6 +65,24 @@ Bốn định dạng cùng lúc: **HTML** để đọc, **JSON** để tích h�
 Quét nhiều máy: copy các thư mục **cấp 3** từ máy khác vào cấp 2 →
 `tsudev-tong-hop.html` tự đọc đệ quy (**không giới hạn độ sâu**) và gom lại.
 
+## Bộ luật phát hiện cập nhật độc lập
+
+Các dấu hiệu kích hoạt trái phép nằm trong một **file dữ liệu riêng có phiên
+bản**, không nằm cứng trong mã. Khi có biến thể mới, chỉ cần thay file
+`detection-rules.json` đặt cạnh `swico.exe` — không cần cài lại, không cần chờ
+bản phát hành mới.
+
+```powershell
+swico.exe --rules .\luat-moi.json
+```
+
+Thứ tự ưu tiên: `--rules` → file cạnh exe → bộ luật đóng kèm bên trong exe.
+File hỏng hoặc thiếu sẽ tự quay về bộ luật đóng kèm kèm cảnh báo, **không làm
+hỏng lần quét**. Chi tiết: [`docs/DETECTION-RULES.md`](docs/DETECTION-RULES.md).
+
+> Đây **không phải** bảo mật bằng che giấu — mã nguồn công khai nên luật cũng
+> công khai. Thứ thay đổi là **tốc độ cập nhật**.
+
 ## Quyền riêng tư
 
 Công cụ **không kết nối Internet** và **không gửi dữ liệu đi đâu**. Mọi thứ chỉ
@@ -76,13 +96,14 @@ src/
     Models/                                    JSON schema v3.0 (hợp đồng dùng chung)
     Abstractions/                              Các "cổng" (port): IWmiQuery, IRegistryReader...
     Collectors/                                TOÀN BỘ logic nghiệp vụ
+    Rules/                                     Luật phát hiện dạng dữ liệu có phiên bản
     Reports/                                   Lắp ráp collector thành báo cáo
     Rendering/                                 HTML + XLSX + Dashboard
     Testing/                                   Adapter giả lập cho unit test
   Tsudev.Audit.Windows/     net8.0-windows  ← Adapter mỏng: WMI, Registry, Process
   Tsudev.Audit.Cli/         net8.0-windows  ← 1 file exe
 tests/
-  unittests/                net8.0          ← 54 test, chạy được trên mọi nền tảng
+  unittests/                net8.0          ← 64 test, chạy được trên mọi nền tảng
 ```
 
 ### Vì sao tách `Core` khỏi Windows?
@@ -91,7 +112,7 @@ tests/
 
 1. **Kiểm thử được** — toàn bộ logic nghiệp vụ (quét dấu hiệu crack, tính điểm
    rủi ro, phân loại phần mềm, dựng HTML/XLSX) unit-test được **không cần máy
-   Windows**. 54 test chạy trên Linux.
+   Windows**. 64 test chạy trên Linux.
 2. **Dễ audit** — mọi lệnh gọi hệ thống tập trung trong đúng một file
    (`WindowsAdapters.cs`). Với một công cụ đọc dữ liệu nhạy cảm và đòi quyền
    Administrator, việc rà soát bảo mật làm được nhanh là điều thiết yếu.
@@ -128,6 +149,7 @@ trên máy không có mạng. Chi tiết: [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY
 | Chống HTML injection | ✅ Đã test |
 | XLSX: quy đổi tên cột, nhận diện số, tên sheet | ✅ Đã test |
 | Dashboard đọc sâu đa máy | ✅ Đã test |
+| Bộ luật tách rời (nạp, kiểm tra, quay về mặc định) | ✅ Đã test |
 | CLI parse tham số | ✅ 16/16 test |
 | **XLSX mở bằng Excel thật** | ⚠️ **CHƯA kiểm chứng** — môi trường dev không có Excel |
 | **Adapter WMI/Registry thực tế** | ⚠️ **CHƯA chạy thử trên Windows** |
@@ -140,7 +162,7 @@ thật**. Cần xác nhận tên thuộc tính WMI, đặc biệt `MSFT_MpComput
 `MSFT_MpThreat`) và `MSFT_ScheduledTask`.
 
 Nếu có lỗi, hầu hết sẽ nằm gọn trong `WindowsAdapters.cs` — logic nghiệp vụ đã
-được 54 test kiểm chứng nên không cần đụng tới.
+được 64 test kiểm chứng nên không cần đụng tới.
 
 Kịch bản kiểm chứng đầy đủ: [`docs/WINDOWS-VERIFICATION.md`](docs/WINDOWS-VERIFICATION.md).
 
@@ -153,6 +175,7 @@ Kịch bản kiểm chứng đầy đủ: [`docs/WINDOWS-VERIFICATION.md`](docs/
 | [`docs/DECISIONS.md`](docs/DECISIONS.md) | Các quyết định đã chốt và lý do |
 | [`docs/CONTINUITY.md`](docs/CONTINUITY.md) | Giao thức nối tiếp giữa các phiên làm việc |
 | [`docs/SIGNING.md`](docs/SIGNING.md) | Ký số qua SignPath Foundation |
+| [`docs/DETECTION-RULES.md`](docs/DETECTION-RULES.md) | Bộ luật phát hiện và cách cập nhật |
 | [`docs/WINDOWS-VERIFICATION.md`](docs/WINDOWS-VERIFICATION.md) | Kịch bản kiểm chứng trên Windows |
 | [`CHANGELOG.md`](CHANGELOG.md) | Nhật ký thay đổi |
 

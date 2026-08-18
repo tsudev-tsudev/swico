@@ -6,6 +6,7 @@ using Tsudev.Audit.Core.Collectors;
 using Tsudev.Audit.Core.Models;
 using Tsudev.Audit.Core.Reports;
 using Tsudev.Audit.Core.Rendering;
+using Tsudev.Audit.Core.Rules;
 using Tsudev.Audit.Core.Testing;
 
 int passed = 0, failed = 0;
@@ -215,6 +216,62 @@ var n1 = XlsxWriter.MakeSafeSheetName("Phạm vi quét (luôn hiển thị dù c
 var n2 = XlsxWriter.MakeSafeSheetName("Phạm vi quét (luôn hiển thị dù có phát hiện hay không)", used);
 Check(n1.Length <= 31 && n2.Length <= 31 && n1 != n2, "ten sheet bi cat 31 ky tu va khong trung nhau");
 File.Delete(tmp);
+
+Console.WriteLine("\n=== 10. Bo luat phat hien tach roi ===");
+
+// Bo luat dong kem phai nap duoc va hop le - neu hong thi moi may deu "sach",
+// tao cam giac an toan gia, nen day la ca kiem thu quan trong.
+var embedded = DetectionRuleSet.Embedded;
+Check(embedded.Validate().Count == 0, "bo luat dong kem hop le");
+Check(!string.IsNullOrWhiteSpace(embedded.Version), "bo luat dong kem co so hieu phien ban");
+Check(embedded.SuspiciousNames.Contains("KMSAuto"), "bo luat dong kem giu du ten nghi van");
+
+// Scan(ctx) va Scan(ctx, Embedded) phai cho KET QUA Y HET - chung minh viec
+// tach luat khong lam doi hanh vi.
+var viaDefault = ActivationRiskScanner.Scan(ctx);
+var viaExplicit = ActivationRiskScanner.Scan(ctx, DetectionRuleSet.Embedded);
+Check(viaDefault.Count == viaExplicit.Count, "tach luat KHONG lam doi hanh vi quet");
+
+// Bo luat tu file ngoai phai thuc su duoc dung
+var customJson = """
+{
+  "version": "test-9.9",
+  "scanRoots": ["%ProgramFiles%"],
+  "suspiciousNames": ["CongCuBiaDatRaDeTest"],
+  "legitimateTaskNames": ["SoftwareProtectionPlatform"],
+  "hookDirectories": ["%SystemRoot%\\System32"],
+  "hookFiles": ["KhongCoThat.dll"],
+  "knownKmsHosts": [],
+  "hostsInterferenceKeywords": []
+}
+""";
+var custom = DetectionRuleSet.Parse(customJson);
+Check(custom.Version == "test-9.9" && custom.Validate().Count == 0, "nap duoc bo luat tu JSON ngoai");
+Check(ActivationRiskScanner.Scan(ctx, custom).Count < viaDefault.Count,
+    "bo luat khac cho ket qua khac (luat that su duoc dung)");
+
+// File hong / thieu KHONG duoc lam hong lan quet
+var missing = DetectionRuleSet.LoadOrEmbedded("/khong/ton/tai/rules.json", out var w1);
+Check(ReferenceEquals(missing, DetectionRuleSet.Embedded) && w1 is not null,
+    "file luat thieu -> quay ve bo luat dong kem kem canh bao");
+
+var badPath = Path.Combine(Path.GetTempPath(), $"bad-rules-{Guid.NewGuid():N}.json");
+File.WriteAllText(badPath, "{ day khong phai JSON hop le ");
+var broken = DetectionRuleSet.LoadOrEmbedded(badPath, out var w2);
+Check(ReferenceEquals(broken, DetectionRuleSet.Embedded) && w2 is not null,
+    "file luat sai dinh dang -> quay ve bo luat dong kem kem canh bao");
+File.Delete(badPath);
+
+// Bo luat RONG nguy hiem hon bo luat sai: no lam moi may deu "sach"
+var emptyPath = Path.Combine(Path.GetTempPath(), $"empty-rules-{Guid.NewGuid():N}.json");
+File.WriteAllText(emptyPath, """{"version":"rong","suspiciousNames":[],"scanRoots":[],"hookFiles":[],"hookDirectories":[]}""");
+var empty = DetectionRuleSet.LoadOrEmbedded(emptyPath, out var w3);
+Check(ReferenceEquals(empty, DetectionRuleSet.Embedded) && w3 is not null,
+    "bo luat RONG bi tu choi (khong duoc tao cam giac an toan gia)");
+File.Delete(emptyPath);
+
+Check(licReport.DetectionRulesVersion == embedded.Version,
+    "bao cao ghi lai phien ban bo luat da dung");
 
 Console.WriteLine($"\n=== KET QUA: {passed} PASS, {failed} FAIL ===");
 return failed == 0 ? 0 : 1;

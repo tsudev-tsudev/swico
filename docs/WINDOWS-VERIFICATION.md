@@ -5,7 +5,7 @@
 >
 > Đây là hạng mục **rủi ro cao nhất** của cả dự án: lớp `WindowsAdapters.cs`
 > chạm trực tiếp vào WMI/Registry và **chưa bao giờ chạy trên Windows**.
-> Toàn bộ logic nghiệp vụ đã có 54 test bảo vệ, nhưng lớp chạm hệ điều hành thì chưa.
+> Toàn bộ logic nghiệp vụ đã có 64 test bảo vệ, nhưng lớp chạm hệ điều hành thì chưa.
 
 Chép kết quả từng mục vào cột **Kết quả thật** rồi gửi lại. Chỗ nào lệch, gần
 như chắc chắn lỗi nằm gọn trong `src/Tsudev.Audit.Windows/WindowsAdapters.cs`.
@@ -58,7 +58,7 @@ cd swico
 .\build.ps1
 ```
 
-Kỳ vọng: test báo `54 PASS, 0 FAIL`, rồi sinh ra `publish\swico.exe`.
+Kỳ vọng: test báo `64 PASS, 0 FAIL`, rồi sinh ra `publish\swico.exe`.
 
 > Dùng `git bundle` thay vì zip thư mục vì nó giữ nguyên lịch sử git. Nếu sau
 > này bạn tạo repo GitHub thật, chỉ cần `git remote add` rồi `git push` là toàn
@@ -90,7 +90,7 @@ Rồi trên Windows `git clone` như bình thường.
 | # | Việc cần làm | Kỳ vọng | Kết quả thật |
 |---|---|---|---|
 | A1 | `dotnet build Tsudev.SystemAudit.sln -c Release` | Không lỗi. Gói `System.Management` restore được. | |
-| A2 | `dotnet run --project tests/unittests -c Release` | `54 PASS, 0 FAIL` | |
+| A2 | `dotnet run --project tests/unittests -c Release` | `64 PASS, 0 FAIL` | |
 | A3 | Nháy đúp `publish\swico.exe` | **Hiện hộp thoại UAC** (do `app.manifest`) | |
 | A4 | `.\publish\swico.exe --help` | In danh sách tham số bằng tiếng Việt có dấu, không lỗi font | |
 | A5 | Chạy **không** quyền Administrator | Hiện cảnh báo, vẫn chạy, không sập | |

@@ -41,7 +41,7 @@
 - ✅ `HtmlReportRenderer` — escape tập trung tại `E()` chống HTML injection
 - ✅ `XlsxWriter` — tự ghi OOXML, không thêm phụ thuộc NuGet
 - ✅ `DashboardBuilder` — quét đệ quy không giới hạn độ sâu
-- ✅ **`54 PASS, 0 FAIL`** — khớp đúng con số README tuyên bố
+- ✅ **`64 PASS, 0 FAIL`** — khớp đúng con số README tuyên bố
 - ✅ `dotnet publish -r win-x64` từ Linux → `swico.exe` **34 MB**
 
 ## Phase 3 — Danh tính, pháp lý, đóng gói, CI/CD ✅
@@ -55,12 +55,39 @@
 - ✅ `.github/workflows/ci.yml` + `release.yml`
 - ✅ `docs/SIGNING.md`, `README.md` viết lại, `CHANGELOG.md`
 
-## Phase 4 — Kiểm chứng trên Windows thật ⛔ **CHỜ NGƯỜI DÙNG**
+## Phase 3b — Kho mã trên GitHub ✅
+
+- ✅ Repo `github.com/tsudev-tsudev/swico` — **private**, 9 commit
+- ✅ Trỏ toàn bộ URL điền tạm về kho thật (19 lần, 8 file)
+- ✅ **CI xanh cả hai job**, gồm smoke test trên Windows runner
+- ⬜ Chuyển sang **public** — chờ sẵn sàng nộp SignPath
+
+## Phase 5a — Tách luật phát hiện ✅
+
+**Đây là điều kiện để chuyển repo sang công khai**, nên làm sớm hơn phần còn
+lại của Phase 5.
+
+- ✅ `Core/Rules/detection-rules.json` — luật dạng dữ liệu có phiên bản
+- ✅ `Core/Rules/DetectionRuleSet.cs` — nạp, kiểm tra, quay về mặc định an toàn
+- ✅ Thứ tự ưu tiên `--rules` → file cạnh exe → bộ luật đóng kèm
+- ✅ Trường `DetectionRulesVersion` trong báo cáo để truy ngược
+- ✅ 10 test mới → **64 PASS, 0 FAIL**
+- ✅ `docs/DETECTION-RULES.md`
+
+## Phase 4 — Kiểm chứng trên Windows thật 🔄 **ĐANG CHỜ NGƯỜI DÙNG**
+
+**Đã xong một phần:** người dùng chạy `swico.exe` trên Windows thật và **nhận
+được báo cáo HTML**. Đây là lần đầu `WindowsAdapters.cs` thực thi — và nó qua
+được. CI cũng chạy `--help` thành công trên Windows runner.
+
+**Còn lại — chính là những mục quan trọng nhất:**
 
 **Hạng mục rủi ro cao nhất của cả dự án.** Người dùng đã xác nhận có máy Windows
 và tự chạy thử được. Kịch bản đầy đủ: `docs/WINDOWS-VERIFICATION.md`.
 
-- ⛔ A: build/test/UAC/`--help` trên Windows
+- ✅ A4: `--help` chạy được (xác nhận qua CI Windows runner)
+- ✅ C1/C2: sinh được báo cáo HTML, mở xem được
+- ⛔ A3: hộp thoại UAC có hiện đúng không
 - ⛔ B: **xác nhận tên thuộc tính WMI** — `MSFT_MpComputerStatus`,
   `MSFT_MpThreatDetection` (trường `ThreatName`), `MSFT_ScheduledTask`
 - ⛔ C: kết quả đầu ra — **C3: mở `.xlsx` bằng Excel thật** là mục quan trọng nhất
@@ -69,7 +96,7 @@ và tự chạy thử được. Kịch bản đầy đủ: `docs/WINDOWS-VERIFIC
 - ⛔ F: kiểm tra installer (cài, gỡ, cài đè, `/VERYSILENT`)
 - ⛔ G: kiểm tra phần mềm diệt virus + nộp VirusTotal
 
-## Phase 5 — Chuẩn hoá chất lượng mã ⬜
+## Phase 5b — Chuẩn hoá chất lượng mã còn lại ⬜
 
 Làm khi đã có kết quả từ Phase 4 — sửa theo dữ liệu thật, không theo phỏng đoán.
 
@@ -77,10 +104,9 @@ Làm khi đã có kết quả từ Phase 4 — sửa theo dữ liệu thật, kh
 - ⬜ `.editorconfig` + cân nhắc `TreatWarningsAsErrors`
 - ⬜ Chuyển bộ test tự chế sang **xUnit** — báo lỗi tử tế, chạy song song
 - ⬜ Tách file gộp nhiều class thành file riêng
-- ⬜ Tách luật phát hiện ra `Core/Rules/` dạng **dữ liệu có phiên bản**
-      (bắt buộc, vì mã nguồn sẽ công khai — xem `docs/SIGNING.md`)
 - ⬜ Logging có cấu trúc thay `Console.WriteLine` rải rác
-- ⬜ Thêm `--version`, cân nhắc `--json-only`
+- ✅ Thêm `--version` và `--rules`; sửa `--help` còn sót tên cũ
+- ⬜ Cân nhắc `--json-only`
 - ⬜ **Đánh giá NativeAOT** thay `PublishSingleFile`: file nhỏ hơn nhiều (hiện
       34 MB), khởi động nhanh hơn, và **ít bị diệt virus báo nhầm hơn hẳn**
 

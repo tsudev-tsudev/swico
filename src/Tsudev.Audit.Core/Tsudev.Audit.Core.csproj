@@ -7,4 +7,11 @@
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>Tsudev.Audit.Core</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Bo luat phat hien duoc NHUNG vao assembly de cong cu chay duoc ngay ca
+         khi chi copy moi mot file exe. File ben ngoai (neu co) chi de GHI DE. -->
+    <EmbeddedResource Include="Rules/detection-rules.json"
+                      LogicalName="Tsudev.Audit.Core.Rules.detection-rules.json" />
+  </ItemGroup>
 </Project>

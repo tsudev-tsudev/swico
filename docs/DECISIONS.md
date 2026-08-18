@@ -27,8 +27,8 @@ Artifact và khảo sát độc lập ở phiên S001 đi tới **cùng một ch
 | Chuyển sang xUnit | GĐ 01 | ✅ Có trong Phase 4 của PLAN.md |
 
 **Kết quả thực tế đã vượt mốc "Xong khi" của giai đoạn 00 trong artifact:**
-artifact đặt điều kiện *"`dotnet build` xanh toàn solution và test báo 54/54 pass"*.
-Đã đạt: `Build succeeded` + `54 PASS, 0 FAIL`.
+artifact đặt điều kiện *"`dotnet build` xanh toàn solution và test báo 64/64 pass"*.
+Đã đạt: `Build succeeded` + `64 PASS, 0 FAIL`.
 
 ---
 
@@ -111,7 +111,7 @@ Những mục dưới đây **cần bổ sung vào `PLAN.md`**:
 
 | Vấn đề | Trạng thái |
 |---|---|
-| **Lớp Rendering có bản sao không?** (artifact Q1) | ✅ **Hết hiệu lực.** Người dùng xác nhận không còn bản sao; đã viết lại xong, 54/54 test pass. |
+| **Lớp Rendering có bản sao không?** (artifact Q1) | ✅ **Hết hiệu lực.** Người dùng xác nhận không còn bản sao; đã viết lại xong, 54/64 test pass. |
 | **License key thương mại** (artifact Điều chỉnh 01) | ✅ **Đã giải quyết.** Người dùng chốt ở phiên S001: *không* làm hệ thống license key, "license" chỉ là tính năng kiểm tra bản quyền Windows. Trùng với đề xuất của artifact. |
 | **`ILicenseGate` giữ điểm nối?** | ⬜ Còn nhỏ. Đề xuất **bỏ** — khi đã chốt không làm license key thì thêm interface cho một tương lai chưa chắc xảy ra là phức tạp thừa. Dễ thêm sau nếu cần. |
 

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Text.Json;
@@ -6,6 +7,7 @@ using System.Text.Json.Serialization;
 using Tsudev.Audit.Core.Models;
 using Tsudev.Audit.Core.Rendering;
 using Tsudev.Audit.Core.Reports;
+using Tsudev.Audit.Core.Rules;
 using Tsudev.Audit.Windows;
 
 namespace Tsudev.Audit.Cli;
@@ -43,6 +45,8 @@ public static class Program
         }
 
         if (opts.ShowHelp) { CliOptions.PrintUsage(); return ExitOk; }
+
+        if (opts.ShowVersion) { PrintVersion(); return ExitOk; }
 
         if (!OperatingSystem.IsWindows())
         {
@@ -85,7 +89,21 @@ public static class Program
 
         var renderer = new HtmlReportRenderer();
         var xlsx = new XlsxWriter();
-        var auditOptions = new AuditOptions { RunDism = opts.RunDism, RunSfc = opts.RunSfc };
+
+        // Uu tien: --rules -> file canh exe -> bo luat dong kem.
+        // Nho vay cap nhat luat chi can tha them mot file JSON canh exe, khong
+        // phai bien dich lai va ky lai.
+        var rulesPath = opts.RulesPath ?? ProbeConventionalRulesFile();
+        var rules = DetectionRuleSet.LoadOrEmbedded(rulesPath, out var rulesWarning);
+        if (rulesWarning is not null) Warn($"CẢNH BÁO: {rulesWarning}");
+        Info($"Bộ luật phát hiện: {rules.Describe()}");
+
+        var auditOptions = new AuditOptions
+        {
+            RunDism = opts.RunDism,
+            RunSfc = opts.RunSfc,
+            Rules = rules
+        };
 
         var produced = new List<AuditReport>();
 
@@ -210,6 +228,36 @@ public static class Program
                 : v;
     }
 
+    /// <summary>
+    /// Tim file luat dat canh file exe theo quy uoc. Tra ve null neu khong co -
+    /// khi do dung bo luat dong kem.
+    /// </summary>
+    private static string? ProbeConventionalRulesFile()
+    {
+        try
+        {
+            var candidate = Path.Combine(AppContext.BaseDirectory, DetectionRuleSet.ConventionalFileName);
+            return File.Exists(candidate) ? candidate : null;
+        }
+        catch (IOException) { return null; }
+    }
+
+    private static void PrintVersion()
+    {
+        var asm = typeof(Program).Assembly;
+        var version = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+                      ?? asm.GetName().Version?.ToString()
+                      ?? "khong xac dinh";
+
+        // Cat phan bam commit ma SDK tu them (vi du "3.0.0+9e1f2c...").
+        var plus = version.IndexOf('+', StringComparison.Ordinal);
+        if (plus > 0) version = version[..plus];
+
+        Console.WriteLine($"tsuowlit SWICO {version}");
+        Console.WriteLine($"Lược đồ dữ liệu: {AuditReport.CurrentSchemaVersion}");
+        Console.WriteLine($"Bộ luật phát hiện đóng kèm: {DetectionRuleSet.Embedded.Version}");
+    }
+
     private static void TryOpen(string path)
     {
         try { Process.Start(new ProcessStartInfo(path) { UseShellExecute = true }); }
@@ -238,6 +286,10 @@ public sealed class CliOptions
     public bool ExportCsv { get; private set; } = true;
     public bool Verbose { get; private set; }
     public bool ShowHelp { get; private set; }
+    public bool ShowVersion { get; private set; }
+
+    /// <summary>Duong dan file bo luat phat hien ben ngoai (tuy chon).</summary>
+    public string? RulesPath { get; private set; }
 
     public static CliOptions Parse(string[] args)
     {
@@ -248,6 +300,7 @@ public sealed class CliOptions
             switch (a)
             {
                 case "-h" or "--help" or "/?": o.ShowHelp = true; break;
+                case "--version": o.ShowVersion = true; break;
                 case "--silent" or "-s": o.Silent = true; break;
                 case "--sfc": o.RunSfc = true; break;
                 case "--no-dism": o.RunDism = false; break;
@@ -270,6 +323,11 @@ public sealed class CliOptions
                     o.OutputRoot = args[i];
                     break;
 
+                case "--rules":
+                    if (++i >= args.Length) throw new ArgumentException("--rules cần đường dẫn tới file .json bộ luật.");
+                    o.RulesPath = args[i];
+                    break;
+
                 default:
                     throw new ArgumentException($"Không nhận ra tham số '{args[i]}'.");
             }
@@ -280,10 +338,10 @@ public sealed class CliOptions
     public static void PrintUsage()
     {
         Console.WriteLine("""
-tsudev System Audit - Kiểm tra bản quyền Windows & cấu hình phần cứng
+tsuowlit SWICO - Kiểm tra bản quyền Windows & cấu hình phần cứng
 
 CÁCH DÙNG:
-  tsudev-audit.exe [tham số]
+  swico.exe [tham số]
 
 THAM SỐ:
   --scope <all|license|hardware>  Phạm vi quét (mặc định: all - quét cả hai)
@@ -292,8 +350,19 @@ THAM SỐ:
       --sfc                       Chạy thêm sfc /verifyonly (CHẬM 5-15 phút, mặc định tắt)
       --no-dism                   Bỏ qua DISM CheckHealth
       --no-csv                    Không xuất file .csv
+      --rules <file.json>         Dùng bộ luật phát hiện từ file ngoài
   -v, --verbose                   Hiện chi tiết lỗi
+      --version                   Hiện phiên bản rồi thoát
   -h, --help                      Hiện trợ giúp này
+
+BỘ LUẬT PHÁT HIỆN:
+  Các dấu hiệu kích hoạt trái phép nằm trong một file dữ liệu riêng, cập nhật
+  được độc lập với file exe - không cần cài lại. Thứ tự ưu tiên:
+    1. File chỉ định bằng --rules
+    2. File detection-rules.json đặt cạnh swico.exe
+    3. Bộ luật đóng kèm bên trong exe
+  File hỏng hoặc thiếu sẽ tự quay về bộ luật đóng kèm kèm một cảnh báo,
+  KHÔNG làm hỏng lần quét.
 
 MÃ THOÁT:
   0  Thành công hoàn toàn
@@ -302,10 +371,11 @@ MÃ THOÁT:
   3  Tham số dòng lệnh không hợp lệ
 
 VÍ DỤ:
-  tsudev-audit.exe                             Quét đầy đủ, mở báo cáo khi xong
-  tsudev-audit.exe --scope license             Chỉ kiểm tra bản quyền
-  tsudev-audit.exe --silent --sfc              Quét sâu, không mở trình duyệt (triển khai hàng loạt)
-  tsudev-audit.exe -o D:\BaoCao --silent       Lưu kết quả vào thư mục chỉ định
+  swico.exe                             Quét đầy đủ, mở báo cáo khi xong
+  swico.exe --scope license             Chỉ kiểm tra bản quyền
+  swico.exe --silent --sfc              Quét sâu, không mở trình duyệt (triển khai hàng loạt)
+  swico.exe -o D:\BaoCao --silent       Lưu kết quả vào thư mục chỉ định
+  swico.exe --rules .\luat-moi.json     Quét bằng bộ luật cập nhật
 """);
     }
 }
