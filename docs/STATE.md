@@ -17,10 +17,10 @@ lúc nhận bàn giao (khi đó **không build được**).
 
 ```
 Build:    ✅ Build succeeded
-Test:     ✅ 120 PASS, 0 FAIL
+Test:     ✅ 129 PASS, 0 FAIL
 Publish:  ✅ publish/swico.exe — 34 MB, PE32+ x86-64
 Repo:     ✅ github.com/tsudev-tsudev/swico (PUBLIC)
-Release:  ✅ quy trinh phat hanh CHAY THAT - ban nhap v3.0.0 du 5 tep
+Release:  ✅ ban nhap v26.8.18 du 5 tep (chua cong khai)
 Installer:✅ Inno Setup BIEN DICH DUOC (truoc do co 4 loi dung han)
 CI:       ✅ xanh ca hai job, gom smoke test tren Windows runner
 Windows:  ✅ DA CHAY THAT - sinh duoc bao cao HTML
@@ -43,7 +43,7 @@ chạy thử trên Windows thật, và nộp hồ sơ SignPath Foundation.
 | Tên miền thương hiệu | `https://tsudev.com` — **giữ nguyên** (bộ test khẳng định điều này) |
 | Giấy phép | Apache-2.0 |
 | Ký số | SignPath Foundation |
-| Phiên bản | 3.0.0 (`Directory.Build.props`) |
+| Phiên bản | **26.8.18** — CalVer `yy.M.d` (`Directory.Build.props`) |
 
 ## 3. Cái gì đã có
 
@@ -116,6 +116,11 @@ Chi tiết: `docs/SIGNING.md`.
 
 ## 5. Cạm bẫy đã biết — đọc để khỏi vấp lại
 
+- **Logo và các biến thể sinh bằng `packaging/tools/make-assets.py`.** Sửa
+  `assets/tsudev-logo.png` xong phải chạy lại script; icon, ảnh trình thuật sĩ
+  và bản nhúng vào HTML đều dẫn xuất từ file gốc đó.
+- **Bản ghi lịch sử (`docs/journal/`, `docs/DECISIONS.md`) vẫn dùng tên cũ
+  `tsuowlit`** — cố ý giữ, đừng "sửa cho đồng bộ".
 - **`global.json` ghim SDK 8.0.424 — đừng xoá.** Runner GitHub có sẵn .NET 10
   SDK và `dotnet build` luôn chọn bản mới nhất nếu không ghim, khiến CI và máy
   dev dùng hai bộ phân tích khác nhau (đã từng làm CI đỏ với CA1859).
