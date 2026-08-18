@@ -15,7 +15,7 @@
 
 #define AppName        "tsuowlit SWICO"
 #define AppPublisher   "tsuowlit"
-#define AppUrl         "https://github.com/tsuowlit/swico"
+#define AppUrl         "https://github.com/tsudev-tsudev/swico"
 #define AppExeName     "swico.exe"
 #define SourceExe      "..\..\publish\" + AppExeName
 

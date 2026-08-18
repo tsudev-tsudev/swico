@@ -15,7 +15,7 @@ ReleaseDate: 2026-08-18
 ElevationRequirement: elevatesSelf
 Installers:
   - Architecture: x64
-    InstallerUrl: https://github.com/tsuowlit/swico/releases/download/v3.0.0/swico-setup-3.0.0.exe
+    InstallerUrl: https://github.com/tsudev-tsudev/swico/releases/download/v3.0.0/swico-setup-3.0.0.exe
     # TODO(phat hanh): thay bang SHA256 that cua file setup. Script phat hanh
     # tinh lai gia tri nay - khong dien tay.
     InstallerSha256: 0000000000000000000000000000000000000000000000000000000000000000

@@ -14,7 +14,7 @@ như chắc chắn lỗi nằm gọn trong `src/Tsudev.Audit.Windows/WindowsAdap
 
 ## Chuẩn bị — đọc kỹ mục này trước
 
-> ⚠️ **Repo `github.com/tsuowlit/swico` CHƯA TỒN TẠI.** Đó là URL điền tạm,
+> ⚠️ **Repo `github.com/tsudev-tsudev/swico` CHƯA TỒN TẠI.** Đó là URL điền tạm,
 > dùng trước cho tài liệu và manifest. Mã nguồn hiện **chỉ nằm trên máy dev
 > Linux**, chưa từng được đẩy lên GitHub. `git clone` sẽ báo không tìm thấy.
 
@@ -79,7 +79,7 @@ git push -u origin main
 
 Rồi trên Windows `git clone` như bình thường.
 
-> Nếu tên repo khác `tsuowlit/swico`, phải sửa lại URL ở: `README.md`,
+> Nếu đổi tên repo, phải sửa lại URL ở: `README.md`,
 > `Directory.Build.props` (`RepositoryUrl`), `packaging/winget/...` (3 file),
 > `packaging/innosetup/swico.iss` (`AppUrl`), `EULA.txt` mục 7, `PRIVACY.md`.
 

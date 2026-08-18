@@ -3,14 +3,14 @@ PackageIdentifier: tsuowlit.SWICO
 PackageVersion: 3.0.0
 PackageLocale: vi-VN
 Publisher: tsuowlit
-PublisherUrl: https://github.com/tsuowlit
-PublisherSupportUrl: https://github.com/tsuowlit/swico/issues
+PublisherUrl: https://github.com/tsudev-tsudev
+PublisherSupportUrl: https://github.com/tsudev-tsudev/swico/issues
 PackageName: tsuowlit SWICO
-PackageUrl: https://github.com/tsuowlit/swico
+PackageUrl: https://github.com/tsudev-tsudev/swico
 License: Apache-2.0
-LicenseUrl: https://github.com/tsuowlit/swico/blob/main/LICENSE
+LicenseUrl: https://github.com/tsudev-tsudev/swico/blob/main/LICENSE
 Copyright: Copyright (c) 2026 tsuowlit
-CopyrightUrl: https://github.com/tsuowlit/swico/blob/main/NOTICE
+CopyrightUrl: https://github.com/tsudev-tsudev/swico/blob/main/NOTICE
 ShortDescription: Kiểm tra bản quyền Windows và thu thập cấu hình phần cứng
 Description: |-
   tsuowlit SWICO kiểm tra tình trạng kích hoạt bản quyền Windows và Office, thu
@@ -31,11 +31,11 @@ Tags:
   - inventory
   - license
   - windows
-ReleaseNotesUrl: https://github.com/tsuowlit/swico/releases/tag/v3.0.0
+ReleaseNotesUrl: https://github.com/tsudev-tsudev/swico/releases/tag/v3.0.0
 Documentations:
   - DocumentLabel: Hướng dẫn sử dụng
-    DocumentUrl: https://github.com/tsuowlit/swico/blob/main/README.md
+    DocumentUrl: https://github.com/tsudev-tsudev/swico/blob/main/README.md
   - DocumentLabel: Tuyên bố quyền riêng tư
-    DocumentUrl: https://github.com/tsuowlit/swico/blob/main/PRIVACY.md
+    DocumentUrl: https://github.com/tsudev-tsudev/swico/blob/main/PRIVACY.md
 ManifestType: defaultLocale
 ManifestVersion: 1.6.0

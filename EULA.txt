@@ -83,4 +83,4 @@ nào, dù rõ ràng hay ngụ ý, theo đúng quy định tại mục 7 và 8 c�
 Toàn bộ mã nguồn được công khai. Bạn có thể tự kiểm chứng mọi điều nêu trên -
 đặc biệt là cam kết ở mục 4 - bằng cách đọc mã nguồn tại:
 
-https://github.com/tsuowlit/swico
+https://github.com/tsudev-tsudev/swico

@@ -3,7 +3,7 @@
 Kiểm tra tình trạng bản quyền Windows/Office và thu thập cấu hình phần cứng —
 **một file `.exe` duy nhất**, không cần cài .NET Runtime.
 
-[![CI](https://github.com/tsuowlit/swico/actions/workflows/ci.yml/badge.svg)](https://github.com/tsuowlit/swico/actions/workflows/ci.yml)
+[![CI](https://github.com/tsudev-tsudev/swico/actions/workflows/ci.yml/badge.svg)](https://github.com/tsudev-tsudev/swico/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
 > **Báo cáo do công cụ tạo ra là dữ liệu kỹ thuật để tham khảo, không phải kết
@@ -13,14 +13,14 @@ Kiểm tra tình trạng bản quyền Windows/Office và thu thập cấu hình
 ## Cài đặt
 
 > ⚠️ **Chưa phát hành.** Repo GitHub và các lệnh dưới đây **chưa hoạt động** —
-> mọi URL `github.com/tsuowlit/swico` trong tài liệu này là chỗ điền tạm. Mã
+> mọi URL `github.com/tsudev-tsudev/swico` trong tài liệu này là chỗ điền tạm. Mã
 > nguồn hiện chỉ tồn tại cục bộ. Xem `docs/STATE.md` để biết trạng thái thật.
 
 ```powershell
 winget install tsuowlit.SWICO
 ```
 
-Hoặc tải từ [Releases](https://github.com/tsuowlit/swico/releases): file setup,
+Hoặc tải từ [Releases](https://github.com/tsudev-tsudev/swico/releases): file setup,
 hoặc bản portable `.zip` giải nén chạy thẳng.
 
 ## Cách dùng

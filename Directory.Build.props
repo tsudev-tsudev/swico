@@ -11,7 +11,7 @@
     <Product>tsuowlit SWICO</Product>
     <Copyright>Copyright (c) 2026 tsuowlit</Copyright>
     <Description>Kiểm tra bản quyền Windows và thu thập cấu hình phần cứng</Description>
-    <RepositoryUrl>https://github.com/tsuowlit/swico</RepositoryUrl>
+    <RepositoryUrl>https://github.com/tsudev-tsudev/swico</RepositoryUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
   </PropertyGroup>
 
