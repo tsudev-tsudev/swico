@@ -17,7 +17,7 @@ lúc nhận bàn giao (khi đó **không build được**).
 
 ```
 Build:    ✅ Build succeeded
-Test:     ✅ 88 PASS, 0 FAIL
+Test:     ✅ 120 PASS, 0 FAIL
 Publish:  ✅ publish/swico.exe — 34 MB, PE32+ x86-64
 Repo:     ✅ github.com/tsudev-tsudev/swico (PUBLIC)
 CI:       ✅ xanh ca hai job, gom smoke test tren Windows runner
@@ -81,7 +81,9 @@ Mở `docs/WINDOWS-VERIFICATION.md`, chạy từng mục, điền cột "Kết q
 | Chạy exe, sinh báo cáo HTML | ✅ Được | xong |
 | **C3** mở `.xlsx` bằng Excel | ❌ Excel báo hỏng | ✅ **đã sửa và người dùng xác nhận mở bình thường** |
 | **B2** tên thuộc tính WMI | ✅ chạy được, đọc đúng SKU Windows + Office | ✅ xong |
-| **D1** đối chiếu PowerShell cũ | ❌ swico báo hợp lệ, PowerShell báo không | ✅ đã sửa — **cần thử lại** |
+| **D1** đối chiếu PowerShell cũ | ❌ swico báo hợp lệ, PowerShell báo không | ✅ **đã sửa và người dùng xác nhận chuẩn xác** |
+| Mã thoát không phản ánh kết luận | ❌ luôn trả 0 | ✅ đã sửa — **cần thử lại** |
+| Terminal mất màu lịch sử cuộn | ❌ do gán `Console.OutputEncoding` | ✅ đã sửa — **cần thử lại** |
 
 **Nguyên nhân thật của D1** (chẩn đoán đầu tiên đã sai): Windows *đúng là* hợp
 lệ (`LicenseStatus 1`); vấn đề nằm ở **Office `LicenseStatus 5` không hề tham

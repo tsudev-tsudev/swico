@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Tsudev.Audit.Core.Abstractions;
+using Tsudev.Audit.Core.Cli;
 using Tsudev.Audit.Core.Collectors;
 using Tsudev.Audit.Core.Models;
 using Tsudev.Audit.Core.Reports;
@@ -481,6 +482,85 @@ File.Delete(emptyPath);
 
 Check(licReport.DetectionRulesVersion == embedded.Version,
     "bao cao ghi lai phien ban bo luat da dung");
+
+Console.WriteLine("\n=== 11. CLI: phan tich tham so ===");
+
+// README tung tuyen bo "CLI parse tham so: 16/16 test" trong khi KHONG co
+// mot test CLI nao - CliOptions nam trong project net8.0-windows nen bo test
+// chay tren Linux khong voi toi duoc. Da chuyen sang Core de tuyen bo do
+// thanh su that.
+var d = CliOptions.Parse(Array.Empty<string>());
+Check(d.Scope == AuditScope.All && !d.Silent && d.RunDism && !d.RunSfc && d.ExportCsv,
+    "mac dinh: quet ca hai, chay DISM, xuat CSV, khong chay SFC");
+Check(!d.ShowHelp && !d.ShowVersion && !d.NoVerdictExit && d.RulesPath is null,
+    "mac dinh: khong bat co nao");
+
+Check(CliOptions.Parse(new[]{"-h"}).ShowHelp
+   && CliOptions.Parse(new[]{"--help"}).ShowHelp
+   && CliOptions.Parse(new[]{"/?"}).ShowHelp, "ba dang tham so tro giup deu nhan");
+Check(CliOptions.Parse(new[]{"--version"}).ShowVersion, "--version");
+Check(CliOptions.Parse(new[]{"--silent"}).Silent && CliOptions.Parse(new[]{"-s"}).Silent, "--silent / -s");
+Check(CliOptions.Parse(new[]{"--sfc"}).RunSfc, "--sfc bat quet sau");
+Check(!CliOptions.Parse(new[]{"--no-dism"}).RunDism, "--no-dism tat DISM");
+Check(!CliOptions.Parse(new[]{"--no-csv"}).ExportCsv, "--no-csv tat xuat CSV");
+Check(CliOptions.Parse(new[]{"--verbose"}).Verbose && CliOptions.Parse(new[]{"-v"}).Verbose, "--verbose / -v");
+Check(CliOptions.Parse(new[]{"--no-verdict-exit"}).NoVerdictExit, "--no-verdict-exit");
+
+Check(CliOptions.Parse(new[]{"--scope","license"}).Scope == AuditScope.License
+   && CliOptions.Parse(new[]{"--scope","HARDWARE"}).Scope == AuditScope.Hardware
+   && CliOptions.Parse(new[]{"--scope","All"}).Scope == AuditScope.All,
+    "--scope nhan ca ba gia tri, khong phan biet hoa thuong");
+Check(CliOptions.Parse(new[]{"-o",@"D:\BaoCao"}).OutputRoot == @"D:\BaoCao", "-o nhan duong dan");
+Check(CliOptions.Parse(new[]{"--rules",@"C:\luat.json"}).RulesPath == @"C:\luat.json", "--rules nhan duong dan");
+
+// Duong dan KHONG duoc ha ve chu thuong: he thong tep cua Windows giu nguyen
+// hoa thuong, va tren nen tang khac thi duong dan phan biet hoa thuong.
+Check(CliOptions.Parse(new[]{"-o",@"D:\BaoCao"}).OutputRoot != @"d:\baocao",
+    "duong dan giu nguyen hoa thuong");
+
+static bool Rejects(params string[] args)
+{
+    try { CliOptions.Parse(args); return false; } catch (ArgumentException) { return true; }
+}
+Check(Rejects("--khong-ton-tai"), "tu choi tham so la");
+Check(Rejects("--scope"), "--scope thieu gia tri -> loi");
+Check(Rejects("--scope","linh-tinh"), "--scope gia tri sai -> loi");
+Check(Rejects("--output"), "--output thieu duong dan -> loi");
+Check(Rejects("--rules"), "--rules thieu duong dan -> loi");
+
+var combo = CliOptions.Parse(new[]{"--scope","license","-o","D:\\X","--silent","--sfc","--no-csv"});
+Check(combo.Scope == AuditScope.License && combo.OutputRoot == "D:\\X"
+   && combo.Silent && combo.RunSfc && !combo.ExportCsv, "ket hop nhieu tham so");
+
+Check(CliOptions.UsageText.Contains("swico.exe") && !CliOptions.UsageText.Contains("tsudev-audit.exe"),
+    "phan tro giup dung ten lenh moi");
+
+Console.WriteLine("\n=== 12. CLI: ma thoat ===");
+
+Check(ExitCodes.FromVerdicts(new[]{ VerdictLevel.Ok, VerdictLevel.Unknown }) == ExitCodes.Ok,
+    "khong co ket luan dang bao dong -> 0");
+Check(ExitCodes.FromVerdicts(new[]{ VerdictLevel.Ok, VerdictLevel.Warning }) == ExitCodes.VerdictWarning,
+    "co canh bao -> 10");
+Check(ExitCodes.FromVerdicts(new[]{ VerdictLevel.Warning, VerdictLevel.Bad }) == ExitCodes.VerdictCritical,
+    "co ket luan nghiem trong -> 20 (thang canh bao)");
+Check(ExitCodes.FromVerdicts(Array.Empty<VerdictLevel>()) == ExitCodes.Ok, "khong co bao cao nao -> 0");
+
+// CA HOI QUY DUNG THEO MAY THAT: Windows hop le + Office chua kich hoat,
+// truoc day tra ve 0 nen script khong bat duoc.
+Check(ExitCodes.Combine(ExitCodes.Ok, ExitCodes.VerdictWarning) == ExitCodes.VerdictWarning,
+    "Office chua kich hoat -> ma thoat 10, KHONG con la 0");
+
+Check(ExitCodes.Combine(ExitCodes.Partial, ExitCodes.VerdictCritical) == ExitCodes.VerdictCritical,
+    "ket luan danh gia thang 'thieu du lieu'");
+Check(ExitCodes.Combine(ExitCodes.Fatal, ExitCodes.VerdictCritical) == ExitCodes.Fatal,
+    "loi nghiem trong thang tat ca");
+Check(ExitCodes.Combine(ExitCodes.BadArgs, ExitCodes.VerdictWarning) == ExitCodes.BadArgs,
+    "tham so sai thang ket luan danh gia");
+Check(ExitCodes.Combine(ExitCodes.Partial, ExitCodes.Ok) == ExitCodes.Partial,
+    "thieu du lieu ma khong co ket luan -> giu ma 1");
+Check(ExitCodes.Combine(ExitCodes.Ok, ExitCodes.Ok) == ExitCodes.Ok, "moi thu binh thuong -> 0");
+Check(ExitCodes.Describe(ExitCodes.VerdictWarning).Contains("CẢNH BÁO", StringComparison.Ordinal),
+    "mo ta ma thoat bang tieng Viet");
 
 Console.WriteLine($"\n=== KET QUA: {passed} PASS, {failed} FAIL ===");
 return failed == 0 ? 0 : 1;

@@ -4,6 +4,7 @@ using System.Runtime.Versioning;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Tsudev.Audit.Core.Cli;
 using Tsudev.Audit.Core.Models;
 using Tsudev.Audit.Core.Rendering;
 using Tsudev.Audit.Core.Reports;
@@ -18,14 +19,12 @@ namespace Tsudev.Audit.Cli;
 /// </summary>
 public static class Program
 {
-    /// <summary>
-    /// Ma thoat chuan hoa cho tich hop RMM/giam sat:
-    ///   0 = thanh cong hoan toan
-    ///   1 = thanh cong nhung co it nhat 1 tinh nang phu bi loi (bao cao chinh van day du)
-    ///   2 = loi nghiem trong, khong tao duoc bao cao
-    ///   3 = tham so dong lenh khong hop le
-    /// </summary>
-    public const int ExitOk = 0, ExitPartial = 1, ExitFatal = 2, ExitBadArgs = 3;
+    // Ma thoat nay o Tsudev.Audit.Core.Cli.ExitCodes de kiem thu duoc tren
+    // moi nen tang. Cac ten duoi day chi la but danh cho de doc.
+    private const int ExitOk = ExitCodes.Ok;
+    private const int ExitPartial = ExitCodes.Partial;
+    private const int ExitFatal = ExitCodes.Fatal;
+    private const int ExitBadArgs = ExitCodes.BadArgs;
 
     /// <summary>
     /// Dung lai mot the hien duy nhat: JsonSerializerOptions xay bo dem noi tai
@@ -41,7 +40,7 @@ public static class Program
     [SupportedOSPlatform("windows")]
     public static int Main(string[] args)
     {
-        Console.OutputEncoding = Encoding.UTF8;
+        ConfigureConsole();
 
         CliOptions opts;
         try
@@ -167,7 +166,14 @@ public static class Program
         else if (opts.Silent)
             Info("[Chế độ --silent] Bỏ qua tự động mở trình duyệt.");
 
-        Info($"\nMã thoát: {exitCode}");
+        // Ket luan danh gia thang "thieu du lieu": mot may co dau hieu kich hoat
+        // trai phep can duoc bao dong hon la mot muc thu thap bi trong.
+        var verdictCode = opts.NoVerdictExit
+            ? ExitCodes.Ok
+            : ExitCodes.FromVerdicts(produced.Select(r => r.VerdictLevel));
+        exitCode = ExitCodes.Combine(exitCode, verdictCode);
+
+        Info($"\nMã thoát: {exitCode} ({ExitCodes.Describe(exitCode)})");
         return exitCode;
     }
 
@@ -269,118 +275,49 @@ public static class Program
         catch { /* khong mo duoc trinh duyet KHONG phai loi nghiem trong */ }
     }
 
+    /// <summary>
+    /// Chuan bi console MA KHONG lam hong phien lam viec cua nguoi dung.
+    ///
+    /// Gan Console.OutputEncoding se goi SetConsoleOutputCP xuong Windows, va
+    /// conhost/Windows Terminal DUNG LAI screen buffer khi ma trang doi - lam
+    /// toan bo lich su cuon truoc do bi mat mau, trong nhu bi xoa man hinh.
+    /// Nguoi dung da bao cao dung hien tuong nay.
+    ///
+    /// Nen chi gan KHI THAT SU CAN. Windows Terminal, PowerShell 7 va phan lon
+    /// moi truong hien dai da o UTF-8 san, nen nhanh nay thuong khong chay.
+    /// </summary>
+    private static void ConfigureConsole()
+    {
+        try
+        {
+            if (Console.IsOutputRedirected) return;                 // ghi ra file/ong dan: khong dong toi console
+            if (Console.OutputEncoding.CodePage == Encoding.UTF8.CodePage) return;  // da dung roi
+
+            Console.OutputEncoding = Encoding.UTF8;
+        }
+        catch (IOException) { /* console khong cho doi ma trang - khong phai loi */ }
+        catch (System.Security.SecurityException) { /* bi chinh sach chan */ }
+    }
+
     private static void Info(string msg) => Console.WriteLine(msg);
+
     private static void Warn(string msg)
     {
+        // Khi dau ra bi chuyen huong (file log, ong dan), KHONG dat mau: ma mau
+        // se lot vao file lam ban noi dung.
+        if (Console.IsOutputRedirected) { Console.WriteLine(msg); return; }
+
         var prev = Console.ForegroundColor;
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine(msg);
-        Console.ForegroundColor = prev;
-    }
-}
-
-public enum AuditScope { All, License, Hardware }
-
-public sealed class CliOptions
-{
-    public AuditScope Scope { get; private set; } = AuditScope.All;
-    public string? OutputRoot { get; private set; }
-    public bool Silent { get; private set; }
-    public bool RunDism { get; private set; } = true;
-    public bool RunSfc { get; private set; }
-    public bool ExportCsv { get; private set; } = true;
-    public bool Verbose { get; private set; }
-    public bool ShowHelp { get; private set; }
-    public bool ShowVersion { get; private set; }
-
-    /// <summary>Duong dan file bo luat phat hien ben ngoai (tuy chon).</summary>
-    public string? RulesPath { get; private set; }
-
-    public static CliOptions Parse(string[] args)
-    {
-        var o = new CliOptions();
-        for (int i = 0; i < args.Length; i++)
+        try
         {
-            var a = args[i].ToLowerInvariant();
-            switch (a)
-            {
-                case "-h" or "--help" or "/?": o.ShowHelp = true; break;
-                case "--version": o.ShowVersion = true; break;
-                case "--silent" or "-s": o.Silent = true; break;
-                case "--sfc": o.RunSfc = true; break;
-                case "--no-dism": o.RunDism = false; break;
-                case "--no-csv": o.ExportCsv = false; break;
-                case "--verbose" or "-v": o.Verbose = true; break;
-
-                case "--scope":
-                    if (++i >= args.Length) throw new ArgumentException("--scope cần một giá trị (all|license|hardware).");
-                    o.Scope = args[i].ToLowerInvariant() switch
-                    {
-                        "all" => AuditScope.All,
-                        "license" => AuditScope.License,
-                        "hardware" => AuditScope.Hardware,
-                        _ => throw new ArgumentException($"--scope không hợp lệ: '{args[i]}' (chỉ nhận all|license|hardware).")
-                    };
-                    break;
-
-                case "--output" or "-o":
-                    if (++i >= args.Length) throw new ArgumentException("--output cần một đường dẫn thư mục.");
-                    o.OutputRoot = args[i];
-                    break;
-
-                case "--rules":
-                    if (++i >= args.Length) throw new ArgumentException("--rules cần đường dẫn tới file .json bộ luật.");
-                    o.RulesPath = args[i];
-                    break;
-
-                default:
-                    throw new ArgumentException($"Không nhận ra tham số '{args[i]}'.");
-            }
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(msg);
         }
-        return o;
-    }
-
-    public static void PrintUsage()
-    {
-        Console.WriteLine("""
-tsuowlit SWICO - Kiểm tra bản quyền Windows & cấu hình phần cứng
-
-CÁCH DÙNG:
-  swico.exe [tham số]
-
-THAM SỐ:
-  --scope <all|license|hardware>  Phạm vi quét (mặc định: all - quét cả hai)
-  -o, --output <thư mục>          Thư mục gốc lưu kết quả (mặc định: cạnh file exe)
-  -s, --silent                    Không tự mở trình duyệt (dùng cho GPO/RMM/Task Scheduler)
-      --sfc                       Chạy thêm sfc /verifyonly (CHẬM 5-15 phút, mặc định tắt)
-      --no-dism                   Bỏ qua DISM CheckHealth
-      --no-csv                    Không xuất file .csv
-      --rules <file.json>         Dùng bộ luật phát hiện từ file ngoài
-  -v, --verbose                   Hiện chi tiết lỗi
-      --version                   Hiện phiên bản rồi thoát
-  -h, --help                      Hiện trợ giúp này
-
-BỘ LUẬT PHÁT HIỆN:
-  Các dấu hiệu kích hoạt trái phép nằm trong một file dữ liệu riêng, cập nhật
-  được độc lập với file exe - không cần cài lại. Thứ tự ưu tiên:
-    1. File chỉ định bằng --rules
-    2. File detection-rules.json đặt cạnh swico.exe
-    3. Bộ luật đóng kèm bên trong exe
-  File hỏng hoặc thiếu sẽ tự quay về bộ luật đóng kèm kèm một cảnh báo,
-  KHÔNG làm hỏng lần quét.
-
-MÃ THOÁT:
-  0  Thành công hoàn toàn
-  1  Thành công nhưng có mục thiếu dữ liệu (báo cáo chính vẫn đầy đủ)
-  2  Lỗi nghiêm trọng, không tạo được báo cáo
-  3  Tham số dòng lệnh không hợp lệ
-
-VÍ DỤ:
-  swico.exe                             Quét đầy đủ, mở báo cáo khi xong
-  swico.exe --scope license             Chỉ kiểm tra bản quyền
-  swico.exe --silent --sfc              Quét sâu, không mở trình duyệt (triển khai hàng loạt)
-  swico.exe -o D:\BaoCao --silent       Lưu kết quả vào thư mục chỉ định
-  swico.exe --rules .\luat-moi.json     Quét bằng bộ luật cập nhật
-""");
+        finally
+        {
+            // try/finally de mot ngoai le khi ghi KHONG de lai console mac ket
+            // o mau vang sau khi chuong trinh ket thuc.
+            Console.ForegroundColor = prev;
+        }
     }
 }

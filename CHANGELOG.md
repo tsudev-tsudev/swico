@@ -41,6 +41,23 @@
 
 ### Sửa
 
+- **Kết luận đánh giá không hề ảnh hưởng tới mã thoát.** Một máy có Office chưa
+  kích hoạt vẫn trả về `0`, nên script không bắt được. Nay mã thoát tách hai
+  nhóm: sức khoẻ công cụ (`0/1/2/3`) và kết luận đánh giá (`10` cảnh báo,
+  `20` nghiêm trọng). Gộp chung vào một mã sẽ mất khả năng phân biệt *"công cụ
+  đọc thiếu dữ liệu"* với *"máy này có vấn đề bản quyền"*. Thêm
+  `--no-verdict-exit` cho hệ RMM coi mọi mã khác 0 là script lỗi.
+- **Công cụ làm mất màu toàn bộ lịch sử cuộn của terminal.** Nguyên nhân là gán
+  `Console.OutputEncoding` vô điều kiện — lệnh này gọi `SetConsoleOutputCP` và
+  khiến conhost/Windows Terminal dựng lại screen buffer. Nay chỉ gán khi mã
+  trang thực sự chưa phải UTF-8, và bỏ qua hoàn toàn khi đầu ra bị chuyển hướng.
+  Việc đổi màu chữ cũng chuyển sang `try/finally` để một ngoại lệ khi ghi không
+  để console mắc kẹt ở màu vàng.
+- **README tuyên bố "CLI parse tham số: 16/16 test" trong khi không có test CLI
+  nào.** `CliOptions` nằm trong project `net8.0-windows` nên bộ test chạy trên
+  Linux không với tới được. Đã chuyển `CliOptions` và `ExitCodes` vào Core —
+  đây là logic thuần, và mã thoát quyết định một hệ giám sát báo động hay im
+  lặng nên phải được kiểm thử.
 - **File `.xlsx` bị Excel báo hỏng và tự sửa.** `xl/_rels/workbook.xml.rels`
   thiếu quan hệ trỏ tới `styles.xml`. Theo chuẩn OPC, một phần nằm trong gói mà
   không quan hệ nào trỏ tới thì coi như không tồn tại — trong khi mọi ô đều

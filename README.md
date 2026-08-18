@@ -32,6 +32,7 @@ swico.exe --scope hardware         Chỉ thu thập phần cứng
 swico.exe --silent --sfc           Quét sâu, không mở trình duyệt (GPO/RMM)
 swico.exe -o D:\BaoCao --silent    Lưu vào thư mục chỉ định
 swico.exe --rules .\luat-moi.json  Quét bằng bộ luật cập nhật
+swico.exe --no-verdict-exit        Kết luận không ảnh hưởng mã thoát
 swico.exe --version                Xem phiên bản
 swico.exe --help                   Xem toàn bộ tham số
 ```
@@ -41,12 +42,30 @@ chạy DISM/SFC. Windows sẽ tự hiện hộp thoại UAC.
 
 ### Mã thoát (cho tích hợp RMM/giám sát)
 
+Chia hai nhóm **có chủ đích**, vì hệ thống giám sát cần phân biệt *"công cụ đọc
+thiếu dữ liệu"* với *"máy này có vấn đề bản quyền"*.
+
+**Sức khoẻ công cụ** — công cụ chạy có trọn vẹn không:
+
 | Mã | Ý nghĩa |
 |----|---------|
-| 0 | Thành công hoàn toàn |
-| 1 | Thành công nhưng có mục thiếu dữ liệu (báo cáo chính vẫn đầy đủ) |
+| 0 | Hoàn tất, không phát hiện vấn đề |
+| 1 | Hoàn tất nhưng thiếu dữ liệu ở một số mục (báo cáo chính vẫn đầy đủ) |
 | 2 | Lỗi nghiêm trọng, không tạo được báo cáo |
 | 3 | Tham số dòng lệnh không hợp lệ |
+
+**Kết luận đánh giá** — máy được quét có vấn đề không:
+
+| Mã | Ý nghĩa |
+|----|---------|
+| 10 | Kết luận mức **cảnh báo** (ví dụ: Office chưa kích hoạt) |
+| 20 | Kết luận mức **nghiêm trọng** (dấu hiệu kích hoạt trái phép) |
+
+Thứ tự ưu tiên khi nhiều điều kiện cùng xảy ra: `2 > 3 > 20 > 10 > 1 > 0`.
+Kết luận đánh giá thắng "thiếu dữ liệu" vì nó cần hành động hơn.
+
+Nếu hệ RMM của bạn coi **mọi** mã khác 0 là script lỗi, thêm `--no-verdict-exit`
+để chỉ dùng nhóm mã sức khoẻ công cụ.
 
 ## Kết quả đầu ra
 
@@ -96,6 +115,7 @@ src/
     Models/                                    JSON schema v3.0 (hợp đồng dùng chung)
     Abstractions/                              Các "cổng" (port): IWmiQuery, IRegistryReader...
     Collectors/                                TOÀN BỘ logic nghiệp vụ
+    Cli/                                       Phân tích tham số + mã thoát (logic thuần, test được)
     Rules/                                     Luật phát hiện dạng dữ liệu có phiên bản
     Reports/                                   Lắp ráp collector thành báo cáo
     Rendering/                                 HTML + XLSX + Dashboard
@@ -103,7 +123,7 @@ src/
   Tsudev.Audit.Windows/     net8.0-windows  ← Adapter mỏng: WMI, Registry, Process
   Tsudev.Audit.Cli/         net8.0-windows  ← 1 file exe
 tests/
-  unittests/                net8.0          ← 64 test, chạy được trên mọi nền tảng
+  unittests/                net8.0          ← 120 test, chạy được trên mọi nền tảng
 ```
 
 ### Vì sao tách `Core` khỏi Windows?
@@ -112,7 +132,7 @@ tests/
 
 1. **Kiểm thử được** — toàn bộ logic nghiệp vụ (quét dấu hiệu crack, tính điểm
    rủi ro, phân loại phần mềm, dựng HTML/XLSX) unit-test được **không cần máy
-   Windows**. 64 test chạy trên Linux.
+   Windows**. 120 test chạy trên Linux.
 2. **Dễ audit** — mọi lệnh gọi hệ thống tập trung trong đúng một file
    (`WindowsAdapters.cs`). Với một công cụ đọc dữ liệu nhạy cảm và đòi quyền
    Administrator, việc rà soát bảo mật làm được nhanh là điều thiết yếu.
@@ -150,7 +170,8 @@ trên máy không có mạng. Chi tiết: [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY
 | XLSX: quy đổi tên cột, nhận diện số, tên sheet | ✅ Đã test |
 | Dashboard đọc sâu đa máy | ✅ Đã test |
 | Bộ luật tách rời (nạp, kiểm tra, quay về mặc định) | ✅ Đã test |
-| CLI parse tham số | ✅ 16/16 test |
+| CLI parse tham số | ✅ 21 test |
+| Mã thoát (gồm ca hồi quy Office chưa kích hoạt) | ✅ 11 test |
 | **XLSX mở bằng Excel thật** | ⚠️ **CHƯA kiểm chứng** — môi trường dev không có Excel |
 | **Adapter WMI/Registry thực tế** | ⚠️ **CHƯA chạy thử trên Windows** |
 
@@ -162,7 +183,7 @@ thật**. Cần xác nhận tên thuộc tính WMI, đặc biệt `MSFT_MpComput
 `MSFT_MpThreat`) và `MSFT_ScheduledTask`.
 
 Nếu có lỗi, hầu hết sẽ nằm gọn trong `WindowsAdapters.cs` — logic nghiệp vụ đã
-được 64 test kiểm chứng nên không cần đụng tới.
+được 120 test kiểm chứng nên không cần đụng tới.
 
 Kịch bản kiểm chứng đầy đủ: [`docs/WINDOWS-VERIFICATION.md`](docs/WINDOWS-VERIFICATION.md).
 
