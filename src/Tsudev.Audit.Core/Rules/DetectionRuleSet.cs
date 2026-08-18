@@ -1,6 +1,6 @@
 using System.Reflection;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using Tsudev.Audit.Core.Serialization;
 
 namespace Tsudev.Audit.Core.Rules;
 
@@ -25,13 +25,6 @@ public sealed class DetectionRuleSet
 
     private const string EmbeddedResourceName =
         "Tsudev.Audit.Core.Rules.detection-rules.json";
-
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        ReadCommentHandling = JsonCommentHandling.Skip,
-        AllowTrailingCommas = true
-    };
 
     /// <summary>Phien ban bo luat, hien trong bao cao de truy nguoc duoc.</summary>
     public string Version { get; set; } = "";
@@ -87,7 +80,7 @@ public sealed class DetectionRuleSet
     }
 
     public static DetectionRuleSet Parse(string json)
-        => JsonSerializer.Deserialize<DetectionRuleSet>(json, JsonOptions)
+        => AuditJson.ReadRules(json)
            ?? throw new InvalidOperationException("Nội dung bộ luật rỗng.");
 
     /// <summary>

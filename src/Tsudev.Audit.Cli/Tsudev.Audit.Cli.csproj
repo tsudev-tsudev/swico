@@ -14,8 +14,42 @@
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <InvariantGlobalization>false</InvariantGlobalization>
+
+    <!-- ===== Toc do tai/cai dat: ba thiet lap duoi day, do bang so lieu that =====
+
+         Kich thuoc file setup sau khi Inno Setup nen (LZMA2):
+
+           nen trong single-file + khong cat tia   29,1 MB   <- cau hinh cu
+           bo nen                                  22,2 MB
+           bo nen + ReadyToRun                     23,7 MB
+           bo nen + ReadyToRun + cat tia            8,8 MB   <- cau hinh nay
+
+         EnableCompressionInSingleFile=FALSE tuong nhu phan truc giac, nhung
+         nen HAI LAN la phan tac dung: payload da nen roi thi Inno khong nen
+         them duoc nua, nen file setup lai TO HON (29,1 so voi 22,2 MB). Bo nen
+         con xoa luon buoc giai nen runtime moi lan khoi dong. -->
+    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+
+    <!-- Bien san ma may, khong phai doi JIT bien dich luc khoi dong.
+         Ton them ~1,5 MB trong file setup, doi lai khoi dong nhanh hon han. -->
+    <PublishReadyToRun>true</PublishReadyToRun>
+
+    <!-- Cat bo phan .NET khong duoc dung toi. Day la thiet lap co tac dong lon
+         nhat: file setup tu 23,7 MB con 8,8 MB.
+         Doi lai: moi cho doc/ghi JSON phai dung ma sinh luc bien dich thay vi
+         phan chieu - xem Core/Serialization/AuditJson.cs. -->
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>partial</TrimMode>
+
+    <!-- Ha ba ma nay tu LOI xuong CANH BAO, CHI trong project nay.
+         Ca ba deu phat sinh tu ben trong System.Management/System.CodeDom -
+         cu the la ManagementClassGenerator, tinh nang sinh ma C# tu luoc do
+         WMI ma cong cu nay KHONG dung. Assembly do da duoc giu nguyen ven
+         bang TrimmerRootAssembly nen khong co gi bi cat.
+         Van de o muc canh bao (khong phai NoWarn) de con nhin thay chung neu
+         danh sach nay doi. Core va Windows van giu nguyen muc LOI. -->
+    <WarningsNotAsErrors>IL2026;IL2104;NETSDK1144</WarningsNotAsErrors>
 
     <!-- Yeu cau quyen Administrator ngay khi chay (hien hop UAC).
          Can file app.manifest di kem - xem ben duoi. -->
@@ -29,5 +63,14 @@
 
   <ItemGroup>
     <ProjectReference Include="../Tsudev.Audit.Windows/Tsudev.Audit.Windows.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- GIU NGUYEN VEN System.Management, khong cat gi trong do.
+         Goi nay goi WMI qua COM va phan chieu, nen trinh cat tia khong nhin
+         thay duoc cai gi that su duoc dung. Cat nham mot thanh phan o day se
+         lam moi truy van WMI tra ve rong - nghia la bao cao van sinh ra nhung
+         KHONG CO DU LIEU, va loi do chi lo ra tren may Windows that. -->
+    <TrimmerRootAssembly Include="System.Management" />
   </ItemGroup>
 </Project>

@@ -10,7 +10,7 @@
 ; ============================================================================
 
 #ifndef AppVersion
-  #define AppVersion "26.8.18.1"
+  #define AppVersion "26.8.18.2"
 #endif
 
 #define AppName        "tsudev SWICO"
@@ -78,6 +78,10 @@ WizardImageFile=..\..\assets\wizard-large.bmp
 #if FileExists(AddBackslash(SourcePath) + "..\..\assets\wizard-small.bmp")
 WizardSmallImageFile=..\..\assets\wizard-small.bmp
 #endif
+; Payload (swico.exe) nay KHONG con duoc nen san ben trong nua - xem ghi chu
+; trong Tsudev.Audit.Cli.csproj - nen buoc nen o day moi thuc su co tac dung.
+; lzma2/max cham khi DONG GOI nhung giai nen nhanh nhu cac muc khac, ma nguoi
+; dung chi cam nhan toc do giai nen.
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern

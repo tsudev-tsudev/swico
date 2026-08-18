@@ -141,7 +141,9 @@ public sealed class AuditReport
 
     public string SchemaVersion { get; set; } = CurrentSchemaVersion;
 
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    // Ban generic JsonStringEnumConverter<T> la ban DUY NHAT ma trinh sinh ma
+    // luc bien dich ho tro; ban khong generic chi chay duoc qua phan chieu.
+    [JsonConverter(typeof(JsonStringEnumConverter<ReportKind>))]
     public ReportKind ReportKind { get; set; }
 
     public string ComputerName { get; set; } = "";
@@ -160,7 +162,7 @@ public sealed class AuditReport
     public List<ReportSection> Sections { get; set; } = new();
 
     // --- Cac truong tom tat de Dashboard doc NHANH ma khong phai duyet het Sections ---
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter<VerdictLevel>))]
     public VerdictLevel VerdictLevel { get; set; } = VerdictLevel.Unknown;
 
     public string? VerdictText { get; set; }
@@ -224,6 +226,6 @@ public sealed class Badge
 {
     public string Text { get; set; } = "";
 
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter<RiskLevel>))]
     public RiskLevel Level { get; set; } = RiskLevel.None;
 }

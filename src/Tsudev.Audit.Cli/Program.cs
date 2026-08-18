@@ -9,6 +9,7 @@ using Tsudev.Audit.Core.Models;
 using Tsudev.Audit.Core.Rendering;
 using Tsudev.Audit.Core.Reports;
 using Tsudev.Audit.Core.Rules;
+using Tsudev.Audit.Core.Serialization;
 using Tsudev.Audit.Core.Updates;
 using Tsudev.Audit.Windows;
 
@@ -26,17 +27,6 @@ public static class Program
     private const int ExitPartial = ExitCodes.Partial;
     private const int ExitFatal = ExitCodes.Fatal;
     private const int ExitBadArgs = ExitCodes.BadArgs;
-
-    /// <summary>
-    /// Dung lai mot the hien duy nhat: JsonSerializerOptions xay bo dem noi tai
-    /// khi dung lan dau, nen tao moi moi lan goi la vut bo bo dem do.
-    /// </summary>
-    private static readonly JsonSerializerOptions ReportJsonOptions = new()
-    {
-        WriteIndented = true,
-        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-    };
 
     [SupportedOSPlatform("windows")]
     public static int Main(string[] args)
@@ -297,8 +287,7 @@ public static class Program
         try
         {
             var jsonName = Path.ChangeExtension(report.HtmlReportFile, ".json");
-            File.WriteAllText(Path.Combine(dir, jsonName),
-                JsonSerializer.Serialize(report, ReportJsonOptions), utf8NoBom);
+            File.WriteAllText(Path.Combine(dir, jsonName), AuditJson.WriteReport(report), utf8NoBom);
         }
         catch (Exception ex) { Warn($"Không ghi được JSON: {ex.Message}"); allOk = false; }
 

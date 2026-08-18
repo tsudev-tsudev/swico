@@ -1,6 +1,6 @@
 using System.Globalization;
 using System.Text;
-using System.Text.Json;
+using Tsudev.Audit.Core.Serialization;
 using Tsudev.Audit.Core.Models;
 
 namespace Tsudev.Audit.Core.Rendering;
@@ -50,7 +50,6 @@ public sealed class DashboardBuilder
         ArgumentException.ThrowIfNullOrWhiteSpace(rootDirectory);
         if (!Directory.Exists(rootDirectory)) return Array.Empty<DashboardEntry>();
 
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         var results = new List<DashboardEntry>();
 
         IEnumerable<string> files;
@@ -74,9 +73,9 @@ public sealed class DashboardBuilder
             AuditReport? report;
             try
             {
-                report = JsonSerializer.Deserialize<AuditReport>(File.ReadAllText(file), options);
+                report = AuditJson.ReadReport(File.ReadAllText(file));
             }
-            catch (JsonException) { continue; }
+            catch (System.Text.Json.JsonException) { continue; }
             catch (IOException) { continue; }
             catch (UnauthorizedAccessException) { continue; }
 

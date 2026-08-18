@@ -57,11 +57,55 @@ jobs:
       - name: Publish single-file exe
         run: dotnet publish src/Tsudev.Audit.Cli -c Release -r win-x64 -o publish
 
-      # --help chay duoc nghia la exe khoi dong duoc va bo phan tich tham so
-      # hoat dong. Day KHONG phai kiem thu day du - viec do can may that voi
-      # cau hinh that, xem docs/WINDOWS-VERIFICATION.md
       - name: Run --help
         run: ./publish/swico.exe --help
+
+      # QUET THAT tren runner Windows.
+      #
+      # Buoc nay ton tai vi ban phat hanh duoc CAT TIA (PublishTrimmed) de giam
+      # kich thuoc 3 lan. Cat tia co the loai bo nham thanh phan ma WMI hoac
+      # bo doc/ghi JSON can den - va loi kieu do KHONG lo ra luc build: chuong
+      # trinh van chay, van sinh ra file, chi la file RONG.
+      #
+      # Chay that mot lan quet la cach duy nhat bat duoc dieu do trong CI.
+      - name: Quet that (kiem chung ban da cat tia)
+        shell: pwsh
+        run: |
+          ./publish/swico.exe --scope hardware --silent --no-update-check --no-csv -o out
+          if ($LASTEXITCODE -ge 2) { throw "Quet that bai voi ma thoat $LASTEXITCODE" }
+
+          $json = Get-ChildItem -Recurse out -Filter *.json | Select-Object -First 1
+          $html = Get-ChildItem -Recurse out -Filter *.html | Select-Object -First 1
+          $xlsx = Get-ChildItem -Recurse out -Filter *.xlsx | Select-Object -First 1
+          if (-not $json) { throw 'Khong sinh ra file .json' }
+          if (-not $html) { throw 'Khong sinh ra file .html' }
+          if (-not $xlsx) { throw 'Khong sinh ra file .xlsx' }
+          Write-Host "json=$($json.Length) html=$($html.Length) xlsx=$($xlsx.Length) byte"
+
+          # JSON phai co NOI DUNG THAT. Neu cat tia lam hong bo sinh ma JSON,
+          # file van duoc tao ra nhung cac truong se rong - day la cai bay.
+          $d = Get-Content $json.FullName -Raw | ConvertFrom-Json
+          if (-not $d.computerName)  { throw 'JSON thieu computerName - nghi ngo cat tia lam hong serialization' }
+          if (-not $d.schemaVersion) { throw 'JSON thieu schemaVersion' }
+          if (-not $d.sections -or $d.sections.Count -lt 3) { throw "JSON chi co $($d.sections.Count) muc - qua it" }
+
+          # WMI phai TRA VE DU LIEU THAT, khong phai bang rong.
+          $rows = ($d.sections | ForEach-Object { $_.tables } | ForEach-Object { $_.rows }).Count
+          if ($rows -lt 5) { throw "Chi co $rows dong du lieu - nghi ngo WMI khong tra ve gi sau khi cat tia" }
+          Write-Host "Tong so dong du lieu thu thap duoc: $rows"
+
+          if (-not $d.hardwareSummary) { throw 'Thieu tom tat phan cung - WMI khong doc duoc gi' }
+          Write-Host "Tom tat phan cung: $($d.hardwareSummary)"
+
+          # .xlsx phai la goi OPC hop le, khong phai file rong.
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = [System.IO.Compression.ZipFile]::OpenRead($xlsx.FullName)
+          $parts = $zip.Entries.FullName
+          $zip.Dispose()
+          foreach ($need in @('xl/workbook.xml','xl/styles.xml','[Content_Types].xml')) {
+            if ($parts -notcontains $need) { throw "File .xlsx thieu phan $need" }
+          }
+          Write-Host "File .xlsx co $($parts.Count) phan - hop le"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
