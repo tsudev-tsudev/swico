@@ -12,9 +12,9 @@
 
 > ## ⚡ VIỆC ĐẦU TIÊN CỦA PHIÊN MỚI
 >
-> **Mục 3.0 trước đã** — phiên S003 để lại **6 commit chưa push**. Chúng chưa
-> qua CI, nên mọi câu "CI xanh" trong tài liệu này đang nói về commit `ff1a9ae`
-> của phiên trước, KHÔNG phải trạng thái hiện tại.
+> **Mục 3.0 trước đã** — phiên S003 để lại **toàn bộ commit của nó chưa push**.
+> Chúng chưa qua CI, nên mọi câu "CI xanh" trong tài liệu này đang nói về commit
+> `ff1a9ae` của phiên trước, KHÔNG phải trạng thái hiện tại.
 >
 > Sau đó **xem mục 3.1** — PR winget #419878 đang vướng nhãn
 > `Validation-Executable-Error` và bot chưa giải thích nguyên nhân.
@@ -35,14 +35,15 @@
 ```
 Build     : ✅ 0 cảnh báo (TreatWarningsAsErrors bật) — đo trên máy dev Linux
 Test      : ✅ 234 PASS, 0 FAIL — đo trên máy dev Linux
-CI        : ⚠️ CHƯA chạy cho 6 commit của phiên S003 (chưa push). Lần xanh gần
+CI        : ⚠️ CHƯA chạy cho các commit của phiên S003 (chưa push). Lần xanh gần
             nhất là run 32201733164, ứng với commit `ff1a9ae` của phiên S002.
 Release   : ✅ v26.8.18.2 đã phát hành chính thức (Latest)
-Repo      : ✅ github.com/tsudev-tsudev/swico — PUBLIC, 44 commit, working tree sạch
+Repo      : ✅ github.com/tsudev-tsudev/swico — PUBLIC, working tree sạch
 SDK       : ✅ ghim 8.0.424 qua global.json (dev và CI dùng CÙNG một SDK)
 Windows   : ✅ đã chạy thật, cài thật, dữ liệu đúng, đối chiếu với bản PowerShell cũ xong
 Terminal  : 🔄 streaming tiến trình quét ĐÃ VIẾT XONG, phần "dáng vẻ" chờ kiểm bằng mắt
-Git       : ⚠️ ĐỨNG TRƯỚC origin/main 6 commit — CHƯA PUSH (xem mục 3.0)
+Git       : ⚠️ ĐỨNG TRƯỚC origin/main — CHƯA PUSH (xem mục 3.0; đếm bằng
+            `git log --oneline origin/main..HEAD`)
 ```
 
 ## 2. Sản phẩm
@@ -63,16 +64,19 @@ Git       : ⚠️ ĐỨNG TRƯỚC origin/main 6 commit — CHƯA PUSH (xem m�
 
 ## 3. VIỆC TIẾP THEO — đọc mục này rồi làm
 
-### 3.0 ⬜ Đẩy 6 commit của phiên S003 lên origin — **LÀM TRƯỚC TIÊN**
+### 3.0 ⬜ Đẩy các commit của phiên S003 lên origin — **LÀM TRƯỚC TIÊN**
 
 Phiên S003 commit đầy đủ nhưng **không push** (đẩy lên kho công khai là việc
 hướng ra ngoài, cần người dùng đồng ý). Hệ quả: các commit đó **chưa qua CI**,
 nên chưa ai xác nhận chúng xanh trên runner Windows.
 
 ```bash
-git log --oneline origin/main..HEAD    # xem 6 commit đang chờ
+git log --oneline origin/main..HEAD    # xem những commit đang chờ
 git push origin main                    # sau khi người dùng đồng ý
 ```
+
+Commit đầu tiên của phiên S003 là `3021fd1`; mọi commit từ đó trở đi đều chưa
+push. Không ghi số cứng ở đây vì mỗi lần commit thêm là con số đó sai.
 
 Push xong thì **theo dõi CI** — phiên S003 có thêm hai bước CI mới chưa từng
 chạy thật lần nào:
