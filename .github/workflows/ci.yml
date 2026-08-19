@@ -40,6 +40,14 @@ jobs:
       - name: Unit tests
         run: dotnet run --project tests/unittests -c Release --no-build
 
+      # Bat so hieu sai quy uoc ngay tu luc PR, thay vi doi den luc gan tag va
+      # phat hien ra khi quy trinh phat hanh da chay duoc nua duong.
+      - name: Kiem tra VersionPrefix dung quy uoc dat ten
+        run: |
+          v=$(sed -n 's:.*<VersionPrefix>\(.*\)</VersionPrefix>.*:\1:p' Directory.Build.props | head -1)
+          echo "VersionPrefix = $v"
+          dotnet run --project tests/unittests -c Release --no-build -- --validate-release-name "$v"
+
   smoke-windows:
     name: Smoke test (Windows)
     runs-on: windows-latest

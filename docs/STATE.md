@@ -4,9 +4,10 @@
 > Phiên Claude Code mới **BẮT BUỘC đọc file này đầu tiên**, trước cả README.
 > Quy ước cập nhật: `docs/CONTINUITY.md`.
 
-- **Cập nhật lần cuối:** 2026-08-19 (cuối phiên S002)
-- **Phiên gần nhất:** S002 — `docs/journal/S002-2026-08-19.md`
+- **Cập nhật lần cuối:** 2026-08-19 (phiên S003)
+- **Phiên gần nhất:** S003 — `docs/journal/S003-2026-08-19.md`
 - **Giai đoạn:** đã phát hành `v26.8.18.2`; PR winget đang chờ gỡ một nhãn lỗi;
+  `26.8.19` đã sẵn sàng trong repo nhưng **chưa gắn tag, chưa phát hành**;
   còn 4 việc chờ người dùng + 1 nhóm việc kỹ thuật
 
 > ## ⚡ VIỆC ĐẦU TIÊN CỦA PHIÊN MỚI
@@ -14,7 +15,11 @@
 > **Xem mục 3.1** — PR winget #419878 đang vướng nhãn
 > `Validation-Executable-Error` và bot chưa giải thích nguyên nhân.
 >
-> Mọi việc khác của phiên S002 đã khép: code đã push, CI run
+> Phiên S003 đã chốt **quy ước đặt tên phiên bản** (`docs/VERSIONING.md`) và
+> nâng `VersionPrefix` lên `26.8.19`. **Chưa gắn tag `v26.8.19`** — việc phát
+> hành là quyết định của người dùng, xem mục 3.6.
+>
+> Mọi việc của phiên S002 đã khép: code đã push, CI run
 > [32201733164](https://github.com/tsudev-tsudev/swico/actions/runs/32201733164)
 > **xanh cả hai job**, bước kiểm dòng-theo-bước trên Windows thật đã chạy và
 > báo **12 bước, tất cả đều có thời gian riêng**.
@@ -25,7 +30,7 @@
 
 ```
 Build     : ✅ 0 cảnh báo (TreatWarningsAsErrors đang bật)
-Test      : ✅ 197 PASS, 0 FAIL
+Test      : ✅ 224 PASS, 0 FAIL
 CI        : ✅ xanh — gồm QUÉT THẬT trên Windows runner + kiểm tra chất lượng dữ liệu
 Release   : ✅ v26.8.18.2 đã phát hành chính thức (Latest)
 Repo      : ✅ github.com/tsudev-tsudev/swico — PUBLIC, 33 commit, working tree sạch
@@ -42,7 +47,8 @@ Git       : ✅ đã push tới origin/main; CI run 32201733164 XANH cả 2 job
 | Tên | `tsudev SWICO` |
 | Assembly | `swico.exe` |
 | Winget ID | `tsudev.SWICO` |
-| Phiên bản | **26.8.18.2** — CalVer `yy.M.d[.N]` (`Directory.Build.props`) |
+| Phiên bản | trong repo: **26.8.19** · đã phát hành: **26.8.18.2** |
+| Đặt tên phát hành | `tsudev-swico-vYY.M.D[.N]` — `docs/VERSIONING.md`, có 25 test |
 | Namespace | `Tsudev.Audit.*` — **giữ nguyên**, chi tiết nội bộ |
 | Tên miền | `https://tsudev.com` (bộ test khẳng định điều này) |
 | Giấy phép | Apache-2.0 |
@@ -153,6 +159,27 @@ Xếp theo giá trị giảm dần:
    thẩm mỹ.
 5. **NativeAOT** — cân nhắc, nhưng đọc mục 4 trước: cắt tỉa đã hỏng, NativeAOT
    gần như chắc chắn cũng hỏng vì cùng nguyên nhân (WMI qua COM + phản chiếu).
+
+### 3.6 ⬜ Phát hành `26.8.19` — sẵn sàng, chờ quyết định
+
+`Directory.Build.props` đã ghi `26.8.19`, nhưng **chưa gắn tag và chưa phát
+hành**. Repo đang ở trạng thái build được, test xanh, chỉ thiếu một quyết định.
+
+Khi muốn phát hành:
+
+```bash
+git tag v26.8.19
+git push origin v26.8.19
+```
+
+`release.yml` sẽ tự kiểm quy ước đặt tên → chạy test → publish → đóng gói → tạo
+bản phát hành **nháp** mang tên `tsudev-swico-v26.8.19`.
+
+> ⛔ Việc này **không đụng gì tới `v26.8.18.2`**, nên PR winget #419878 (mục 3.1)
+> không bị ảnh hưởng. Đừng chạy lại `release.yml` cho `26.8.18.2` — xem mục 4.4.
+
+Nếu hôm nay đã phát hành `26.8.19` rồi mà cần phát hành lại **trong cùng ngày**,
+số hiệu tiếp theo là `26.8.19.2` (không phải `.1`) — `docs/VERSIONING.md` mục 2.1.
 
 ---
 
@@ -265,8 +292,10 @@ Cần người dùng xác nhận cái nào đúng rồi mới sửa.
 | `docs/DECISIONS.md` | Đối chiếu với artifact kế hoạch, các quyết định đã chốt |
 | `docs/journal/S001-2026-08-18.md` | Toàn bộ diễn biến phiên S001, kèm **lý do** từng quyết định |
 | `docs/journal/S002-2026-08-19.md` | Phiên S002: sửa hash PR winget, streaming tiến trình quét |
+| `docs/journal/S003-2026-08-19.md` | Phiên S003: quy ước đặt tên phiên bản, cổng chặn trong CI/CD |
 | `docs/SIGNING.md` | Ký số qua SignPath |
 | `docs/WINGET.md` | Nộp winget + cách dùng ngay |
 | `docs/UPDATES.md` | Chức năng tự cập nhật |
+| `docs/VERSIONING.md` | **Quy ước đặt tên phiên bản** — thực thi bằng mã, không chỉ bằng lời |
 | `docs/DETECTION-RULES.md` | Bộ luật phát hiện |
 | `docs/WINDOWS-VERIFICATION.md` | Kịch bản kiểm chứng trên Windows |

@@ -1,11 +1,38 @@
 # Nhật ký thay đổi
 
 Định dạng theo [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/);
-đánh số phiên bản theo [SemVer](https://semver.org/lang/vi/).
+đánh số phiên bản theo **CalVer** — quy ước đầy đủ ở
+[`docs/VERSIONING.md`](docs/VERSIONING.md).
 
 ## [Chưa phát hành]
 
 ### Thêm
+
+- **Quy ước đặt tên phiên bản phát hành, được thực thi bằng mã.** Mỗi bản phát
+  hành mang tên `tsudev-swico-vYY.M.D[.N]`, trong đó `N` là **thứ tự của bản
+  trong ngày** và chỉ xuất hiện từ bản thứ hai
+  (`tsudev-swico-v26.8.19` → `tsudev-swico-v26.8.19.2` → `…v26.8.19.3`).
+  - Quy ước **không chỉ nằm trong tài liệu**: `ReleaseName.Validate` từ chối mọi
+    số hiệu sai, và `release.yml` gọi chính hàm đó để **dừng hẳn quy trình phát
+    hành** trước khi build. `ci.yml` kiểm luôn `VersionPrefix` ở mỗi PR.
+  - Bị cấm: `.1` (bản thứ nhất đã có tên rồi, `.1` là cái tên thứ hai cho cùng
+    một bản), số 0 đứng đầu (`26.08.09` và `26.8.9` cùng số hiệu nhưng khác tên
+    file, mà công cụ tìm file cài đặt **theo tên**), và hậu tố `-rc1`.
+  - Tag git vẫn dùng dạng ngắn `v26.8.19.2` để `release.yml` bắt được mẫu `v*`;
+    **tên bản phát hành** trên GitHub nay là tên đầy đủ.
+  - Lý do số đếm phải nằm sau dấu chấm: [`docs/VERSIONING.md`](docs/VERSIONING.md)
+    mục 3.
+
+### Sửa
+
+- **`VersionNumber.TryParse` không đọc được tên bản phát hành đầy đủ.** Tên đó
+  chứa dấu `-`, mà bước cắt hậu tố cắt tại dấu `-` đầu tiên nên chuỗi còn lại chỉ
+  là `"tsudev"`. Hỏng **im lặng**: `UpdateChecker` coi "không đọc được" là
+  `CheckFailed` và **không chặn**, nên chức năng cập nhật bắt buộc sẽ lặng lẽ
+  ngừng hoạt động thay vì báo lỗi.
+- **`docs/UPDATES.md` mô tả sai cách đánh số.** Tài liệu ghi `26.8.18.1` là "bản
+  phát hành thứ hai", trong khi bản thứ hai đã phát hành thật mang số `26.8.18.2`.
+  Tài liệu sai so với bản đã phát hành, không phải ngược lại.
 
 - **Hiển thị tiến trình quét theo thời gian thực.** Trước đây một lần quét in ba
   dòng `[1] Đang...` `[2] Đang...` `[3] Đang...` rồi im lặng hàng phút — người

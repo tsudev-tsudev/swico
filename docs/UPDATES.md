@@ -8,7 +8,7 @@ bỏ sót dấu hiệu mới và cho ra kết luận "sạch" trên một máy t
 
 Vì vậy khi phát hiện có bản mới, công cụ **chặn lần quét** cho tới khi cập nhật.
 
-## Ba tình huống, ba cách xử lý
+## Bốn tình huống, bốn cách xử lý
 
 | Tình huống | Xử lý | Mã thoát |
 |---|---|---|
@@ -77,19 +77,41 @@ Khi tắt, công cụ **không thực hiện bất kỳ kết nối mạng nào*
 
 ## Đánh số phiên bản
 
-CalVer `yy.M.d`, thêm thành phần thứ tư khi phải phát hành lại trong cùng ngày:
+> Quy ước đầy đủ, kèm lý do và các trường hợp bị cấm: **`docs/VERSIONING.md`**.
+> Phần dưới đây chỉ tóm tắt phần có liên quan tới chức năng cập nhật.
+
+Tên phát hành: `tsudev-swico-vYY.M.D[.N]`, trong đó `N` là **thứ tự của bản phát
+hành trong ngày** và chỉ xuất hiện từ bản thứ hai:
 
 | Phiên bản | Nghĩa |
 |---|---|
-| `26.8.18` | phát hành ngày 18/08/2026 |
-| `26.8.18.1` | bản phát hành **thứ hai** trong ngày 18/08/2026 |
-| `26.8.20` | phát hành ngày 20/08/2026 |
+| `26.8.18` | bản thứ nhất ngày 18/08/2026 |
+| `26.8.18.2` | bản **thứ hai** ngày 18/08/2026 |
+| `26.8.19` | bản thứ nhất ngày 19/08/2026 |
+| `26.8.20` | bản thứ nhất ngày 20/08/2026 |
 
-Thứ tự so sánh: `26.8.18` < `26.8.18.1` < `26.8.19` < `26.8.20`.
+Thứ tự so sánh: `26.8.18` < `26.8.18.2` < `26.8.19` < `26.8.20`.
 
 Thành phần thứ tư là bắt buộc về mặt kỹ thuật: không có nó, hai bản dựng khác
 nhau trong cùng một ngày sẽ mang **cùng một số hiệu** — điều không bao giờ được
 phép xảy ra với phần mềm đã phát hành.
+
+### Vì sao số đếm phải nằm sau một dấu chấm
+
+Chức năng trên trang này đứng hay đổ hoàn toàn dựa vào **một phép so sánh**:
+
+```csharp
+if (latest.Version <= current)  → đang dùng bản mới nhất
+else                            → chặn lại, bắt cập nhật
+```
+
+Phép so sánh đó chỉ đúng khi thứ tự số hiệu trùng với thứ tự thời gian phát hành.
+Nếu dính số đếm liền vào ngày (`26.8.192` cho bản thứ hai ngày 19/8), thành phần
+thứ ba bị so sánh như **một số nguyên** và `192 > 20`: máy đang chạy bản đó sẽ
+**không bao giờ** nhận được bản ngày 20/8, còn máy chạy bản ngày 20/8 lại bị mời
+hạ cấp. Đó là lý do dấu chấm không phải chuyện thẩm mỹ.
+
+Điều này được khoá lại bằng test — xem mục `13b` trong `tests/unittests/Program.cs`.
 
 ## Kiến trúc
 
@@ -98,6 +120,7 @@ Theo đúng nguyên tắc Ports & Adapters của dự án:
 | Thành phần | Nơi | Test được trên Linux |
 |---|---|---|
 | So sánh phiên bản (`VersionNumber`) | Core | ✅ |
+| Quy ước đặt tên (`ReleaseName`) | Core | ✅ |
 | Quyết định có chặn hay không (`UpdateChecker`) | Core | ✅ |
 | Đọc JSON của GitHub (`GitHubReleaseParser`) | Core | ✅ |
 | Tra mã băm (`ChecksumFile`) | Core | ✅ |

@@ -15,16 +15,23 @@ Kiểm tra tình trạng bản quyền Windows/Office và thu thập cấu hình
 
 ## Đánh số phiên bản
 
-Dự án dùng **CalVer** theo dạng `yy.M.d` — phiên bản chính là ngày phát hành:
+Mỗi bản phát hành mang tên `tsudev-swico-vYY.M.D[.N]` — **CalVer**, phiên bản
+chính là ngày phát hành:
 
-| Phiên bản | Phát hành ngày |
+| Tên bản phát hành | Nghĩa |
 |---|---|
-| `26.8.18` | 18/08/2026 |
-| `26.9.3` | 03/09/2026 |
+| `tsudev-swico-v26.8.19` | bản thứ nhất ngày 19/08/2026 |
+| `tsudev-swico-v26.8.19.2` | bản **thứ hai** cùng ngày 19/08/2026 |
+| `tsudev-swico-v26.9.3` | bản thứ nhất ngày 03/09/2026 |
 
-Không có số 0 thừa ở đầu (`26.8.18`, không phải `26.08.18`) để khớp cách .NET và
-Inno Setup diễn giải số hiệu phiên bản. Ưu điểm: nhìn tên file
-`swico-setup-26.8.18.exe` là biết ngay bản đó cũ hay mới, không cần tra bảng.
+Số cuối chỉ xuất hiện từ bản thứ hai trong ngày, và nó **chính là thứ tự** của
+bản đó trong ngày. Không có số 0 thừa ở đầu (`26.8.19`, không phải `26.08.19`)
+để khớp cách .NET và Inno Setup diễn giải số hiệu. Ưu điểm: nhìn tên file
+`swico-setup-26.8.19.exe` là biết ngay bản đó cũ hay mới, không cần tra bảng.
+
+Số đếm nằm **sau một dấu chấm** chứ không dính liền vào ngày, vì `26.8.192` sẽ
+được so sánh như số nguyên `192 > 20` và làm hỏng chính chức năng tự cập nhật.
+Quy ước đầy đủ, kèm những gì bị cấm và vì sao: [`docs/VERSIONING.md`](docs/VERSIONING.md).
 
 ## Cài đặt
 
@@ -283,7 +290,8 @@ trên máy không có mạng. Chi tiết: [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY
 | XLSX: quy đổi tên cột, nhận diện số, tên sheet | ✅ Đã test |
 | Dashboard đọc sâu đa máy | ✅ Đã test |
 | Logo, favicon & chữ ký thương hiệu | ✅ 11 test |
-| So sánh phiên bản CalVer | ✅ 13 test |
+| So sánh phiên bản CalVer | ✅ 15 test |
+| Quy ước đặt tên phiên bản (`ReleaseName`) | ✅ 25 test |
 | Cổng kiểm tra cập nhật | ✅ 10 test |
 | Đọc bản phát hành GitHub + đối chiếu mã băm | ✅ 16 test |
 | Bộ luật tách rời (nạp, kiểm tra, quay về mặc định) | ✅ Đã test |
@@ -324,6 +332,7 @@ Kịch bản kiểm chứng đầy đủ: [`docs/WINDOWS-VERIFICATION.md`](docs/
 | [`docs/SIGNING.md`](docs/SIGNING.md) | Ký số qua SignPath Foundation |
 | [`docs/WINGET.md`](docs/WINGET.md) | Đưa gói lên winget và vì sao chưa dùng được |
 | [`docs/UPDATES.md`](docs/UPDATES.md) | Chức năng tự cập nhật và các quyết định thiết kế |
+| [`docs/VERSIONING.md`](docs/VERSIONING.md) | Quy ước đặt tên phiên bản phát hành |
 | [`docs/DETECTION-RULES.md`](docs/DETECTION-RULES.md) | Bộ luật phát hiện và cách cập nhật |
 | [`docs/WINDOWS-VERIFICATION.md`](docs/WINDOWS-VERIFICATION.md) | Kịch bản kiểm chứng trên Windows |
 | [`CHANGELOG.md`](CHANGELOG.md) | Nhật ký thay đổi |

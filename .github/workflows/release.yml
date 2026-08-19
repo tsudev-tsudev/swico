@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Phien ban (vi du 3.0.0)'
+        description: 'Phien ban theo docs/VERSIONING.md, vi du 26.8.19 hoac 26.8.19.2'
         required: true
 
 permissions:
@@ -50,6 +50,33 @@ jobs:
           if ([string]::IsNullOrWhiteSpace($v)) { throw 'Khong xac dinh duoc phien ban.' }
           "version=$v" >> $env:GITHUB_OUTPUT
           Write-Host "Phien ban: $v"
+
+      # QUY UOC DAT TEN LA MOT BUOC CHAN, khong phai mot loi nhac trong tai lieu.
+      # Mot so hieu sai quy uoc lot qua day se di thang ra may nguoi dung, va
+      # go lai thi phai phat hanh them mot ban nua.
+      #
+      # Luat KHONG duoc chep lai sang PowerShell o day: goi thang vao
+      # ReleaseName.Validate cua ma san xuat - luat chi ton tai o mot cho, va
+      # cho do co 25 ca kiem tra. Xem docs/VERSIONING.md.
+      - name: Kiem tra quy uoc dat ten
+        shell: pwsh
+        run: |
+          $v = '${{ steps.ver.outputs.version }}'
+
+          dotnet run --project tests/unittests -c Release -- --validate-release-name $v
+          if ($LASTEXITCODE -ne 0) { throw "Tag v$v SAI QUY UOC dat ten - xem docs/VERSIONING.md" }
+
+          # Tag va Directory.Build.props phai TRUNG NHAU. Neu khong, so hieu
+          # trong exe se khac so hieu tren trang phat hanh, va chuc nang tu cap
+          # nhat se so sanh nham - dung loai loi khong ai phat hien duoc cho toi
+          # khi nguoi dung ket ma tool "khong chiu cap nhat".
+          $props = ([xml](Get-Content Directory.Build.props)).Project.PropertyGroup.VersionPrefix |
+                   Where-Object { $_ } | Select-Object -First 1
+          if ($props -ne $v) {
+            throw "Tag la v$v nhung Directory.Build.props ghi $props. " +
+                  "Sua Directory.Build.props roi gan tag lai - do la nguon su that duy nhat."
+          }
+          Write-Host "Ten ban phat hanh: tsudev-swico-v$v"
 
       # Bo test PHAI chay truoc khi dong goi. Phat hanh mot ban chua qua test
       # la cach nhanh nhat de mat long tin vao ca quy trinh.
@@ -214,8 +241,11 @@ jobs:
           # "refs/heads/main" chu khong phai mot tag, va action se di tim release
           # cho "tag" do roi that bai. Chi ro tag khien ca hai cach kich hoat
           # (day tag va chay tay) deu hoat dong giong nhau.
+          # Tag dung dang ngan 'v...' vi workflow nay kich hoat theo mau 'v*'.
+          # Ten ban phat hanh - thu nguoi dung thuc su nhin thay - dung ten day
+          # du theo quy uoc trong docs/VERSIONING.md.
           tag_name: v${{ steps.ver.outputs.version }}
-          name: v${{ steps.ver.outputs.version }}
+          name: tsudev-swico-v${{ steps.ver.outputs.version }}
           files: packaging/output/*
           generate_release_notes: true
           draft: true

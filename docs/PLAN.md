@@ -135,6 +135,24 @@ Chạy thật `release.yml` trên runner Windows, ba lần, sửa từng lỗi l
 - ✅ PR winget đã nộp: **microsoft/winget-pkgs#419878**
 - ✅ Đường cài winget dùng được ngay: `packaging/tools/winget-local-install.ps1`
 
+## Phase 6c — Quy ước đặt tên phiên bản ✅
+
+Làm ở phiên S003. Điểm mấu chốt: quy ước **được thực thi bằng mã**, không phải
+được nhắc trong tài liệu — vì một quy ước chỉ nằm trong văn bản là một quy ước
+sẽ bị quên.
+
+- ✅ `docs/VERSIONING.md` — dạng chuẩn `tsudev-swico-vYY.M.D[.N]`, ba điều bị
+      cấm kèm lý do, số hiệu đi tới đâu, quy trình phát hành
+- ✅ `Core/Updates/ReleaseName.cs` — `Validate/For/TagFor/OrdinalOfDay/NextSameDay`
+- ✅ Sửa lỗi thật trong `VersionNumber.TryParse`: không đọc được tên phát hành
+      đầy đủ (dấu `-` bị bước cắt hậu tố cắt nhầm), và hỏng **im lặng**
+- ✅ `release.yml` — bước chặn gọi thẳng `ReleaseName.Validate`; kiểm tag khớp
+      `Directory.Build.props`; tên bản phát hành dùng tên đầy đủ
+- ✅ `ci.yml` — kiểm `VersionPrefix` ở mỗi PR
+- ✅ 25 test mới → 197 → **224 PASS, 0 FAIL**
+- ✅ Sửa `docs/UPDATES.md` (mô tả sai `.1` là bản thứ hai) và tuyên bố SemVer
+      sai trong `CHANGELOG.md`
+
 ## Phase 7 — Ký số ⛔ **CHỜ NGƯỜI DÙNG**
 
 - ⛔ **Nộp hồ sơ SignPath Foundation** — duyệt mất vài ngày tới vài tuần,

@@ -5,7 +5,7 @@
        lay theo. Khong khai bao Version trong tung .csproj nua.
        ============================================================ -->
   <PropertyGroup>
-    <VersionPrefix>26.8.18.2</VersionPrefix>
+    <VersionPrefix>26.8.19</VersionPrefix>
     <Company>tsudev</Company>
     <Authors>tsudev</Authors>
     <Product>tsudev SWICO</Product>

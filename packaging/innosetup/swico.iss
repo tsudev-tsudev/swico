@@ -10,7 +10,7 @@
 ; ============================================================================
 
 #ifndef AppVersion
-  #define AppVersion "26.8.18.2"
+  #define AppVersion "26.8.19"
 #endif
 
 #define AppName        "tsudev SWICO"
