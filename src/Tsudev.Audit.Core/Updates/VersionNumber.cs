@@ -14,9 +14,16 @@ namespace Tsudev.Audit.Core.Updates;
 /// </summary>
 /// <remarks>
 /// Thanh phan thu tu (<c>Revision</c>) la TUY CHON, dung khi phai phat hanh
-/// lai trong CUNG MOT NGAY: <c>26.8.18.1</c>. Danh so theo ngay ma khong co
-/// thanh phan nay thi hai ban dung khac nhau se mang cung mot so hieu - dieu
-/// khong bao gio duoc phep xay ra voi phan mem da phat hanh.
+/// lai trong CUNG MOT NGAY, va no chinh la THU TU cua ban do trong ngay:
+/// <c>26.8.19.2</c> la ban thu HAI ngay 19/08/2026. Ban thu nhat khong mang so
+/// dem (<c>26.8.19</c>), nen <c>.1</c> khong duoc dung - xem
+/// <see cref="ReleaseName.Validate"/>.
+///
+/// Danh so theo ngay ma khong co thanh phan nay thi hai ban dung khac nhau se
+/// mang cung mot so hieu - dieu khong bao gio duoc phep xay ra voi phan mem da
+/// phat hanh.
+///
+/// Quy uoc day du: <c>docs/VERSIONING.md</c>.
 /// </remarks>
 public readonly record struct VersionNumber(int Year, int Month, int Day, int Revision = 0)
     : IComparable<VersionNumber>
@@ -38,7 +45,15 @@ public readonly record struct VersionNumber(int Year, int Month, int Day, int Re
         if (string.IsNullOrWhiteSpace(text)) return false;
 
         var s = text.Trim();
-        if (s.StartsWith('v') || s.StartsWith('V')) s = s[1..];
+
+        // Bo tien to cua TEN PHAT HANH day du truoc, vi ten do co chua dau '-'
+        // ma buoc cat hau to ben duoi se cat nham thanh "tsudev". Ten phat hanh
+        // xuat hien o truong `name` cua GitHub Release, o tieu de ban ghi thay
+        // doi, va trong bao cao loi ma nguoi dung dan vao - phai doc duoc ca ba.
+        if (s.StartsWith(ReleaseName.Prefix, StringComparison.OrdinalIgnoreCase))
+            s = s[ReleaseName.Prefix.Length..];
+        else if (s.StartsWith('v') || s.StartsWith('V'))
+            s = s[1..];
 
         // Cat moi hau to: "-rc1", "+bam-commit"...
         var cut = s.AsSpan().IndexOfAny(SuffixStart);

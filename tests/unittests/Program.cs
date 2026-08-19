@@ -13,6 +13,30 @@ using Tsudev.Audit.Core.Rules;
 using Tsudev.Audit.Core.Testing;
 using Tsudev.Audit.Core.Updates;
 
+// ---------------------------------------------------------------------------
+// CONG KIEM TRA QUY UOC DAT TEN - duoc release.yml goi TRUOC khi build:
+//
+//     dotnet run --project tests/unittests -c Release -- --validate-release-name v26.8.19.2
+//
+// Vi sao goi vao day thay vi chep lai luat sang PowerShell: hai ban cua cung
+// mot luat se lech nhau theo thoi gian, va ban lech se dung la ban khong ai
+// test. O day dung CHINH ReleaseName.Validate cua ma san xuat - luat chi ton
+// tai o MOT cho, va cho do co 25 ca kiem tra.
+// ---------------------------------------------------------------------------
+if (args.Length == 2 && args[0] == "--validate-release-name")
+{
+    if (ReleaseName.Validate(args[1], out var checkedVersion, out var problem))
+    {
+        Console.WriteLine($"OK: {ReleaseName.For(checkedVersion)} " +
+                          $"(ban thu {ReleaseName.OrdinalOfDay(checkedVersion)} trong ngay " +
+                          $"{checkedVersion.Day}/{checkedVersion.Month}/20{checkedVersion.Year:00})");
+        return 0;
+    }
+    Console.Error.WriteLine($"SAI QUY UOC DAT TEN: {problem}");
+    Console.Error.WriteLine("Quy uoc day du: docs/VERSIONING.md");
+    return 1;
+}
+
 int passed = 0, failed = 0;
 void Check(bool cond, string label)
 {
@@ -638,11 +662,91 @@ Check(!V("26.13.1").IsValid && !V("26.8.99").IsValid, "thang/ngay ngoai pham vi 
 
 // Thanh phan thu tu cho truong hop phat hanh lai TRONG CUNG MOT NGAY.
 // Thieu no thi hai ban dung khac nhau se mang cung mot so hieu.
-Check(V("26.8.18.1") > V("26.8.18"), "26.8.18.1 moi hon 26.8.18");
-Check(V("26.8.18.2") > V("26.8.18.1"), "so lan phat hanh lai tang dan");
+// So dem bat dau tu .2 - xem docs/VERSIONING.md muc 2.1.
+Check(V("26.8.18.2") > V("26.8.18"), "26.8.18.2 moi hon 26.8.18");
+Check(V("26.8.18.3") > V("26.8.18.2"), "so lan phat hanh lai tang dan");
 Check(V("26.8.19") > V("26.8.18.5"), "sang ngay moi van thang moi lan phat hanh lai");
-Check(V("26.8.18.1").ToString() == "26.8.18.1" && V("26.8.18").ToString() == "26.8.18",
+Check(V("26.8.18.2").ToString() == "26.8.18.2" && V("26.8.18").ToString() == "26.8.18",
     "chi hien thanh phan thu tu khi khac 0");
+Check(V("tsudev-swico-v26.8.19.2") == new VersionNumber(26, 8, 19, 2),
+    "doc duoc ca TEN PHAT HANH day du, khong chi tag");
+Check(V("TSUDEV-SWICO-V26.8.19") == new VersionNumber(26, 8, 19),
+    "tien to ten phat hanh khong phan biet hoa thuong");
+
+Console.WriteLine("\n=== 13b. Quy uoc dat ten phien ban (docs/VERSIONING.md) ===");
+
+static bool Ok(string? s) { return ReleaseName.Validate(s, out _, out _); }
+static string? Why(string s) { ReleaseName.Validate(s, out _, out var p); return p; }
+
+// --- Dung quy uoc ---
+Check(Ok("26.8.19") && Ok("v26.8.19") && Ok("tsudev-swico-v26.8.19"),
+    "nhan ca ba dang viet cua ban thu nhat trong ngay");
+Check(Ok("26.8.19.2") && Ok("tsudev-swico-v26.8.19.3"),
+    "nhan so dem cua ban thu hai va thu ba trong ngay");
+Check(Ok("26.9.1") && Ok("26.12.31") && Ok("27.1.1"),
+    "thang/ngay mot chu so, va ranh gioi cuoi nam");
+
+// --- Sai quy uoc: ".1" ---
+// Ban thu nhat da co ten la 26.8.19 roi; cho phep .1 nghia la MOT ban phat
+// hanh co HAI cai ten.
+Check(!Ok("26.8.19.1"), "TU CHOI so dem '.1'");
+Check(Why("26.8.19.1")!.Contains("bắt đầu từ '.2'", StringComparison.Ordinal),
+    "loi cua '.1' noi ro so dem bat dau tu dau");
+Check(!Ok("26.8.19.0"), "TU CHOI so dem '.0' - cung la mot cach viet khac cua ban thu nhat");
+
+// --- Sai quy uoc: so 0 dung dau ---
+// 26.08.09 va 26.8.9 la CUNG mot so hieu nhung KHAC chuoi -> hai ten file cai
+// dat cho cung mot ban, trong khi cong cu tim file cai dat THEO TEN.
+Check(!Ok("26.08.19") && !Ok("26.8.09"), "TU CHOI so 0 dung dau");
+Check(Why("26.08.19")!.Contains("0 đứng đầu", StringComparison.Ordinal),
+    "loi so 0 dung dau noi dung ban chat");
+
+// --- Sai quy uoc: hau to, thieu/thua thanh phan ---
+// Luu y su khac biet co chu dich voi VersionNumber.TryParse: no CAT hau to vi
+// no doc du lieu tu mang; con Validate gac cong khau phat hanh nen KHAT KHE.
+Check(V("26.8.19-rc1").IsValid && !Ok("26.8.19-rc1"),
+    "TryParse de dai voi '-rc1', Validate thi khong");
+Check(!Ok("26.8") && !Ok("26.8.19.2.1"), "TU CHOI thieu hoac thua thanh phan");
+Check(!Ok("") && !Ok(null) && !Ok("   "), "TU CHOI chuoi rong");
+Check(!Ok("26.13.1") && !Ok("26.8.99"), "TU CHOI thang/ngay ngoai pham vi");
+Check(!Ok("2026.8.19"), "TU CHOI nam bon chu so - CalVer dung nam hai chu so");
+
+// --- Dung ten ---
+Check(ReleaseName.For(new VersionNumber(26, 8, 19)) == "tsudev-swico-v26.8.19",
+    "dung ten phat hanh cua ban thu nhat");
+Check(ReleaseName.For(new VersionNumber(26, 8, 19, 2)) == "tsudev-swico-v26.8.19.2",
+    "dung ten phat hanh cua ban thu hai");
+Check(ReleaseName.TagFor(new VersionNumber(26, 8, 19, 2)) == "v26.8.19.2",
+    "tag git dung dang ngan de release.yml bat duoc mau 'v*'");
+
+// --- Dem thu tu trong ngay ---
+Check(ReleaseName.OrdinalOfDay(new VersionNumber(26, 8, 19)) == 1,
+    "ban khong mang so dem la ban thu NHAT trong ngay");
+Check(ReleaseName.OrdinalOfDay(new VersionNumber(26, 8, 19, 2)) == 2,
+    "so dem CHINH LA thu tu cua ban trong ngay");
+Check(ReleaseName.NextSameDay(new VersionNumber(26, 8, 19)) == new VersionNumber(26, 8, 19, 2),
+    "phat hanh lai lan dau trong ngay -> .2");
+Check(ReleaseName.NextSameDay(new VersionNumber(26, 8, 19, 2)) == new VersionNumber(26, 8, 19, 3),
+    "phat hanh lai tiep -> .3");
+Check(ReleaseName.ForDate(new DateOnly(2026, 8, 19)) == new VersionNumber(26, 8, 19),
+    "sinh so hieu tu ngay thang");
+Check(ReleaseName.ForDate(new DateOnly(2027, 1, 1)) == new VersionNumber(27, 1, 1),
+    "sinh so hieu qua nam moi");
+
+// --- CA QUAN TRONG NHAT CUA CA MUC NAY ---
+//
+// Day dung la cho ma phuong an "dinh so dem lien vao ngay" (26.8.192) lam
+// hong: 192 > 20 nen ban thu 2 ngay 19/8 se duoc coi la MOI HON ban ngay 20/8,
+// va may dang chay no se KHONG BAO GIO nhan duoc ban cap nhat sau.
+//
+// Neu mot phien sau doi lai cach danh so, chinh ca kiem tra nay se do.
+Check(V("26.8.19") < V("26.8.19.2") && V("26.8.19.2") < V("26.8.19.3")
+   && V("26.8.19.3") < V("26.8.20"),
+    "THU TU TRONG CHUOI: 26.8.19 < 26.8.19.2 < 26.8.19.3 < 26.8.20");
+Check(new UpdateChecker(new FakeFeed(Rel("v26.8.20"))).Check("26.8.19.3").MustUpdate,
+    "may chay ban thu 3 ngay 19/8 VAN nhan duoc ban ngay 20/8");
+Check(!new UpdateChecker(new FakeFeed(Rel("v26.8.19.2"))).Check("26.8.20").MustUpdate,
+    "may chay ban ngay 20/8 KHONG bi moi ha cap ve ban 19/8");
 
 Console.WriteLine("\n=== 14. Cong kiem tra cap nhat ===");
 
