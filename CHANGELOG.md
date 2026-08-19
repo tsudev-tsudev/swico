@@ -25,6 +25,21 @@
 
 ### Sửa
 
+- **Bản portable rơi vào vòng lặp cập nhật không lối thoát.** Khi có bản mới,
+  công cụ tải `swico-setup-*.exe` rồi chạy — kể cả khi nó đang chạy ở dạng
+  portable. Trình cài đặt đưa một bản **thứ hai** vào `Program Files`, còn file
+  `.exe` đang chạy (thường trên USB) **vẫn cũ**; lần sau chạy lại đúng file đó
+  thì lại bị chặn tiếp, mãi mãi.
+  - Nay bản portable **vẫn bị chặn** — bộ luật cũ thì vẫn là bộ luật cũ — nhưng
+    **không hiện hộp thoại** một nút "Cập nhật" (bấm vào cũng không cài được gì)
+    mà chỉ rõ đường tải bản `.zip` mới.
+  - Nhận biết bằng sự có mặt của `unins000.exe` cạnh ứng dụng. Khi không chắc,
+    mặc định coi là portable: đoán nhầm về phía đó chỉ gây phiền, đoán nhầm về
+    phía kia thì tạo lại đúng vòng lặp trên.
+  - `GitHubReleaseParser` nay nhận ra cả tệp `swico-portable-*.zip` đính kèm.
+- **Một số nhánh "phải cập nhật" thoát lặng lẽ, không in mã thoát.** Chỉ nhánh
+  `--silent` in dòng `Mã thoát: 30`; ba nhánh còn lại thoát mà không nói gì.
+  Nay mọi nhánh đều đi qua một chỗ duy nhất.
 - **`VersionNumber.TryParse` không đọc được tên bản phát hành đầy đủ.** Tên đó
   chứa dấu `-`, mà bước cắt hậu tố cắt tại dấu `-` đầu tiên nên chuỗi còn lại chỉ
   là `"tsudev"`. Hỏng **im lặng**: `UpdateChecker` coi "không đọc được" là

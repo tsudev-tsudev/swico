@@ -30,7 +30,7 @@
 
 ```
 Build     : ✅ 0 cảnh báo (TreatWarningsAsErrors đang bật)
-Test      : ✅ 224 PASS, 0 FAIL
+Test      : ✅ 234 PASS, 0 FAIL
 CI        : ✅ xanh — gồm QUÉT THẬT trên Windows runner + kiểm tra chất lượng dữ liệu
 Release   : ✅ v26.8.18.2 đã phát hành chính thức (Latest)
 Repo      : ✅ github.com/tsudev-tsudev/swico — PUBLIC, 33 commit, working tree sạch
@@ -112,7 +112,15 @@ Chạy nó và kiểm:
 | Chạy bản 26.8.18 đã cài | Hộp thoại **một nút "Cập nhật"** → tải → đối chiếu SHA-256 → chạy installer |
 | `swico.exe --silent` | Mã thoát **30**, **KHÔNG** hiện hộp thoại |
 | `swico.exe --no-update-check` | Quét bình thường, không kết nối mạng |
+| **Giải nén bản portable `.zip` rồi chạy** | **KHÔNG** hiện hộp thoại; chỉ rõ đường tải bản portable mới; mã thoát **30** |
+| **Bản đã cài, kiểm `unins000.exe`** | Có tệp đó trong thư mục cài → nhận đúng là bản đã cài, vẫn hiện hộp thoại |
 | Đo lại tốc độ cài | Setup nay 24,9 MB thay vì 29,8 MB |
+
+> Hai dòng in đậm là **mới ở phiên S003** và là hai dòng đáng kiểm nhất: chúng
+> kiểm chính giả định "Inno Setup luôn đặt `unins000.exe` cạnh ứng dụng". Giả
+> định đó đọc từ tài liệu Inno Setup, **chưa ai xác nhận trên máy thật**. Nếu
+> sai, bản đã cài sẽ bị coi nhầm là portable — phiền chứ không hỏng, nhưng vẫn
+> phải biết.
 
 ### 3.3 ⛔ Kiểm bằng mắt phần hiển thị tiến trình — **cần người dùng**
 

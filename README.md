@@ -292,8 +292,8 @@ trên máy không có mạng. Chi tiết: [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY
 | Logo, favicon & chữ ký thương hiệu | ✅ 11 test |
 | So sánh phiên bản CalVer | ✅ 15 test |
 | Quy ước đặt tên phiên bản (`ReleaseName`) | ✅ 25 test |
-| Cổng kiểm tra cập nhật | ✅ 10 test |
-| Đọc bản phát hành GitHub + đối chiếu mã băm | ✅ 16 test |
+| Cổng kiểm tra cập nhật (gồm nhánh bản portable) | ✅ 17 test |
+| Đọc bản phát hành GitHub + đối chiếu mã băm | ✅ 18 test |
 | Bộ luật tách rời (nạp, kiểm tra, quay về mặc định) | ✅ Đã test |
 | CLI parse tham số | ✅ 21 test |
 | Mã thoát (gồm ca hồi quy Office chưa kích hoạt) | ✅ 11 test |

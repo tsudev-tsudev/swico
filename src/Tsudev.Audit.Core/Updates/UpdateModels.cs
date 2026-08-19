@@ -7,7 +7,27 @@ public sealed record ReleaseInfo(
     string PageUrl,
     string? InstallerUrl,
     string? ChecksumsUrl,
-    DateTimeOffset? PublishedAt);
+    DateTimeOffset? PublishedAt,
+    string? PortableUrl = null);
+
+/// <summary>
+/// Ban dang chay den tu dau. Quyet dinh cach cap nhat, va do la mot khac biet
+/// THAT SU chu khong phai chi tiet trinh bay.
+/// </summary>
+public enum InstallKind
+{
+    /// <summary>Cai qua file setup - cap nhat duoc bang cach chay file setup moi.</summary>
+    Installed,
+
+    /// <summary>
+    /// Ban portable (giai nen tu .zip, thuong nam tren USB).
+    ///
+    /// Chay file setup o day la SAI: no se cai mot ban thu hai vao Program
+    /// Files, con file tren USB VAN CU. Lan sau chay lai ban tren USB thi lai
+    /// bi chan tiep - mot vong lap khong loi thoat.
+    /// </summary>
+    Portable
+}
 
 /// <summary>Ket qua kiem tra cap nhat.</summary>
 public enum UpdateStatus
@@ -33,7 +53,8 @@ public sealed record UpdateCheckResult(
     UpdateStatus Status,
     VersionNumber Current,
     ReleaseInfo? Latest = null,
-    string? Message = null)
+    string? Message = null,
+    bool CanSelfInstall = false)
 {
     /// <summary>
     /// Co chan lan quet lai khong.
@@ -42,4 +63,15 @@ public sealed record UpdateCheckResult(
     /// KHONG chan - xem ghi chu thiet ke trong <see cref="UpdateChecker"/>.
     /// </summary>
     public bool MustUpdate => Status == UpdateStatus.UpdateRequired;
+
+    /// <summary>
+    /// Co chan quet, nhung cong cu KHONG tu cai duoc - nguoi dung phai tu tai
+    /// va thay the. Dung cho ban portable.
+    ///
+    /// Tach rieng khoi <see cref="MustUpdate"/> co chu dich: van chan (bo luat
+    /// cu van la bo luat cu), chi khac o chuyen cai dat duoc hay khong. Hien
+    /// hop thoai mot nut "Cap nhat" o day se la noi doi - bam vao khong cai
+    /// duoc gi.
+    /// </summary>
+    public bool MustUpdateManually => MustUpdate && !CanSelfInstall;
 }

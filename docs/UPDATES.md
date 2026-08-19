@@ -8,13 +8,14 @@ bỏ sót dấu hiệu mới và cho ra kết luận "sạch" trên một máy t
 
 Vì vậy khi phát hiện có bản mới, công cụ **chặn lần quét** cho tới khi cập nhật.
 
-## Bốn tình huống, bốn cách xử lý
+## Năm tình huống, năm cách xử lý
 
 | Tình huống | Xử lý | Mã thoát |
 |---|---|---|
 | Đã là bản mới nhất | Quét bình thường | theo kết quả quét |
-| **Có bản mới**, chạy tương tác | Hộp thoại một nút **"Cập nhật"** → tải, xác minh, cài | `30` |
+| **Có bản mới**, bản **đã cài**, chạy tương tác | Hộp thoại một nút **"Cập nhật"** → tải, xác minh, cài | `30` |
 | **Có bản mới**, chạy `--silent` | **Không** hộp thoại, thoát ngay | `30` |
+| **Có bản mới**, bản **portable** | **Không** hộp thoại, chỉ rõ chỗ tải bản portable mới | `30` |
 | **Không kiểm tra được** | ⚠️ **Quét bình thường** kèm ghi chú | theo kết quả quét |
 
 ### Vì sao "không kiểm tra được" KHÔNG chặn
@@ -34,6 +35,26 @@ chắc chắn đều cho đi tiếp, kèm ghi chú trong báo cáo.
 `--silent` dùng cho triển khai hàng loạt qua GPO/RMM. Một hộp thoại ở đó sẽ
 **treo vô thời hạn** — không ai ngồi bấm nút. Thay vào đó, thoát với mã `30` để
 hệ thống triển khai tự xử lý.
+
+### Vì sao bản portable được xử lý khác
+
+Bản portable **vẫn bị chặn** — bộ luật cũ thì vẫn là bộ luật cũ, bất kể công cụ
+được cài kiểu gì. Chỉ khác ở chỗ nó **không tự cài**.
+
+Chạy file setup cho một bản portable là một cái bẫy: nó cài **một bản thứ hai**
+vào `Program Files`, còn file `.exe` đang chạy — thường nằm trên USB — thì
+**vẫn cũ**. Lần sau kỹ thuật viên cắm USB vào máy khác và chạy đúng file đó, họ
+lại bị chặn tiếp. Mãi mãi, mà không hiểu vì sao.
+
+Nên với bản portable, công cụ nói thẳng: tải bản `.zip` mới, giải nén, ghi đè.
+
+**Cách nhận biết:** Inno Setup luôn đặt `unins000.exe` cạnh ứng dụng khi cài;
+bản portable giải nén từ `.zip` thì không có tệp đó. Khi không chắc chắn, mặc
+định coi là **portable** — đoán nhầm về phía đó chỉ gây phiền (phải tự tải), còn
+đoán nhầm về phía kia thì tạo ra đúng vòng lặp vừa mô tả.
+
+Mã: `InstallKindDetector` trong `src/Tsudev.Audit.Windows/UpdateAdapters.cs`;
+quyết định nằm ở `UpdateChecker` trong Core nên **test được trên Linux**.
 
 ## Bảo mật: xác minh trước khi chạy
 

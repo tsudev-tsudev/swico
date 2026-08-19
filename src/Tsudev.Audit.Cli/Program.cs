@@ -118,13 +118,17 @@ public static class Program
     /// Cong kiem tra phien ban. Tra ve ma thoat khi phai dung lai, null khi
     /// duoc phep quet tiep.
     ///
-    /// BA TINH HUONG, BA CACH XU LY KHAC NHAU:
+    /// BON TINH HUONG, BON CACH XU LY KHAC NHAU:
     ///
-    ///  1. Co ban moi + dang chay tuong tac -> hien hop thoai mot nut, cap nhat
-    ///     xong roi thoat. Nguoi dung se chay lai ban moi.
+    ///  1. Co ban moi + ban DA CAI + chay tuong tac -> hien hop thoai mot nut,
+    ///     cap nhat xong roi thoat. Nguoi dung se chay lai ban moi.
     ///  2. Co ban moi + dang chay --silent  -> KHONG hien hop thoai (se treo
     ///     cung tien trinh trien khai tu dong), thoat voi ma 30.
-    ///  3. Khong kiem tra duoc            -> QUET TIEP nhu binh thuong.
+    ///  3. Co ban moi + ban PORTABLE -> chan lai nhung KHONG hien hop thoai va
+    ///     KHONG chay file setup; chi ro cho tai ban portable moi. Chay file
+    ///     setup o day se cai mot ban thu hai vao Program Files trong khi file
+    ///     dang chay VAN CU - nguoi dung se bi chan mai mai.
+    ///  4. Khong kiem tra duoc            -> QUET TIEP nhu binh thuong.
     ///     Cong cu nay duoc dung dung o nhung noi mang bi han che nhat; chan
     ///     lai se lam no vo dung chinh o do.
     /// </summary>
@@ -140,7 +144,9 @@ public static class Program
         var current = CurrentVersion();
         Info("Đang kiểm tra phiên bản mới...");
 
-        var result = new UpdateChecker(new GitHubUpdateFeed(current)).Check(current);
+        // Ban dang chay den tu dau quyet dinh cach cap nhat - xem tinh huong 3.
+        var kind = InstallKindDetector.Detect();
+        var result = new UpdateChecker(new GitHubUpdateFeed(current)).Check(current, kind);
 
         switch (result.Status)
         {
@@ -172,15 +178,25 @@ public static class Program
             // bam nut, va tien trinh trien khai se treo vo thoi han.
             Warn($"Chế độ --silent: không hiện hộp thoại. Cập nhật rồi chạy lại.");
             Warn($"Tải bản mới tại: {result.Latest?.PageUrl}");
-            Info($"\nMã thoát: {ExitCodes.UpdateRequired} ({ExitCodes.Describe(ExitCodes.UpdateRequired)})");
-            return ExitCodes.UpdateRequired;
+            return UpdateBlocked();
+        }
+
+        // BAN PORTABLE: khong co gi de "bam Cap nhat" ca. Hien mot hop thoai
+        // mot nut o day la noi doi voi nguoi dung - bam vao khong cai duoc gi.
+        if (result.MustUpdateManually)
+        {
+            Warn("Bản portable không tự cập nhật được. Hãy làm thủ công:");
+            Warn($"  1. Tải: {result.Latest?.PortableUrl ?? result.Latest?.PageUrl}");
+            Warn("  2. Giải nén rồi ghi đè lên thư mục đang chạy công cụ này.");
+            Warn($"  3. Đối chiếu SHA-256 với SHA256SUMS.txt của cùng bản phát hành đó.");
+            return UpdateBlocked();
         }
 
         if (!UpdatePrompt.AskToUpdate(result))
         {
             Warn("Bạn đã đóng hộp thoại mà không cập nhật. Không thể tiếp tục quét.");
             Warn($"Tải bản mới tại: {result.Latest?.PageUrl}");
-            return ExitCodes.UpdateRequired;
+            return UpdateBlocked();
         }
 
         var installer = UpdateInstaller.DownloadAndVerify(result.Latest!, Info, out var failure);
@@ -188,17 +204,28 @@ public static class Program
         {
             Warn($"Cập nhật KHÔNG thành công: {failure}");
             Warn($"Vui lòng tải và cài thủ công tại: {result.Latest?.PageUrl}");
-            return ExitCodes.UpdateRequired;
+            return UpdateBlocked();
         }
 
         if (!UpdateInstaller.Launch(installer, out var launchError))
         {
             Warn($"Không chạy được file cài đặt: {launchError}");
             Warn($"File đã tải và đã xác minh nằm tại: {installer}");
-            return ExitCodes.UpdateRequired;
+            return UpdateBlocked();
         }
 
         Info("\nĐã khởi động trình cài đặt. Sau khi cài xong, hãy chạy lại công cụ.");
+        return UpdateBlocked();
+    }
+
+    /// <summary>
+    /// In ma thoat roi tra ve 30. Moi nhanh "phai cap nhat" deu di qua day, de
+    /// khong con nhanh nao thoat lang le - nguoi doc log cua mot lan chay tu
+    /// dong can nhin thay ma thoat, khong phai doan.
+    /// </summary>
+    private static int UpdateBlocked()
+    {
+        Info($"\nMã thoát: {ExitCodes.UpdateRequired} ({ExitCodes.Describe(ExitCodes.UpdateRequired)})");
         return ExitCodes.UpdateRequired;
     }
 

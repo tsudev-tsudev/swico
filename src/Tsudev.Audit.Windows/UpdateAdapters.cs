@@ -64,6 +64,46 @@ public sealed class GitHubUpdateFeed : IUpdateFeed
 
 }
 
+/// <summary>
+/// Xac dinh ban dang chay la ban DA CAI hay ban PORTABLE.
+///
+/// KHONG CHAM TOI MANG - chi mot phep kiem tra su ton tai cua mot tep tren dia.
+/// De o day de moi thu lien quan toi cap nhat nam canh nhau; loi cam ket trong
+/// PRIVACY.md la "moi ma CHAM MANG nam trong tep nay", khong phai chieu nguoc lai.
+///
+/// Cach nhan biet: Inno Setup luon dat trinh go cai <c>unins000.exe</c> canh
+/// ung dung khi cai. Ban portable giai nen tu .zip thi khong co tep do.
+///
+/// Doan nham ve phia nao thi hong the nao:
+/// - doan nham ban CAI thanh PORTABLE -> nguoi dung phai tu tai, phien hon
+///   nhung khong hong gi;
+/// - doan nham ban PORTABLE thanh CAI -> chay file setup, cai them mot ban vao
+///   Program Files, ban tren USB van cu, va nguoi dung bi chan mai mai.
+/// Nen khi khong chac chan, mac dinh la PORTABLE.
+/// </summary>
+[SupportedOSPlatform("windows")]
+public static class InstallKindDetector
+{
+    /// <summary>Ten trinh go cai do Inno Setup sinh ra trong thu muc ung dung.</summary>
+    public const string UninstallerName = "unins000.exe";
+
+    public static InstallKind Detect()
+    {
+        try
+        {
+            var exe = Environment.ProcessPath;
+            var dir = string.IsNullOrWhiteSpace(exe) ? null : Path.GetDirectoryName(exe);
+            if (string.IsNullOrWhiteSpace(dir)) return InstallKind.Portable;
+
+            return File.Exists(Path.Combine(dir, UninstallerName))
+                ? InstallKind.Installed
+                : InstallKind.Portable;
+        }
+        catch (IOException) { return InstallKind.Portable; }
+        catch (UnauthorizedAccessException) { return InstallKind.Portable; }
+    }
+}
+
 /// <summary>Tai file cai dat va XAC MINH truoc khi chay.</summary>
 [SupportedOSPlatform("windows")]
 public static class UpdateInstaller

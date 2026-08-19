@@ -750,8 +750,10 @@ Check(!new UpdateChecker(new FakeFeed(Rel("v26.8.19.2"))).Check("26.8.20").MustU
 
 Console.WriteLine("\n=== 14. Cong kiem tra cap nhat ===");
 
-static ReleaseInfo Rel(string tag, string? installer = "https://x/swico-setup.exe")
-    => new(V(tag), tag, "https://x/releases/" + tag, installer, "https://x/SHA256SUMS.txt", DateTimeOffset.Now);
+static ReleaseInfo Rel(string tag, string? installer = "https://x/swico-setup.exe",
+                      string? portable = "https://x/swico-portable.zip")
+    => new(V(tag), tag, "https://x/releases/" + tag, installer, "https://x/SHA256SUMS.txt",
+           DateTimeOffset.Now, portable);
 
 var newer = new UpdateChecker(new FakeFeed(Rel("v26.8.20"))).Check("26.8.18");
 Check(newer.Status == UpdateStatus.UpdateRequired && newer.MustUpdate,
@@ -783,6 +785,36 @@ Check(noInstaller.Status == UpdateStatus.CheckFailed && !noInstaller.MustUpdate
    && noInstaller.Message!.Contains("thủ công", StringComparison.Ordinal),
     "ban moi khong kem file cai dat -> huong dan cap nhat thu cong, khong chan");
 
+// --- BAN PORTABLE ---
+//
+// Chay file setup cho ban portable la mot CAI BAY: no cai mot ban thu hai vao
+// Program Files, con file .exe dang chay (thuong tren USB) VAN CU. Lan sau
+// chay lai chinh file do thi lai bi chan - mot vong lap khong loi thoat ma
+// nguoi dung khong hieu vi sao.
+var portable = new UpdateChecker(new FakeFeed(Rel("v26.8.20"))).Check("26.8.19", InstallKind.Portable);
+Check(portable.MustUpdate, "ban portable co ban moi -> VAN chan quet (bo luat cu van la bo luat cu)");
+Check(!portable.CanSelfInstall && portable.MustUpdateManually,
+    "ban portable KHONG tu cai duoc -> phai cap nhat thu cong");
+Check(portable.Message!.Contains("swico-portable.zip", StringComparison.Ordinal),
+    "chi ro cho tai ban portable moi, khong phai file setup");
+
+var installed = new UpdateChecker(new FakeFeed(Rel("v26.8.20"))).Check("26.8.19", InstallKind.Installed);
+Check(installed.MustUpdate && installed.CanSelfInstall && !installed.MustUpdateManually,
+    "ban da cai thi tu cai duoc -> van hien hop thoai mot nut nhu cu");
+Check(new UpdateChecker(new FakeFeed(Rel("v26.8.20"))).Check("26.8.19").CanSelfInstall,
+    "mac dinh khi khong noi ro la ban DA CAI - giu nguyen hanh vi cu");
+
+// Ban phat hanh khong kem .zip portable -> van chan, va chi ve trang phat hanh.
+var noZip = new UpdateChecker(new FakeFeed(Rel("v26.8.20", portable: null)))
+    .Check("26.8.19", InstallKind.Portable);
+Check(noZip.MustUpdate && noZip.MustUpdateManually, "khong co ban portable moi -> van chan");
+Check(noZip.Message!.Contains("releases/v26.8.20", StringComparison.Ordinal),
+    "khong co .zip thi chi ve trang phat hanh");
+
+Check(new UpdateChecker(new FakeFeed(Rel("v26.8.19"))).Check("26.8.19", InstallKind.Portable).Status
+        == UpdateStatus.UpToDate,
+    "ban portable dang o ban moi nhat -> khong chan");
+
 Check(ExitCodes.Combine(ExitCodes.UpdateRequired, ExitCodes.VerdictCritical) == ExitCodes.UpdateRequired,
     "can cap nhat thang moi ket luan danh gia (chua quet thi chua co ket luan)");
 
@@ -813,6 +845,10 @@ Check(GitHubReleaseParser.Parse("{ khong phai json", out var badErr) is null && 
     "JSON hong -> tra ve null kem ly do, khong nem exception");
 Check(GitHubReleaseParser.Parse("", out _) is null, "chuoi rong -> null");
 Check(GitHubReleaseParser.Parse("[]", out _) is null, "JSON khong phai doi tuong -> null");
+Check(parsed.PortableUrl == "https://x/portable.zip",
+    "nhan ra ban portable .zip trong danh sach tep dinh kem");
+Check(GitHubReleaseParser.Parse("""{"tag_name":"v26.8.20"}""", out _)!.PortableUrl is null,
+    "khong co tep dinh kem -> khong co ban portable");
 Check(GitHubReleaseParser.Parse("""{"tag_name":"v26.8.20"}""", out _)!.InstallerUrl is null,
     "khong co danh sach tep dinh kem -> khong co file cai dat");
 

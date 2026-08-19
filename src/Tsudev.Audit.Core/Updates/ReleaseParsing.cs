@@ -18,6 +18,9 @@ public static class GitHubReleaseParser
     /// <summary>Tien to ten file cai dat trong danh sach tep dinh kem.</summary>
     public const string InstallerPrefix = "swico-setup-";
 
+    /// <summary>Tien to ten ban portable (.zip).</summary>
+    public const string PortablePrefix = "swico-portable-";
+
     public const string ChecksumsFileName = "SHA256SUMS.txt";
 
     public static ReleaseInfo? Parse(string json, out string? failureReason)
@@ -51,7 +54,7 @@ public static class GitHubReleaseParser
                                         DateTimeStyles.RoundtripKind, out var pub))
                 published = pub;
 
-            string? installer = null, checksums = null;
+            string? installer = null, checksums = null, portable = null;
             if (root.TryGetProperty("assets", out var assets) && assets.ValueKind == JsonValueKind.Array)
             {
                 foreach (var a in assets.EnumerateArray())
@@ -63,12 +66,15 @@ public static class GitHubReleaseParser
                     if (name.StartsWith(InstallerPrefix, StringComparison.OrdinalIgnoreCase) &&
                         name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
                         installer = url;
+                    else if (name.StartsWith(PortablePrefix, StringComparison.OrdinalIgnoreCase) &&
+                             name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                        portable = url;
                     else if (name.Equals(ChecksumsFileName, StringComparison.OrdinalIgnoreCase))
                         checksums = url;
                 }
             }
 
-            return new ReleaseInfo(version, tag, page, installer, checksums, published);
+            return new ReleaseInfo(version, tag, page, installer, checksums, published, portable);
         }
         catch (JsonException ex)
         {

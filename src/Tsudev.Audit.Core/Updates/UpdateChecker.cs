@@ -23,7 +23,13 @@ public sealed class UpdateChecker
     public UpdateChecker(IUpdateFeed feed)
         => _feed = feed ?? throw new ArgumentNullException(nameof(feed));
 
-    public UpdateCheckResult Check(string currentVersionText)
+    /// <param name="currentVersionText">So hieu cua ban dang chay.</param>
+    /// <param name="kind">
+    /// Ban dang chay den tu dau. Ban portable KHONG tu cai duoc: chay file
+    /// setup se cai mot ban thu hai vao Program Files trong khi file tren USB
+    /// van cu, va lan sau chay lai no thi lai bi chan tiep.
+    /// </param>
+    public UpdateCheckResult Check(string currentVersionText, InstallKind kind = InstallKind.Installed)
     {
         if (!VersionNumber.TryParse(currentVersionText, out var current))
         {
@@ -62,6 +68,22 @@ public sealed class UpdateChecker
                 $"Đang dùng bản mới nhất ({current}).");
         }
 
+        // BAN PORTABLE: van chan, nhung KHONG tu cai.
+        //
+        // Chay file setup o day la mot cai bay: no cai mot ban thu hai vao
+        // Program Files, con file .exe tren USB thi VAN CU - lan sau chay lai
+        // file do se lai bi chan, mai mai. Nguoi dung khong co cach nao thoat
+        // ra ma khong hieu chuyen gi dang xay ra.
+        if (kind == InstallKind.Portable)
+        {
+            var where = string.IsNullOrWhiteSpace(latest.PortableUrl) ? latest.PageUrl : latest.PortableUrl;
+            return new UpdateCheckResult(UpdateStatus.UpdateRequired, current, latest,
+                $"Đã có phiên bản mới {latest.Version} (bạn đang dùng {current}). " +
+                $"Đây là bản portable nên phải tự thay thế: tải {where}, " +
+                "giải nén rồi ghi đè lên thư mục đang chạy.",
+                CanSelfInstall: false);
+        }
+
         // Co ban moi nhung KHONG co file cai dat -> khong the cap nhat tu dong.
         // Bao cho nguoi dung biet nhung khong chan ho lai.
         if (string.IsNullOrWhiteSpace(latest.InstallerUrl))
@@ -72,6 +94,7 @@ public sealed class UpdateChecker
         }
 
         return new UpdateCheckResult(UpdateStatus.UpdateRequired, current, latest,
-            $"Đã có phiên bản mới {latest.Version} (bạn đang dùng {current}).");
+            $"Đã có phiên bản mới {latest.Version} (bạn đang dùng {current}).",
+            CanSelfInstall: true);
     }
 }
