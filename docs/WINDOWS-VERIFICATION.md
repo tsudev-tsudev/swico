@@ -191,7 +191,7 @@ dấu hiệu crack, đọc trạng thái Defender — mô tả gần trùng kh�
 ## H. Hiển thị tiến trình quét trên terminal thật
 
 **Vì sao mục này phải làm bằng mắt người:** thứ tự các bước, việc huỷ và mã thoát
-đều đã có test tự động (197 test trên Linux + kiểm tra dòng-theo-bước trong CI
+đều đã có test tự động (234 test trên Linux + kiểm tra dòng-theo-bước trong CI
 Windows). Nhưng *dáng vẻ* của nó thì không: một con quay đứng im, một dòng bị vỡ
 vì cửa sổ hẹp, hay một con trỏ không được trả về sau Ctrl+C đều **không** làm test
 nào đỏ — chỉ có người ngồi trước màn hình mới thấy.

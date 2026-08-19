@@ -70,9 +70,14 @@
 
 ### Kiểm thử
 
-- 173 → **197 test**. 24 ca mới phủ: thứ tự các bước của cả hai loại báo cáo,
-  huỷ trước khi chạy, huỷ *giữa chừng* (giữ nguyên các bước đã xong), `ScanStep`
-  không nuốt ngoại lệ, ghi chú thời gian của DISM/sfc, và mã thoát 130.
+- 173 → **234 test**, chia làm ba đợt:
+  - **+24** cho tiến trình quét: thứ tự các bước của cả hai loại báo cáo, huỷ
+    trước khi chạy, huỷ *giữa chừng* (giữ nguyên các bước đã xong), `ScanStep`
+    không nuốt ngoại lệ, ghi chú thời gian của DISM/sfc, và mã thoát 130.
+  - **+25** cho quy ước đặt tên phiên bản, trong đó ca quan trọng nhất khoá lại
+    thứ tự `26.8.19 < 26.8.19.2 < 26.8.19.3 < 26.8.20` — đúng chỗ mà cách đánh
+    số dính liền làm hỏng. Đổi cách đánh số thì ca này đỏ.
+  - **+10** cho nhánh bản portable của cổng kiểm tra cập nhật.
 - CI Windows kiểm thêm rằng lần quét thật in **≥ 10 dòng bước, mỗi dòng kèm thời
   gian riêng** — bắt được trường hợp tiến trình lặng lẽ quay về kiểu in dồn.
 - ⚠️ **Chưa tự động hoá được:** con quay có quay mượt không, màu có đúng không,

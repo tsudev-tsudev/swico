@@ -156,7 +156,7 @@ Xếp theo giá trị giảm dần:
    tích hợp CI chuẩn.
 2. **Tách file gộp nhiều class thành file riêng** (`InventoryCollectors.cs` 4 class,
    `LicenseCollectors.cs` 5 class). Đã hoãn từ Phase 1 vì lúc đó chưa có test;
-   nay có 197 test làm lưới an toàn.
+   nay có 234 test làm lưới an toàn.
 3. **Logging có cấu trúc** thay `Console.WriteLine` rải rác, kèm tuỳ chọn ghi log
    ra file cho tình huống hỗ trợ từ xa.
 4. **`--json-only`** cho tích hợp máy-đọc-máy.

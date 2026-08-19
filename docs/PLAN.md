@@ -153,6 +153,20 @@ sẽ bị quên.
 - ✅ Sửa `docs/UPDATES.md` (mô tả sai `.1` là bản thứ hai) và tuyên bố SemVer
       sai trong `CHANGELOG.md`
 
+## Phase 6d — Gỡ vòng lặp cập nhật của bản portable ✅
+
+Làm ở phiên S003, sau khi rà lại chức năng cập nhật đã phát hành.
+
+- ✅ `InstallKind`, `ReleaseInfo.PortableUrl`, `UpdateCheckResult.CanSelfInstall`
+- ✅ `UpdateChecker.Check(version, kind)` — bản portable **vẫn chặn**, chỉ không tự cài
+- ✅ `GitHubReleaseParser` nhận ra `swico-portable-*.zip`
+- ✅ `InstallKindDetector` — nhận biết qua `unins000.exe`; không chắc thì mặc
+      định **portable** (chiều đoán sai rẻ hơn)
+- ✅ Mọi nhánh "phải cập nhật" đều in mã thoát 30 (trước đó 3/4 nhánh thoát lặng lẽ)
+- ✅ 10 test mới → 224 → **234 PASS, 0 FAIL**
+- ⛔ Giả định "Inno Setup luôn đặt `unins000.exe` cạnh ứng dụng" **chưa kiểm
+      chứng trên Windows thật** — `docs/STATE.md` mục 3.2
+
 ## Phase 7 — Ký số ⛔ **CHỜ NGƯỜI DÙNG**
 
 - ⛔ **Nộp hồ sơ SignPath Foundation** — duyệt mất vài ngày tới vài tuần,
