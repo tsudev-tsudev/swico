@@ -4,9 +4,20 @@
 > Phiên Claude Code mới **BẮT BUỘC đọc file này đầu tiên**, trước cả README.
 > Quy ước cập nhật: `docs/CONTINUITY.md`.
 
-- **Cập nhật lần cuối:** 2026-08-19 (phiên S002)
+- **Cập nhật lần cuối:** 2026-08-19 (cuối phiên S002)
 - **Phiên gần nhất:** S002 — `docs/journal/S002-2026-08-19.md`
-- **Giai đoạn:** đã phát hành `v26.8.18.2`; còn 4 việc chờ người dùng + 1 nhóm việc kỹ thuật
+- **Giai đoạn:** đã phát hành `v26.8.18.2`; PR winget đang chờ gỡ một nhãn lỗi;
+  còn 4 việc chờ người dùng + 1 nhóm việc kỹ thuật
+
+> ## ⚡ VIỆC ĐẦU TIÊN CỦA PHIÊN MỚI
+>
+> ```bash
+> git push origin main      # commit 809a253 mới chỉ nằm ở local
+> ```
+>
+> Commit `809a253` (streaming tiến trình quét) **chưa được push**. Push xong CI
+> Windows sẽ chạy và xác nhận phần dòng-theo-bước — thứ mà máy dev Linux không
+> tự kiểm được. Sau đó xem mục 3.1 (PR winget đang vướng một nhãn lỗi mới).
 
 ---
 
@@ -21,6 +32,7 @@ Repo      : ✅ github.com/tsudev-tsudev/swico — PUBLIC, 33 commit, working tr
 SDK       : ✅ ghim 8.0.424 qua global.json (dev và CI dùng CÙNG một SDK)
 Windows   : ✅ đã chạy thật, cài thật, dữ liệu đúng, đối chiếu với bản PowerShell cũ xong
 Terminal  : 🔄 streaming tiến trình quét ĐÃ VIẾT XONG, phần "dáng vẻ" chờ kiểm bằng mắt
+Git       : ⚠️ commit 809a253 CHƯA PUSH — việc đầu tiên của phiên mới
 ```
 
 ## 2. Sản phẩm
@@ -40,27 +52,46 @@ Terminal  : 🔄 streaming tiến trình quét ĐÃ VIẾT XONG, phần "dáng v
 
 ## 3. VIỆC TIẾP THEO — đọc mục này rồi làm
 
-### 3.1 ⛔ Hoàn tất PR winget #419878 — **cần người dùng**
+### 3.1 ⛔ PR winget #419878 — vướng `Validation-Executable-Error`
 
-PR đã mở: https://github.com/microsoft/winget-pkgs/pull/419878
+PR: https://github.com/microsoft/winget-pkgs/pull/419878
 
-**Đã xong:** ký CLA (`license/cla` pass). Lỗi `Error-Hash-Mismatch` **đã sửa** ở
-phiên S002 — commit `49ed455` trên nhánh `tsudev.SWICO-26.8.18.2` đặt lại
-`InstallerSha256` thành `63833A50C758C69D1A466707C682754F647F0A09F6ABED6575FC9310B17EC1CA`,
-đúng hash của file `.exe` đang nằm trên release (đã tự tải về tính lại, khớp cả
-`SHA256SUMS.txt` lẫn manifest do CI sinh). Nguyên nhân gốc và cách tránh:
-`docs/journal/S002-2026-08-19.md` + mục 4.4 dưới đây.
+**Đã xong ở phiên S002:** ký CLA ✅, và lỗi `Error-Hash-Mismatch` **đã sửa** bằng
+commit `49ed455` trên nhánh `tsudev.SWICO-26.8.18.2` (đặt `InstallerSha256` =
+`63833A50C758C69D1A466707C682754F647F0A09F6ABED6575FC9310B17EC1CA`, đúng hash
+của file `.exe` đang nằm trên release).
 
-**Còn lại — cần máy Windows.** `winget` không có trên Linux nên phiên Claude
-không chạy được hai lệnh này; đừng tick chúng trong PR khi chưa thực sự chạy:
+**Kết quả pipeline:**
 
-```powershell
-winget validate --manifest <thư-mục-manifest>
-winget install  --manifest <thư-mục-manifest>
-```
+| Bước | Kết quả |
+|---|---|
+| 01–07, 09, 10 | ✅ pass (`07. Installers Scan` — bước từng đỏ — nay 6m30s pass) |
+| **08. Installation Validation** | ⏭️ **skipping** (53m27s) |
 
-Manifest lấy từ `winget-manifest-26.8.18.2.zip` đính kèm bản phát hành — artifact
-này mang hash ĐÚNG, dùng thẳng được, không cần sửa gì.
+Nhãn: `Azure-Pipeline-Passed`, `New-Package`, `Validation-Guide`,
+**`Validation-Executable-Error`**.
+
+**CHƯA BIẾT nguyên nhân.** Bot Microsoft chưa đăng bình luận giải thích tính tới
+cuối phiên S002. Giả thuyết đáng ngờ nhất — **chưa kiểm chứng** — là installer
+chưa được ký số (mục 3.4). Bước 08 là bước cài thử thật trong sandbox Windows.
+
+**Việc cần làm:**
+
+1. Đọc bình luận mới của bot:
+   `gh pr view 419878 --repo microsoft/winget-pkgs --json comments`
+2. Tra ý nghĩa nhãn tại
+   <https://learn.microsoft.com/windows/package-manager/package/repository#pull-request-labels>
+3. Trên máy Windows, chạy rồi **báo kết quả thật vào PR** (đừng tick khi chưa chạy):
+   ```powershell
+   winget validate --manifest <thư-mục-manifest>
+   winget install  --manifest <thư-mục-manifest>
+   ```
+   Manifest lấy từ `winget-manifest-26.8.18.2.zip` đính kèm bản phát hành —
+   artifact này mang hash ĐÚNG, dùng thẳng được.
+
+> ⛔ **KHÔNG chạy lại `release.yml` cho `v26.8.18.2`.** Sẽ sinh file setup mới,
+> ghi đè asset trên release, và làm hash trong PR sai trở lại. Đây đúng là cái
+> bẫy đã gây ra `Error-Hash-Mismatch` — xem mục 4.4.
 
 `winget install tsudev.SWICO` chỉ chạy được **sau khi PR được hợp nhất**. Trong
 lúc chờ, dùng `packaging/tools/winget-local-install.ps1`.
@@ -200,6 +231,16 @@ Và một lần trong PR gửi ra ngoài: **tự tick các ô** "đã ký CLA", 
 **Quy tắc rút ra:** viết tài liệu theo trạng thái **thật**, không theo trạng thái
 mong muốn. Mọi ô tick trong mẫu PR là một lời khai — tick một ô chưa làm là nói
 dối với người sẽ đọc nó.
+
+#### ⚠️ MỘT MÂU THUẪN CHƯA GIẢI QUYẾT (phát hiện ở phiên S002)
+
+`README.md` mục "Giới hạn cần biết" vẫn viết lớp `Tsudev.Audit.Windows`
+**"chưa từng chạy trên Windows thật"**, trong khi chính file này (mục 1) ghi
+Windows đã chạy thật, cài thật, đối chiếu xong từ phiên S001.
+
+**Một trong hai đang sai.** Phiên S002 cố ý KHÔNG tự sửa: sửa nhầm chiều thì
+biến một tài liệu sai thành một tài liệu sai theo kiểu khác, khó phát hiện hơn.
+Cần người dùng xác nhận cái nào đúng rồi mới sửa.
 
 ### 4.6 Bản ghi lịch sử — cố ý KHÔNG sửa
 
