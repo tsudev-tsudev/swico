@@ -75,8 +75,40 @@ jobs:
       - name: Quet that va kiem tra du lieu co thuc
         shell: pwsh
         run: |
-          ./publish/swico.exe --scope hardware --silent --no-update-check --no-csv -o out
-          if ($LASTEXITCODE -ge 2) { throw "Quet that bai voi ma thoat $LASTEXITCODE" }
+          # Giu lai dau ra de kiem tra ca NOI DUNG lan CACH no duoc in ra.
+          $out = ./publish/swico.exe --scope hardware --silent --no-update-check --no-csv -o out 2>&1
+          $exit = $LASTEXITCODE
+          $out | ForEach-Object { Write-Host $_ }
+          if ($exit -ge 2) { throw "Quet that bai voi ma thoat $exit" }
+
+          # --- Tien trinh quet phai duoc bao theo TUNG BUOC ---
+          #
+          # Truoc day ca lan quet chi in ba dong "[1] Dang..." roi im lang hang
+          # phut. Buoc kiem tra nay giu cho dieu do khong quay lai: moi buoc thu
+          # thap phai co mot dong rieng, kem thoi gian that cua chinh no.
+          #
+          # Dau tick la "✓" khi console doc duoc UTF-8 va "+" khi khong - chap
+          # nhan ca hai, vi ma trang cua runner khong phai thu ta kiem soat.
+          $steps = @($out | Where-Object { $_ -match '^\s+(\u2713|\+)\s' })
+          Write-Host "So buoc duoc bao: $($steps.Count)"
+          if ($steps.Count -lt 10) {
+            throw "Chi co $($steps.Count) buoc duoc bao - quet phan cung phai bao >= 10 buoc"
+          }
+
+          $timed = @($steps | Where-Object { $_ -match '\d+\.\d+ s\s*$' })
+          if ($timed.Count -lt $steps.Count) {
+            throw "$($steps.Count - $timed.Count) buoc khong kem thoi gian chay"
+          }
+
+          # CHI dung nhan ASCII o day. Nhan buoc co dau tieng Viet, ma ma trang
+          # console cua runner khong phai thu ta kiem soat - doi chieu chuoi co
+          # dau se bien mot buoc kiem tra dang tin thanh mot buoc do dong bong.
+          foreach ($need in @('CPU', 'RAM', 'Windows Defender')) {
+            if (-not ($steps -match [regex]::Escape($need))) {
+              throw "Thieu buoc '$need' trong danh sach tien trinh"
+            }
+          }
+          Write-Host "Tien trinh quet: $($steps.Count) buoc, tat ca deu co thoi gian rieng"
 
           $json = Get-ChildItem -Recurse out -Filter *.json | Select-Object -First 1
           $html = Get-ChildItem -Recurse out -Filter *.html | Select-Object -First 1

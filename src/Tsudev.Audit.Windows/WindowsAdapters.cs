@@ -4,6 +4,7 @@ using System.Runtime.Versioning;
 using System.Security.Principal;
 using Microsoft.Win32;
 using Tsudev.Audit.Core.Abstractions;
+using Tsudev.Audit.Core.Progress;
 
 namespace Tsudev.Audit.Windows;
 
@@ -96,7 +97,8 @@ public sealed class WindowsRegistryReader : IRegistryReader
 
 public sealed class ProcessRunner : IProcessRunner
 {
-    public ProcessResult Run(string fileName, string arguments, int timeoutSeconds = 60)
+    public ProcessResult Run(string fileName, string arguments, int timeoutSeconds = 60,
+        CancellationToken cancellation = default)
     {
         try
         {
@@ -111,17 +113,44 @@ public sealed class ProcessRunner : IProcessRunner
             using var process = Process.Start(psi);
             if (process is null) return ProcessResult.Failed($"Không khởi chạy được '{fileName}'.");
 
-            // Doc async de tranh deadlock khi buffer output day
-            var stdout = process.StandardOutput.ReadToEndAsync();
-            var stderr = process.StandardError.ReadToEndAsync();
+            // Doc async de tranh deadlock khi buffer output day.
+            //
+            // CO CHU DICH truyen CancellationToken.None: khi nguoi dung huy, ta
+            // GIET tien trinh con roi nem OperationCanceledException - khong he
+            // doc toi ket qua hai luong nay nua. Truyen token vao day chi tao ra
+            // hai Task hong khong ai quan sat, ma khong dung som duoc mot phan
+            // nghin giay nao.
+            var stdout = process.StandardOutput.ReadToEndAsync(CancellationToken.None);
+            var stderr = process.StandardError.ReadToEndAsync(CancellationToken.None);
 
-            if (!process.WaitForExit(timeoutSeconds * 1000))
+            // Cho theo TUNG LAT NGAN thay vi mot lan cho dai, de con ngo toi
+            // tin hieu huy. sfc chay toi 15 phut; neu chi WaitForExit(1800s)
+            // thi Ctrl+C khong the dung no lai, va nguoi dung thay terminal
+            // "khong phan hoi" dung mot phan tu.
+            var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
+            while (!process.WaitForExit(200))
             {
-                try { process.Kill(entireProcessTree: true); } catch { }
-                return ProcessResult.Failed($"'{fileName}' chạy quá {timeoutSeconds} giây - đã hủy.");
+                if (cancellation.IsCancellationRequested)
+                {
+                    try { process.Kill(entireProcessTree: true); } catch { /* da thoat roi */ }
+                    throw new OperationCanceledException(cancellation);
+                }
+
+                if (DateTime.UtcNow >= deadline)
+                {
+                    try { process.Kill(entireProcessTree: true); } catch { /* da thoat roi */ }
+                    return ProcessResult.Failed($"'{fileName}' chạy quá {timeoutSeconds} giây - đã hủy.");
+                }
             }
 
             return new ProcessResult(process.ExitCode, stdout.Result, stderr.Result);
+        }
+        catch (OperationCanceledException)
+        {
+            // Huy KHONG phai loi chay tien trinh - de no noi len tren, neu
+            // khong thi Ctrl+C se bi bien thanh mot dong "Loi khi chay" trong
+            // bao cao va lan quet van chay tiep nhu chua co gi xay ra.
+            throw;
         }
         catch (Exception ex)
         {
@@ -171,9 +200,18 @@ public static class WindowsEnvironment
         catch { return false; }
     }
 
-    /// <summary>Tao SystemContext day du cho mot lan quet tren may Windows that.</summary>
+    /// <summary>
+    /// Tao SystemContext day du cho mot lan quet tren may Windows that.
+    ///
+    /// <paramref name="progress"/> va <paramref name="cancellation"/> deu tuy
+    /// chon: bo trong thi lan quet chay im lang va khong huy duoc - dung hanh
+    /// vi cu, nen moi cho goi san khong phai sua.
+    /// </summary>
     [SupportedOSPlatform("windows")]
-    public static SystemContext CreateContext(DateTimeOffset? scanTime = null)
+    public static SystemContext CreateContext(
+        DateTimeOffset? scanTime = null,
+        IProgressSink? progress = null,
+        CancellationToken cancellation = default)
     {
         var warnings = new List<string>();
         var ctx = new SystemContext
@@ -184,7 +222,9 @@ public static class WindowsEnvironment
             Files = new FileProbe(),
             ComputerName = Environment.MachineName,
             ScanTime = scanTime ?? DateTimeOffset.Now,
-            IsElevated = IsElevated()
+            IsElevated = IsElevated(),
+            Progress = progress ?? NullProgressSink.Instance,
+            Cancellation = cancellation
         };
         // Chuyen canh bao tich luy tu adapter vao context
         foreach (var w in warnings) ctx.Warn(w);

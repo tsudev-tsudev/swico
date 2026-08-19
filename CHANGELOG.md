@@ -3,6 +3,40 @@
 Định dạng theo [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/);
 đánh số phiên bản theo [SemVer](https://semver.org/lang/vi/).
 
+## [Chưa phát hành]
+
+### Thêm
+
+- **Hiển thị tiến trình quét theo thời gian thực.** Trước đây một lần quét in ba
+  dòng `[1] Đang...` `[2] Đang...` `[3] Đang...` rồi im lặng hàng phút — người
+  dùng không phân biệt được "đang chạy" với "treo". Nay mỗi bước thu thập in một
+  dòng riêng **ngay khi nó xong**, kèm thời gian thật của chính bước đó, và một
+  con quay cho biết công cụ vẫn đang chạy.
+  - Những bước chạy lâu (`DISM`, `sfc /verifyonly`) tự báo **thời gian dự kiến**.
+  - Đầu ra bị chuyển hướng (file log, ống dẫn, RMM/CI) thì tự **bỏ con quay và
+    mã màu** — không để ký tự điều khiển lọt vào file log.
+  - Console không đọc được UTF-8 thì lùi về ký tự ASCII thay vì hiện chữ rác.
+- **Ctrl+C dừng ngay lập tức, kể cả khi `sfc` đang chạy dở.** Tiến trình con bị
+  kết thúc thật (trước đây `WaitForExit(1800s)` khiến Ctrl+C không có tác dụng
+  suốt tối đa 15 phút), con trỏ terminal được trả về, và công cụ thoát với mã
+  **130** — quy ước POSIX `128 + SIGINT` mà bash/PowerShell/CI đều hiểu sẵn.
+  Bấm Ctrl+C lần thứ hai thì để hệ điều hành kết thúc ngay, phòng khi chính bước
+  dọn dẹp bị kẹt.
+- `IProgressSink` trong `Core/Progress/` — thứ tự các bước quét là **logic
+  nghiệp vụ**, nên nó nằm trong Core và **kiểm thử được trên Linux**, đúng
+  nguyên tắc đã rút ra ở `docs/STATE.md` mục 4.3.
+
+### Kiểm thử
+
+- 173 → **197 test**. 24 ca mới phủ: thứ tự các bước của cả hai loại báo cáo,
+  huỷ trước khi chạy, huỷ *giữa chừng* (giữ nguyên các bước đã xong), `ScanStep`
+  không nuốt ngoại lệ, ghi chú thời gian của DISM/sfc, và mã thoát 130.
+- CI Windows kiểm thêm rằng lần quét thật in **≥ 10 dòng bước, mỗi dòng kèm thời
+  gian riêng** — bắt được trường hợp tiến trình lặng lẽ quay về kiểu in dồn.
+- ⚠️ **Chưa tự động hoá được:** con quay có quay mượt không, màu có đúng không,
+  con trỏ có được trả về sau Ctrl+C không. Kịch bản kiểm bằng mắt: mục H trong
+  `docs/WINDOWS-VERIFICATION.md`.
+
 ## [26.8.18.2] — 18/08/2026
 
 ### Hiệu năng

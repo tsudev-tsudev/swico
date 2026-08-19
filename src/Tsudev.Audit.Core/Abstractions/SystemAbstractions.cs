@@ -1,3 +1,5 @@
+using Tsudev.Audit.Core.Progress;
+
 namespace Tsudev.Audit.Core.Abstractions;
 
 /// <summary>
@@ -53,7 +55,16 @@ public enum RegistryRoot
 /// <summary>Chay tien trinh ngoai co gioi han thoi gian.</summary>
 public interface IProcessRunner
 {
-    ProcessResult Run(string fileName, string arguments, int timeoutSeconds = 60);
+    /// <summary>
+    /// Chay mot tien trinh ngoai va cho no ket thuc.
+    ///
+    /// <paramref name="cancellation"/> phai GIET tien trinh con, khong chi
+    /// thoat khoi vong cho. DISM mat toi 3 phut va sfc toi 15 phut; neu Ctrl+C
+    /// chi bo cho ma de tien trinh chay tiep thi terminal tra ve nhung may van
+    /// gong - dung cai cam giac "treo" ma nguoi dung muon tranh.
+    /// </summary>
+    ProcessResult Run(string fileName, string arguments, int timeoutSeconds = 60,
+        CancellationToken cancellation = default);
 }
 
 /// <summary>Kiem tra su ton tai cua file/thu muc tren dia.</summary>
@@ -91,6 +102,18 @@ public sealed class SystemContext
 
     /// <summary>Script co dang chay voi quyen Administrator hay khong.</summary>
     public bool IsElevated { get; init; }
+
+    /// <summary>
+    /// Noi bao tien trinh quet. Mac dinh KHONG bao gi ca, nen moi cho dang
+    /// dung SystemContext (ke ca 173 test hien co) chay nguyen ven.
+    /// </summary>
+    public IProgressSink Progress { get; init; } = NullProgressSink.Instance;
+
+    /// <summary>
+    /// Tin hieu huy tu nguoi dung (Ctrl+C). Mac dinh khong bao gio huy.
+    /// Kiem tra o ranh gioi giua cac buoc - xem <see cref="Tsudev.Audit.Core.Progress.ScanStep"/>.
+    /// </summary>
+    public CancellationToken Cancellation { get; init; } = CancellationToken.None;
 
     /// <summary>Canh bao thu thap duoc trong qua trinh chay (hien minh bach trong bao cao).</summary>
     public List<string> Warnings { get; } = new();

@@ -31,6 +31,16 @@ public static class ExitCodes
     /// </summary>
     public const int UpdateRequired = 30;
 
+    /// <summary>
+    /// Nguoi dung bam Ctrl+C.
+    ///
+    /// Chon 130 vi day la quy uoc POSIX da co san (128 + SIGINT), duoc bash,
+    /// PowerShell va gan nhu moi he CI hieu san la "bi ngat", khong phai "chay
+    /// loi". Dat mot ma rieng cua rieng minh se buoc moi he giam sat phai hoc
+    /// them mot con so vo co.
+    /// </summary>
+    public const int Cancelled = 130;
+
     /// <summary>Ma thoat suy ra tu ket luan XAU NHAT trong cac bao cao da tao.</summary>
     public static int FromVerdicts(IEnumerable<VerdictLevel> verdicts)
     {
@@ -51,7 +61,7 @@ public static class ExitCodes
     /// </summary>
     public static int Combine(int toolHealth, int verdict)
     {
-        if (toolHealth is Fatal or BadArgs or UpdateRequired) return toolHealth;
+        if (toolHealth is Fatal or BadArgs or UpdateRequired or Cancelled) return toolHealth;
         return verdict != Ok ? verdict : toolHealth;
     }
 
@@ -62,6 +72,7 @@ public static class ExitCodes
         Fatal => "lỗi nghiêm trọng, không tạo được báo cáo",
         BadArgs => "tham số dòng lệnh không hợp lệ",
         UpdateRequired => "cần cập nhật trước khi quét",
+        Cancelled => "người dùng đã huỷ (Ctrl+C)",
         VerdictWarning => "kết luận mức CẢNH BÁO",
         VerdictCritical => "kết luận mức NGHIÊM TRỌNG",
         _ => "không xác định"
@@ -203,8 +214,9 @@ MÃ THOÁT: chia hai nhóm, KHÔNG gộp chung
     10  Kết luận mức CẢNH BÁO (ví dụ: Office chưa kích hoạt)
     20  Kết luận mức NGHIÊM TRỌNG (dấu hiệu kích hoạt trái phép)
     30  Cần cập nhật trước khi quét (chỉ ở chế độ --silent)
+   130  Người dùng đã huỷ bằng Ctrl+C (quy ước POSIX 128+SIGINT)
 
-  Thứ tự ưu tiên khi nhiều điều kiện cùng xảy ra: 2 > 3 > 20 > 10 > 1 > 0
+  Thứ tự ưu tiên khi nhiều điều kiện cùng xảy ra: 2 > 3 > 130 > 20 > 10 > 1 > 0
 
   Hệ thống giám sát cần phân biệt "công cụ đọc thiếu dữ liệu" với "máy này có
   vấn đề bản quyền" - gộp cả hai vào một mã thì mất đúng thông tin quan trọng

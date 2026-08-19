@@ -86,6 +86,33 @@ swico.exe --help                   Xem toàn bộ tham số
 Công cụ yêu cầu quyền Administrator để đọc trạng thái bản quyền, Defender và
 chạy DISM/SFC. Windows sẽ tự hiện hộp thoại UAC.
 
+### Theo dõi tiến trình khi đang quét
+
+Một lần quét đầy đủ mất từ vài chục giây tới hơn 15 phút (nếu bật `--sfc`).
+Công cụ in **từng bước một, ngay khi bước đó chạy xong**, kèm thời gian thật của
+chính nó — không dồn lại tới cuối:
+
+```
+[2] Đang thu thập cấu hình phần cứng...
+    ✓ Tổng quan thiết bị     0.4 s
+    ✓ CPU                    0.1 s
+    ✓ RAM                    0.2 s
+    ⠹ Toàn vẹn file hệ thống   3.1 s
+      DISM CheckHealth đang chạy (thường dưới 5 giây, tối đa 3 phút)...
+```
+
+Con quay ở dòng cuối cho biết công cụ **đang chạy chứ không treo** — đây là khác
+biệt mà một cột thời gian đứng yên không nói được. Những bước chạy lâu (DISM,
+`sfc`) còn tự báo thời gian dự kiến.
+
+Khi đầu ra bị **chuyển hướng** (ghi ra file log, đưa qua ống dẫn, chạy trong
+RMM/CI), công cụ tự bỏ con quay và mã màu — chỉ còn mỗi bước một dòng sạch, để
+không có ký tự điều khiển nào lọt vào file log.
+
+**Ctrl+C dừng ngay lập tức**, kể cả khi `sfc` đang chạy dở: tiến trình con bị
+kết thúc, con trỏ terminal được trả về bình thường, những mục đã quét xong vẫn
+nằm nguyên trên màn hình, và công cụ thoát với mã `130`.
+
 ### Mã thoát (cho tích hợp RMM/giám sát)
 
 Chia hai nhóm **có chủ đích**, vì hệ thống giám sát cần phân biệt *"công cụ đọc
@@ -107,8 +134,9 @@ thiếu dữ liệu"* với *"máy này có vấn đề bản quyền"*.
 | 10 | Kết luận mức **cảnh báo** (ví dụ: Office chưa kích hoạt) |
 | 20 | Kết luận mức **nghiêm trọng** (dấu hiệu kích hoạt trái phép) |
 | 30 | **Cần cập nhật** trước khi quét (chỉ ở chế độ `--silent`) |
+| 130 | Người dùng **huỷ** bằng Ctrl+C (quy ước POSIX `128 + SIGINT`) |
 
-Thứ tự ưu tiên khi nhiều điều kiện cùng xảy ra: `2 > 3 > 20 > 10 > 1 > 0`.
+Thứ tự ưu tiên khi nhiều điều kiện cùng xảy ra: `2 > 3 > 130 > 20 > 10 > 1 > 0`.
 Kết luận đánh giá thắng "thiếu dữ liệu" vì nó cần hành động hơn.
 
 Nếu hệ RMM của bạn coi **mọi** mã khác 0 là script lỗi, thêm `--no-verdict-exit`
@@ -194,7 +222,7 @@ assets/                     Logo gốc + biến thể sinh tự động (icon, f
 packaging/
   tools/make-assets.py      Sinh mọi biến thể của logo từ file gốc
 tests/
-  unittests/                net8.0          ← 173 test, chạy được trên mọi nền tảng
+  unittests/                net8.0          ← 197 test, chạy được trên mọi nền tảng
 ```
 
 ### Vì sao tách `Core` khỏi Windows?
@@ -203,7 +231,7 @@ tests/
 
 1. **Kiểm thử được** — toàn bộ logic nghiệp vụ (quét dấu hiệu crack, tính điểm
    rủi ro, phân loại phần mềm, dựng HTML/XLSX) unit-test được **không cần máy
-   Windows**. 173 test chạy trên Linux.
+   Windows**. 197 test chạy trên Linux.
 2. **Dễ audit** — mọi lệnh gọi hệ thống tập trung trong đúng một file
    (`WindowsAdapters.cs`). Với một công cụ đọc dữ liệu nhạy cảm và đòi quyền
    Administrator, việc rà soát bảo mật làm được nhanh là điều thiết yếu.
@@ -247,6 +275,8 @@ trên máy không có mạng. Chi tiết: [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY
 | Bộ luật tách rời (nạp, kiểm tra, quay về mặc định) | ✅ Đã test |
 | CLI parse tham số | ✅ 21 test |
 | Mã thoát (gồm ca hồi quy Office chưa kích hoạt) | ✅ 11 test |
+| Tiến trình quét: thứ tự bước, huỷ giữa chừng, mã 130 | ✅ 24 test |
+| **Con quay & màu trên terminal thật** | ⚠️ **CHƯA tự động hoá** — cần mắt người |
 | **XLSX mở bằng Excel thật** | ⚠️ **CHƯA kiểm chứng** — môi trường dev không có Excel |
 | **Adapter WMI/Registry thực tế** | ⚠️ **CHƯA chạy thử trên Windows** |
 
@@ -258,7 +288,14 @@ thật**. Cần xác nhận tên thuộc tính WMI, đặc biệt `MSFT_MpComput
 `MSFT_MpThreat`) và `MSFT_ScheduledTask`.
 
 Nếu có lỗi, hầu hết sẽ nằm gọn trong `WindowsAdapters.cs` — logic nghiệp vụ đã
-được 173 test kiểm chứng nên không cần đụng tới.
+được 197 test kiểm chứng nên không cần đụng tới.
+
+**Phần hiển thị tiến trình cũng có một khoảng chưa tự động hoá được.** Thứ tự
+các bước, việc huỷ giữa chừng và mã thoát 130 đều có test chạy trên Linux; CI
+trên Windows còn kiểm rằng mỗi bước in ra một dòng riêng kèm thời gian của chính
+nó. Nhưng *con quay có quay mượt không*, *màu có đúng không*, *con trỏ có được
+trả về sau Ctrl+C không* thì *chưa* có cách kiểm tự động — những thứ đó cần một
+người ngồi trước terminal thật. Xem `docs/WINDOWS-VERIFICATION.md`.
 
 Kịch bản kiểm chứng đầy đủ: [`docs/WINDOWS-VERIFICATION.md`](docs/WINDOWS-VERIFICATION.md).
 

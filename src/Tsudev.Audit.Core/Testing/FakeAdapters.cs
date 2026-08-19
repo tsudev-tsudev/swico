@@ -109,8 +109,10 @@ public sealed class FakeProcessRunner : IProcessRunner
         return this;
     }
 
-    public ProcessResult Run(string fileName, string arguments, int timeoutSeconds = 60)
+    public ProcessResult Run(string fileName, string arguments, int timeoutSeconds = 60,
+        CancellationToken cancellation = default)
     {
+        cancellation.ThrowIfCancellationRequested();
         var command = $"{fileName} {arguments}";
         foreach (var (key, value) in _responses)
             if (command.Contains(key, StringComparison.OrdinalIgnoreCase)) return value;

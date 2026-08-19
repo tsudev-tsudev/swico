@@ -362,15 +362,22 @@ public static class SystemIntegrityCollector
     {
         var t = DataTable.Create("", "Công cụ kiểm tra", "Kết quả", "Thời gian chạy");
 
+        // Bao truoc THOI GIAN DU KIEN, khong chi ten cong cu. Day la hai buoc
+        // lau nhat trong ca lan quet; khong noi gi thi nguoi dung se tuong may
+        // treo va tat cua so - mat luon ket qua da quet duoc.
         if (runDism)
         {
-            var r = ctx.Process.Run("DISM.exe", "/Online /Cleanup-Image /CheckHealth", timeoutSeconds: 180);
+            ctx.Progress.Note("DISM CheckHealth đang chạy (thường dưới 5 giây, tối đa 3 phút)...");
+            var r = ctx.Process.Run("DISM.exe", "/Online /Cleanup-Image /CheckHealth",
+                timeoutSeconds: 180, cancellation: ctx.Cancellation);
             t.AddRow("DISM CheckHealth", InterpretDism(r), "Nhanh (<5 giây)");
         }
 
         if (runSfc)
         {
-            var r = ctx.Process.Run("sfc.exe", "/verifyonly", timeoutSeconds: 1800);
+            ctx.Progress.Note("sfc /verifyonly đang chạy - việc này mất 5-15 phút, Ctrl+C để dừng...");
+            var r = ctx.Process.Run("sfc.exe", "/verifyonly",
+                timeoutSeconds: 1800, cancellation: ctx.Cancellation);
             t.AddRow("System File Checker (sfc /verifyonly)", InterpretSfc(r), "Chậm (5-15 phút)");
         }
 

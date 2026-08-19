@@ -103,7 +103,7 @@ Làm khi đã có kết quả từ Phase 4 — sửa theo dữ liệu thật, kh
 - ✅ Dọn sạch 27 cảnh báo CA — trong đó CA1305 ở `FileNaming` là **lỗi thật**
 - ✅ `.editorconfig` + bật `TreatWarningsAsErrors`
 - ⬜ Chuyển bộ test tự chế sang **xUnit** — báo lỗi tử tế, chạy song song
-      (nay đã 173 ca trong MỘT file top-level statements — quá nhiều)
+      (nay đã 197 ca trong MỘT file top-level statements — quá nhiều)
 - ⬜ Tách file gộp nhiều class thành file riêng
 - ⬜ Logging có cấu trúc thay `Console.WriteLine` rải rác
 - ✅ Thêm `--version` và `--rules`; sửa `--help` còn sót tên cũ

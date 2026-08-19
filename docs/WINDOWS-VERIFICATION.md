@@ -188,6 +188,32 @@ dấu hiệu crack, đọc trạng thái Defender — mô tả gần trùng kh�
 
 ---
 
+## H. Hiển thị tiến trình quét trên terminal thật
+
+**Vì sao mục này phải làm bằng mắt người:** thứ tự các bước, việc huỷ và mã thoát
+đều đã có test tự động (197 test trên Linux + kiểm tra dòng-theo-bước trong CI
+Windows). Nhưng *dáng vẻ* của nó thì không: một con quay đứng im, một dòng bị vỡ
+vì cửa sổ hẹp, hay một con trỏ không được trả về sau Ctrl+C đều **không** làm test
+nào đỏ — chỉ có người ngồi trước màn hình mới thấy.
+
+| # | Việc cần làm | Kỳ vọng | Kết quả thật |
+|---|---|---|---|
+| H1 | Chạy `swico.exe --scope hardware --no-update-check` trong Windows Terminal | Mỗi bước hiện **một dòng riêng** kèm thời gian; con quay quay đều ở dòng đang chạy | |
+| H2 | Nhìn kỹ lúc bước "Toàn vẹn file hệ thống" chạy | Có dòng ghi chú thời gian dự kiến của DISM; con quay **không đứng im** | |
+| H3 | Chạy với `--sfc` rồi bấm **Ctrl+C** lúc `sfc` đang chạy | Dừng trong vòng ~1 giây; các bước đã xong **vẫn còn** trên màn hình; mã thoát `130` | |
+| H4 | Ngay sau H3, gõ tiếp một lệnh bất kỳ | **Con trỏ hiện lại bình thường**, chữ không bị mất màu, terminal không cần `reset` | |
+| H5 | Ngay sau H3, mở Task Manager | **Không còn** tiến trình `sfc.exe` hay `DISM.exe` nào sót lại | |
+| H6 | Thu hẹp cửa sổ terminal còn ~40 cột rồi chạy lại | Dòng con quay bị **cắt ngắn**, không xuống dòng, không để lại dòng rác | |
+| H7 | Chạy trong `cmd.exe` cũ (mã trang 437) | Nếu không đọc được UTF-8 thì tự lùi về `+` và `\|/`, **không** hiện ký tự rác | |
+| H8 | `swico.exe --scope hardware > log.txt` rồi mở `log.txt` | Mỗi bước một dòng sạch, **không** có ký tự `\r`, không có mã màu ANSI | |
+| H9 | Chạy qua Task Scheduler / RMM với `--silent` | Log không có ký tự điều khiển; mã thoát như cũ | |
+
+> H4 và H5 là hai mục quan trọng nhất. Một công cụ để lại terminal hỏng hoặc để
+> `sfc.exe` chạy tiếp sau khi đã "thoát" thì tệ hơn hẳn một công cụ không có
+> thanh tiến trình nào.
+
+---
+
 ## Sau khi chạy xong
 
 Gửi lại bảng này kèm mọi thông báo lỗi nguyên văn. Với mỗi mục lệch, ghi rõ:

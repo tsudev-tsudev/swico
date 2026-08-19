@@ -60,16 +60,58 @@ public static class Program
         var gate = CheckForUpdate(opts);
         if (gate is not null) return gate.Value;
 
+        using var cancel = new CancellationTokenSource();
+        using var progress = new ConsoleProgressReporter();
+        HookCancelKey(cancel, progress);
+
         try
         {
-            return Run(opts);
+            return Run(opts, progress, cancel.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            // Huy KHONG phai loi. Phan da quet xong van con nguyen tren man
+            // hinh - do la ca diem cua viec in tung buoc mot.
+            progress.Dispose();
+            Warn("\nĐã huỷ theo yêu cầu. Những mục đã quét xong vẫn hiển thị ở trên;");
+            Warn("file báo cáo của lần quét này (nếu đã tạo) sẽ thiếu các mục còn lại.");
+            Info($"\nMã thoát: {ExitCodes.Cancelled} ({ExitCodes.Describe(ExitCodes.Cancelled)})");
+            return ExitCodes.Cancelled;
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine($"LỖI NGHIÊM TRỌNG: {ex.Message}");
-            if (opts.Verbose) Console.Error.WriteLine(ex.ToString());
+            // Don dong con quay do dang TRUOC khi in loi, neu khong thong bao
+            // loi se de len chinh dong dang quay va doc thanh mot dong lai cai.
+            progress.Dispose();
+            Error($"\nLỖI NGHIÊM TRỌNG: {ex.Message}");
+            if (opts.Verbose) Error(ex.ToString());
             return ExitFatal;
         }
+    }
+
+    /// <summary>
+    /// Bat Ctrl+C de tu don dep thay vi de .NET giet ngang tien trinh.
+    ///
+    /// Vi sao phai tu don: mac dinh .NET ket thuc tien trinh ngay lap tuc. Khi
+    /// do (1) DISM/sfc dang chay o tien trinh con van chay tiep - may van gong
+    /// du terminal da tra ve dau nhac; (2) con tro dang bi an de phuc vu con
+    /// quay se KHONG duoc hien lai, va phien terminal cua nguoi dung hong cho
+    /// den khi ho tu go `reset`.
+    ///
+    /// Bam Ctrl+C LAN THU HAI thi de he dieu hanh giet that - phong khi chinh
+    /// buoc don dep bi ket.
+    /// </summary>
+    private static void HookCancelKey(CancellationTokenSource cancel, ConsoleProgressReporter progress)
+    {
+        Console.CancelKeyPress += (_, e) =>
+        {
+            if (cancel.IsCancellationRequested) return;   // lan hai: khong chan nua
+
+            e.Cancel = true;
+            cancel.Cancel();
+            progress.Dispose();
+            Warn("\nĐang huỷ, chờ dọn dẹp... (bấm Ctrl+C lần nữa để thoát ngay)");
+        };
     }
 
     /// <summary>
@@ -171,7 +213,7 @@ public static class Program
     }
 
     [SupportedOSPlatform("windows")]
-    private static int Run(CliOptions opts)
+    private static int Run(CliOptions opts, ConsoleProgressReporter progress, CancellationToken cancel)
     {
         var exitCode = ExitOk;
         var scanTime = DateTimeOffset.Now;
@@ -214,9 +256,9 @@ public static class Program
         if (opts.Scope is AuditScope.License or AuditScope.All)
         {
             Info("\n[1] Đang kiểm tra bản quyền Windows & phần mềm...");
-            var ctx = WindowsEnvironment.CreateContext(scanTime);
+            var ctx = WindowsEnvironment.CreateContext(scanTime, progress, cancel);
             var report = LicenseReportBuilder.Build(ctx, auditOptions);
-            if (!Save(report, level3, renderer, xlsx, opts)) exitCode = ExitPartial;
+            if (!SaveWithProgress(report, level3, renderer, xlsx, opts, progress)) exitCode = ExitPartial;
             if (report.Warnings.Count > 0) exitCode = ExitPartial;
             produced.Add(report);
         }
@@ -224,9 +266,9 @@ public static class Program
         if (opts.Scope is AuditScope.Hardware or AuditScope.All)
         {
             Info("\n[2] Đang thu thập cấu hình phần cứng...");
-            var ctx = WindowsEnvironment.CreateContext(scanTime.AddSeconds(1));
+            var ctx = WindowsEnvironment.CreateContext(scanTime.AddSeconds(1), progress, cancel);
             var report = HardwareReportBuilder.Build(ctx, auditOptions);
-            if (!Save(report, level3, renderer, xlsx, opts)) exitCode = ExitPartial;
+            if (!SaveWithProgress(report, level3, renderer, xlsx, opts, progress)) exitCode = ExitPartial;
             if (report.Warnings.Count > 0) exitCode = ExitPartial;
             produced.Add(report);
         }
@@ -235,13 +277,17 @@ public static class Program
         // ket qua copy tu may khac vao)
         Info("\n[3] Đang cập nhật tsudev-tong-hop.html...");
         string? dashboardPath = null;
+        cancel.ThrowIfCancellationRequested();
+        progress.BeginStep("Trang tổng hợp");
         try
         {
             dashboardPath = new DashboardBuilder(renderer).BuildAndSave(level2);
+            progress.EndStep();
             Info($"    → {dashboardPath}");
         }
         catch (Exception ex)
         {
+            progress.FailStep(ex.Message);
             Warn($"Không tạo được trang tổng hợp: {ex.Message}");
             exitCode = ExitPartial;
         }
@@ -269,6 +315,30 @@ public static class Program
 
         Info($"\nMã thoát: {exitCode} ({ExitCodes.Describe(exitCode)})");
         return exitCode;
+    }
+
+    /// <summary>
+    /// Ghi bao cao ra dia, co bao tien trinh.
+    ///
+    /// Tach khoi <see cref="Save"/> de chinh ham ghi file khong phai biet gi ve
+    /// giao dien - va de buoc ghi hien ra man hinh nhu moi buoc khac, vi voi
+    /// bao cao nhieu nghin dong phan mem thi ghi XLSX khong he tuc thi.
+    /// </summary>
+    private static bool SaveWithProgress(AuditReport report, string dir, HtmlReportRenderer renderer,
+        XlsxWriter xlsx, CliOptions opts, ConsoleProgressReporter progress)
+    {
+        progress.BeginStep("Ghi báo cáo ra đĩa");
+        try
+        {
+            var ok = Save(report, dir, renderer, xlsx, opts);
+            progress.EndStep();
+            return ok;
+        }
+        catch (Exception ex)
+        {
+            progress.FailStep(ex.Message);
+            throw;
+        }
     }
 
     private static bool Save(AuditReport report, string dir, HtmlReportRenderer renderer,
@@ -393,6 +463,30 @@ public static class Program
     }
 
     private static void Info(string msg) => Console.WriteLine(msg);
+
+    /// <summary>
+    /// Loi nghiem trong: mau DO va ra stderr.
+    ///
+    /// Mau do phan biet han voi mau vang cua canh bao va mau thuong cua noi
+    /// dung bao cao - de nguoi dung nhin mot cai la biet dong nao la ket qua,
+    /// dong nao la su co. Ra stderr de dua qua ong dan van tach duoc.
+    /// </summary>
+    private static void Error(string msg)
+    {
+        if (Console.IsErrorRedirected) { Console.Error.WriteLine(msg); return; }
+
+        var prev = Console.ForegroundColor;
+        try
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Error.WriteLine(msg);
+        }
+        finally
+        {
+            Console.ForegroundColor = prev;
+        }
+        Console.Error.Flush();
+    }
 
     private static void Warn(string msg)
     {

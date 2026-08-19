@@ -6,7 +6,7 @@
 
 - **Cập nhật lần cuối:** 2026-08-19 (phiên S002)
 - **Phiên gần nhất:** S002 — `docs/journal/S002-2026-08-19.md`
-- **Giai đoạn:** đã phát hành `v26.8.18.2`; còn 3 việc chờ người dùng + 1 nhóm việc kỹ thuật
+- **Giai đoạn:** đã phát hành `v26.8.18.2`; còn 4 việc chờ người dùng + 1 nhóm việc kỹ thuật
 
 ---
 
@@ -14,12 +14,13 @@
 
 ```
 Build     : ✅ 0 cảnh báo (TreatWarningsAsErrors đang bật)
-Test      : ✅ 173 PASS, 0 FAIL
+Test      : ✅ 197 PASS, 0 FAIL
 CI        : ✅ xanh — gồm QUÉT THẬT trên Windows runner + kiểm tra chất lượng dữ liệu
 Release   : ✅ v26.8.18.2 đã phát hành chính thức (Latest)
 Repo      : ✅ github.com/tsudev-tsudev/swico — PUBLIC, 33 commit, working tree sạch
 SDK       : ✅ ghim 8.0.424 qua global.json (dev và CI dùng CÙNG một SDK)
 Windows   : ✅ đã chạy thật, cài thật, dữ liệu đúng, đối chiếu với bản PowerShell cũ xong
+Terminal  : 🔄 streaming tiến trình quét ĐÃ VIẾT XONG, phần "dáng vẻ" chờ kiểm bằng mắt
 ```
 
 ## 2. Sản phẩm
@@ -76,7 +77,20 @@ Chạy nó và kiểm:
 | `swico.exe --no-update-check` | Quét bình thường, không kết nối mạng |
 | Đo lại tốc độ cài | Setup nay 24,9 MB thay vì 29,8 MB |
 
-### 3.3 ⛔ Sau khi SignPath duyệt — **cần người dùng**
+### 3.3 ⛔ Kiểm bằng mắt phần hiển thị tiến trình — **cần người dùng**
+
+Phiên S002 đã thêm streaming tiến trình quét: mỗi bước một dòng, có con quay,
+Ctrl+C dừng ngay và thoát mã `130`. Phần **logic** đã có 24 test (Linux) và CI
+Windows kiểm số dòng-theo-bước. Phần **dáng vẻ** thì không test tự động được.
+
+Chạy 9 mục ở `docs/WINDOWS-VERIFICATION.md` mục **H**. Quan trọng nhất:
+
+| Mục | Việc | Vì sao quan trọng nhất |
+|---|---|---|
+| H4 | Sau Ctrl+C, gõ tiếp một lệnh | Con trỏ bị ẩn mà không hiện lại = terminal hỏng sau khi công cụ đã thoát |
+| H5 | Sau Ctrl+C, mở Task Manager | Còn sót `sfc.exe`/`DISM.exe` = máy vẫn gồng dù đã "thoát" |
+
+### 3.4 ⛔ Sau khi SignPath duyệt — **cần người dùng**
 
 1. Thêm secret `SIGNPATH_API_TOKEN` và variable `SIGNPATH_ORGANIZATION_ID`.
 2. Phía SignPath: `project-slug=swico`, `signing-policy-slug=release-signing`,
@@ -87,17 +101,17 @@ Chạy nó và kiểm:
 
 Chi tiết: `docs/SIGNING.md`.
 
-### 3.4 ⬜ Việc kỹ thuật còn lại — làm được không cần người dùng
+### 3.5 ⬜ Việc kỹ thuật còn lại — làm được không cần người dùng
 
 Xếp theo giá trị giảm dần:
 
 1. **Chuyển bộ test sang xUnit.** Hiện là bộ tự chế đếm pass/fail thủ công
-   (`tests/unittests/Program.cs`, ~800 dòng top-level statements). 173 ca trong
+   (`tests/unittests/Program.cs`, ~800 dòng top-level statements). 197 ca trong
    một file là quá nhiều cho một file. xUnit cho báo lỗi tử tế, chạy song song,
    tích hợp CI chuẩn.
 2. **Tách file gộp nhiều class thành file riêng** (`InventoryCollectors.cs` 4 class,
    `LicenseCollectors.cs` 5 class). Đã hoãn từ Phase 1 vì lúc đó chưa có test;
-   nay có 173 test làm lưới an toàn.
+   nay có 197 test làm lưới an toàn.
 3. **Logging có cấu trúc** thay `Console.WriteLine` rải rác, kèm tuỳ chọn ghi log
    ra file cho tình huống hỗ trợ từ xa.
 4. **`--json-only`** cho tích hợp máy-đọc-máy.
@@ -204,6 +218,7 @@ dối với người sẽ đọc nó.
 | `docs/PLAN.md` | Lộ trình theo giai đoạn |
 | `docs/DECISIONS.md` | Đối chiếu với artifact kế hoạch, các quyết định đã chốt |
 | `docs/journal/S001-2026-08-18.md` | Toàn bộ diễn biến phiên S001, kèm **lý do** từng quyết định |
+| `docs/journal/S002-2026-08-19.md` | Phiên S002: sửa hash PR winget, streaming tiến trình quét |
 | `docs/SIGNING.md` | Ký số qua SignPath |
 | `docs/WINGET.md` | Nộp winget + cách dùng ngay |
 | `docs/UPDATES.md` | Chức năng tự cập nhật |

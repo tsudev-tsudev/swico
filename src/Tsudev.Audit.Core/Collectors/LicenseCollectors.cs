@@ -252,7 +252,8 @@ public static class OfficeLicenseCollector
 
         if (ospp is not null)
         {
-            var result = ctx.Process.Run("cscript.exe", $"//Nologo \"{ospp}\" /dstatus", timeoutSeconds: 90);
+            var result = ctx.Process.Run("cscript.exe", $"//Nologo \"{ospp}\" /dstatus",
+                timeoutSeconds: 90, cancellation: ctx.Cancellation);
             if (!result.Success && string.IsNullOrWhiteSpace(result.StandardOutput))
             {
                 ctx.Warn("Không chạy được ospp.vbs để kiểm tra bản quyền Office.");
@@ -349,7 +350,8 @@ public static class SlmgrCollector
         if (!ctx.Files.FileExists(slmgr))
             return "Không tìm thấy slmgr.vbs trên máy này.";
 
-        var result = ctx.Process.Run("cscript.exe", $"//Nologo \"{slmgr}\" /dli", timeoutSeconds: 90);
+        var result = ctx.Process.Run("cscript.exe", $"//Nologo \"{slmgr}\" /dli",
+            timeoutSeconds: 90, cancellation: ctx.Cancellation);
         var text = result.CombinedOutput.Trim();
         return string.IsNullOrWhiteSpace(text)
             ? "Không lấy được kết quả từ slmgr.vbs /dli (có thể cần quyền Administrator)."

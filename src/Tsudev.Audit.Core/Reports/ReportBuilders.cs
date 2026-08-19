@@ -2,6 +2,7 @@ using System.Globalization;
 using Tsudev.Audit.Core.Abstractions;
 using Tsudev.Audit.Core.Collectors;
 using Tsudev.Audit.Core.Models;
+using Tsudev.Audit.Core.Progress;
 using Tsudev.Audit.Core.Rules;
 
 namespace Tsudev.Audit.Core.Reports;
@@ -46,11 +47,12 @@ public static class LicenseReportBuilder
         report.Sections.Add(new ReportSection
         {
             Id = "sec-os", NavLabel = "1. Hệ điều hành", Heading = "1. Thông tin hệ điều hành",
-            Tables = { OsInfoCollector.Collect(ctx) }
+            Tables = { ScanStep.Run(ctx, "Hệ điều hành", () => OsInfoCollector.Collect(ctx)) }
         });
 
         // --- 2. Ban quyen Windows ---
-        var (licTable, license) = WindowsLicenseCollector.Collect(ctx);
+        var (licTable, license) = ScanStep.Run(ctx, "Bản quyền Windows",
+            () => WindowsLicenseCollector.Collect(ctx));
         report.Sections.Add(new ReportSection
         {
             Id = "sec-license", NavLabel = "2. Bản quyền Windows",
@@ -59,11 +61,12 @@ public static class LicenseReportBuilder
                           "Windows khai báo nhiều SKU dưới cùng một sản phẩm; kết luận chỉ là <b>hợp lệ</b> khi " +
                           "<b>không còn SKU nào</b> ở trạng thái có vấn đề hoặc đang trong thời gian dùng thử.",
             Tables = { licTable },
-            PreformattedText = SlmgrCollector.Collect(ctx)
+            PreformattedText = ScanStep.Run(ctx, "Chi tiết slmgr", () => SlmgrCollector.Collect(ctx))
         });
 
         // --- 2b. Office / M365 ---
-        var (officeTable, office) = OfficeLicenseCollector.Collect(ctx);
+        var (officeTable, office) = ScanStep.Run(ctx, "Bản quyền Office / M365",
+            () => OfficeLicenseCollector.Collect(ctx));
         report.Sections.Add(new ReportSection
         {
             Id = "sec-office", NavLabel = "2b. Office/M365",
@@ -75,12 +78,14 @@ public static class LicenseReportBuilder
         });
 
         // --- 4. Phan mem (thu thap truoc de tinh diem rui ro o muc 3) ---
-        var software = SoftwareCollector.Collect(ctx);
+        var software = ScanStep.Run(ctx, "Danh sách phần mềm đã cài",
+            () => SoftwareCollector.Collect(ctx));
         var manualReview = software.Where(s => s.NeedsManualReview).ToList();
 
         // --- 3. Danh gia tinh hop phap ---
         var rules = options.Rules ?? DetectionRuleSet.Embedded;
-        var findings = ActivationRiskScanner.Scan(ctx, rules);
+        var findings = ScanStep.Run(ctx, "Dấu hiệu kích hoạt trái phép",
+            () => ActivationRiskScanner.Scan(ctx, rules));
         var scope = ActivationRiskScanner.BuildScope(findings, rules);
         report.DetectionRulesVersion = rules.Version;
 
@@ -186,7 +191,8 @@ public static class HardwareReportBuilder
         if (!ctx.IsElevated)
             ctx.Warn("Đang chạy KHÔNG có quyền Administrator - một số mục (Defender, DISM, Serial Number) có thể thiếu dữ liệu.");
 
-        var (overview, summary) = HardwareCollector.CollectOverview(ctx);
+        var (overview, summary) = ScanStep.Run(ctx, "Tổng quan thiết bị",
+            () => HardwareCollector.CollectOverview(ctx));
         report.HardwareSummary = summary;
         report.Sections.Add(new ReportSection
         {
@@ -197,10 +203,11 @@ public static class HardwareReportBuilder
         report.Sections.Add(new ReportSection
         {
             Id = "sec-cpu", NavLabel = "2. CPU", Heading = "2. CPU (Bộ xử lý)",
-            Tables = { HardwareCollector.CollectCpu(ctx) }
+            Tables = { ScanStep.Run(ctx, "CPU", () => HardwareCollector.CollectCpu(ctx)) }
         });
 
-        var (ramTable, usedSlots, totalSlots) = HardwareCollector.CollectRam(ctx);
+        var (ramTable, usedSlots, totalSlots) = ScanStep.Run(ctx, "RAM",
+            () => HardwareCollector.CollectRam(ctx));
         report.Sections.Add(new ReportSection
         {
             Id = "sec-ram", NavLabel = "3. RAM",
@@ -211,19 +218,23 @@ public static class HardwareReportBuilder
         report.Sections.Add(new ReportSection
         {
             Id = "sec-disk", NavLabel = "4. Ổ đĩa", Heading = "4. Ổ đĩa & phân vùng",
-            Tables = { HardwareCollector.CollectDisks(ctx), HardwareCollector.CollectVolumes(ctx) }
+            Tables =
+            {
+                ScanStep.Run(ctx, "Ổ đĩa", () => HardwareCollector.CollectDisks(ctx)),
+                ScanStep.Run(ctx, "Phân vùng", () => HardwareCollector.CollectVolumes(ctx))
+            }
         });
 
         report.Sections.Add(new ReportSection
         {
             Id = "sec-gpu", NavLabel = "5. GPU", Heading = "5. Card đồ họa (GPU)",
-            Tables = { HardwareCollector.CollectGpu(ctx) }
+            Tables = { ScanStep.Run(ctx, "Card đồ họa", () => HardwareCollector.CollectGpu(ctx)) }
         });
 
         report.Sections.Add(new ReportSection
         {
             Id = "sec-net", NavLabel = "6. Mạng", Heading = "6. Card mạng (đang hoạt động)",
-            Tables = { HardwareCollector.CollectNetwork(ctx) }
+            Tables = { ScanStep.Run(ctx, "Card mạng", () => HardwareCollector.CollectNetwork(ctx)) }
         });
 
         report.Sections.Add(new ReportSection
@@ -231,7 +242,7 @@ public static class HardwareReportBuilder
             Id = "sec-drivers", NavLabel = "7. Driver lỗi", Heading = "7. Driver lỗi trong Device Manager",
             Description = "Liệt kê thiết bị có mã lỗi (ConfigManagerErrorCode khác 0) - tương đương dấu chấm than vàng " +
                           "hoặc dấu X đỏ trong Device Manager.",
-            Tables = { HardwareCollector.CollectDriverErrors(ctx) }
+            Tables = { ScanStep.Run(ctx, "Driver lỗi", () => HardwareCollector.CollectDriverErrors(ctx)) }
         });
 
         var integrity = new ReportSection
@@ -240,13 +251,15 @@ public static class HardwareReportBuilder
             Heading = "8. Toàn vẹn file hệ thống & driver",
             Description = "Dùng 2 công cụ CHÍNH THỨC của Windows: <b>DISM CheckHealth</b> kiểm tra nhanh kho thành phần " +
                           "hệ thống, và <b>System File Checker</b> xác minh từng file hệ thống/driver so với bản gốc.",
-            Tables = { SystemIntegrityCollector.Collect(ctx, options.RunDism, options.RunSfc) },
+            Tables = { ScanStep.Run(ctx, "Toàn vẹn file hệ thống",
+                () => SystemIntegrityCollector.Collect(ctx, options.RunDism, options.RunSfc)) },
             MethodNote = "Nếu kết quả báo lỗi, chạy với quyền Administrator: <code>DISM /Online /Cleanup-Image /RestoreHealth</code> " +
                          "rồi <code>sfc /scannow</code>. Mục System File Checker mặc định TẮT (mất 5-15 phút) - bật bằng tham số <code>--sfc</code>."
         };
         report.Sections.Add(integrity);
 
-        var (defStatus, defThreats, threatCount) = DefenderCollector.Collect(ctx);
+        var (defStatus, defThreats, threatCount) = ScanStep.Run(ctx, "Windows Defender",
+            () => DefenderCollector.Collect(ctx));
         var defSection = new ReportSection
         {
             Id = "sec-defender", NavLabel = "9. Chống mã độc",

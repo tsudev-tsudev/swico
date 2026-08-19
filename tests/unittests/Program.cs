@@ -6,6 +6,7 @@ using Tsudev.Audit.Core.Abstractions;
 using Tsudev.Audit.Core.Cli;
 using Tsudev.Audit.Core.Collectors;
 using Tsudev.Audit.Core.Models;
+using Tsudev.Audit.Core.Progress;
 using Tsudev.Audit.Core.Reports;
 using Tsudev.Audit.Core.Rendering;
 using Tsudev.Audit.Core.Rules;
@@ -734,6 +735,134 @@ Check(ChecksumFile.Find("997BD2318999D0FD7FE82238CECFE51AB7EE7C08C0BCD4B9FE1910A
 Check(ChecksumFile.Find("997bd2318999d0fd7fe82238cecfe51ab7ee7c08c0bcd4b9fe1910aa5e884abb *a.exe", "a.exe") is not null,
     "chap nhan tien to '*' cua che do nhi phan");
 
+Console.WriteLine("\n=== 17. Tien trinh quet: thu tu buoc, huy, ma thoat ===");
+
+// Dung mot SystemContext toi thieu: cac collector deu chiu duoc du lieu rong
+// (chung khong bao gio nem), nen bao cao van dung duoc va ta do dung thu ban
+// muon do o day - THU TU CAC BUOC, khong phai noi dung bao cao.
+static SystemContext ProgressCtx(IProgressSink sink, CancellationToken cancel = default) => new()
+{
+    Wmi = new FakeWmiQuery(),
+    Registry = new FakeRegistryReader(),
+    Process = new FakeProcessRunner(),
+    Files = new FakeFileProbe(),
+    ComputerName = "MAY-TEST",
+    ScanTime = DateTimeOffset.Now,
+    IsElevated = true,
+    Progress = sink,
+    Cancellation = cancel
+};
+
+var recorder = new RecordingProgressSink();
+_ = LicenseReportBuilder.Build(ProgressCtx(recorder), new AuditOptions());
+
+Check(recorder.StepLabels.Count >= 6,
+    $"bao cao ban quyen bao it nhat 6 buoc (duoc {recorder.StepLabels.Count})");
+Check(recorder.StepLabels[0] == "Hệ điều hành",
+    $"buoc dau tien la 'He dieu hanh' (duoc '{recorder.StepLabels.FirstOrDefault()}')");
+Check(recorder.StepLabels.Contains("Bản quyền Windows")
+      && recorder.StepLabels.Contains("Dấu hiệu kích hoạt trái phép"),
+    "co buoc ban quyen Windows va buoc quet dau hieu kich hoat trai phep");
+Check(recorder.Completed == recorder.StepLabels.Count,
+    $"moi buoc da bat dau deu ket thuc ({recorder.Completed}/{recorder.StepLabels.Count})");
+Check(!recorder.Events.Any(e => e.StartsWith("FAIL", StringComparison.Ordinal)),
+    "khong buoc nao bao that bai khi du lieu rong");
+
+// Thu tu la mot RANG BUOC NGHIEP VU, khong phai ngau nhien: phan mem phai
+// duoc thu thap TRUOC khi quet dau hieu, vi diem rui ro tinh tu ca hai.
+var iSoftware = recorder.StepLabels.ToList().IndexOf("Danh sách phần mềm đã cài");
+var iRisk = recorder.StepLabels.ToList().IndexOf("Dấu hiệu kích hoạt trái phép");
+Check(iSoftware >= 0 && iRisk >= 0 && iSoftware < iRisk,
+    "thu thap phan mem chay TRUOC khi quet dau hieu (diem rui ro can ca hai)");
+
+var hwRecorder = new RecordingProgressSink();
+_ = HardwareReportBuilder.Build(ProgressCtx(hwRecorder), new AuditOptions { RunDism = false, RunSfc = false });
+Check(hwRecorder.StepLabels.Contains("CPU") && hwRecorder.StepLabels.Contains("RAM")
+      && hwRecorder.StepLabels.Contains("Windows Defender"),
+    "bao cao phan cung bao cac buoc CPU / RAM / Defender");
+Check(hwRecorder.Completed == hwRecorder.StepLabels.Count,
+    "bao cao phan cung: moi buoc deu ket thuc");
+
+// Huy: phai dung LAI, khong duoc chay not cho het roi mai bao.
+using var cts = new CancellationTokenSource();
+cts.Cancel();
+var cancelledSink = new RecordingProgressSink();
+var cancelThrew = false;
+try { _ = LicenseReportBuilder.Build(ProgressCtx(cancelledSink, cts.Token), new AuditOptions()); }
+catch (OperationCanceledException) { cancelThrew = true; }
+Check(cancelThrew, "token da huy -> Build nem OperationCanceledException");
+Check(cancelledSink.StepLabels.Count == 0,
+    $"huy truoc khi chay -> khong buoc nao duoc bat dau (duoc {cancelledSink.StepLabels.Count})");
+
+// Huy GIUA CHUNG: cac buoc da xong phai duoc giu, phan con lai dung han.
+using var midCts = new CancellationTokenSource();
+var midSink = new RecordingProgressSink();
+var midCtx = new SystemContext
+{
+    Wmi = new FakeWmiQuery(),
+    Registry = new FakeRegistryReader(),
+    Process = new FakeProcessRunner(),
+    Files = new FakeFileProbe(),
+    ComputerName = "MAY-TEST",
+    ScanTime = DateTimeOffset.Now,
+    IsElevated = true,
+    Progress = new CancelAfterSink(midSink, midCts, afterSteps: 2),
+    Cancellation = midCts.Token
+};
+var midThrew = false;
+try { _ = LicenseReportBuilder.Build(midCtx, new AuditOptions()); }
+catch (OperationCanceledException) { midThrew = true; }
+Check(midThrew, "huy giua chung -> Build dung lai bang OperationCanceledException");
+Check(midSink.Completed == 2,
+    $"huy sau 2 buoc -> dung 2 buoc hoan tat duoc giu lai (duoc {midSink.Completed})");
+Check(midSink.StepLabels.Count == 2,
+    $"khong buoc nao khac duoc bat dau sau khi huy (duoc {midSink.StepLabels.Count})");
+
+// ScanStep phai bao FAIL khi cong viec nem loi, va van de loi noi len tren.
+var failSink = new RecordingProgressSink();
+var failThrew = false;
+try
+{
+    ScanStep.Run(ProgressCtx(failSink), "Buoc hong",
+        () => throw new InvalidOperationException("hong that"));
+}
+catch (InvalidOperationException) { failThrew = true; }
+Check(failThrew, "ScanStep KHONG nuot ngoai le cua cong viec");
+Check(failSink.Events.Any(e => e == "FAIL hong that"),
+    "ScanStep bao FAIL kem ly do khi cong viec nem loi");
+
+// Note: dung cho viec chay lau, phai den duoc sink.
+var noteSink = new RecordingProgressSink();
+var noteCtx = ProgressCtx(noteSink);
+_ = SystemIntegrityCollector.Collect(noteCtx, runDism: true, runSfc: true);
+Check(noteSink.Events.Count(e => e.StartsWith("NOTE", StringComparison.Ordinal)) == 2,
+    "DISM va sfc moi cai bao mot ghi chu thoi gian du kien");
+Check(noteSink.Events.Any(e => e.Contains("5-15 phút", StringComparison.Ordinal)),
+    "ghi chu cua sfc noi ro no mat 5-15 phut");
+
+// Sink mac dinh khong duoc lam gi ca - day la thu bao ve 173 test cu.
+var quiet = new SystemContext
+{
+    Wmi = new FakeWmiQuery(), Registry = new FakeRegistryReader(),
+    Process = new FakeProcessRunner(), Files = new FakeFileProbe(),
+    ComputerName = "MAY-TEST", ScanTime = DateTimeOffset.Now
+};
+Check(ReferenceEquals(quiet.Progress, NullProgressSink.Instance),
+    "SystemContext khong khai bao Progress -> dung NullProgressSink");
+Check(!quiet.Cancellation.CanBeCanceled,
+    "SystemContext khong khai bao Cancellation -> khong bao gio huy");
+
+// Ma thoat 130
+Check(ExitCodes.Cancelled == 130, "ma thoat huy = 130 (quy uoc POSIX 128+SIGINT)");
+Check(ExitCodes.Describe(130).Contains("huỷ", StringComparison.Ordinal),
+    "Describe(130) noi ro la nguoi dung huy");
+Check(ExitCodes.Combine(ExitCodes.Cancelled, ExitCodes.VerdictCritical) == ExitCodes.Cancelled,
+    "huy giua chung THANG ket luan danh gia - ket luan do dua tren du lieu chua day du");
+Check(ExitCodes.Combine(ExitCodes.Partial, ExitCodes.VerdictCritical) == ExitCodes.VerdictCritical,
+    "quet xong nhung thieu du lieu thi ket luan van thang (hanh vi cu giu nguyen)");
+Check(CliOptions.UsageText.Contains("130", StringComparison.Ordinal),
+    "phan tro giup co liet ke ma thoat 130");
+
 Console.WriteLine($"\n=== KET QUA: {passed} PASS, {failed} FAIL ===");
 return failed == 0 ? 0 : 1;
 
@@ -747,5 +876,35 @@ sealed class FakeFeed : IUpdateFeed
     {
         if (_ex is not null) throw _ex;
         failureReason = _err; return _r;
+    }
+}
+
+
+/// <summary>
+/// Sink chuyen tiep moi su kien sang mot sink khac, va bam nut huy sau dung
+/// <c>afterSteps</c> buoc hoan tat.
+///
+/// Dung de mo phong nguoi dung bam Ctrl+C GIUA lan quet - tinh huong ma test
+/// "huy truoc khi chay" khong cham toi duoc, nhung lai la tinh huong that su
+/// hay xay ra.
+/// </summary>
+sealed class CancelAfterSink : IProgressSink
+{
+    private readonly IProgressSink _inner;
+    private readonly CancellationTokenSource _cts;
+    private readonly int _afterSteps;
+    private int _done;
+
+    public CancelAfterSink(IProgressSink inner, CancellationTokenSource cts, int afterSteps)
+        { _inner = inner; _cts = cts; _afterSteps = afterSteps; }
+
+    public void BeginStep(string label) => _inner.BeginStep(label);
+    public void FailStep(string reason) => _inner.FailStep(reason);
+    public void Note(string message) => _inner.Note(message);
+
+    public void EndStep()
+    {
+        _inner.EndStep();
+        if (++_done >= _afterSteps) _cts.Cancel();
     }
 }
