@@ -92,18 +92,32 @@ Một lần quét đầy đủ mất từ vài chục giây tới hơn 15 phút 
 Công cụ in **từng bước một, ngay khi bước đó chạy xong**, kèm thời gian thật của
 chính nó — không dồn lại tới cuối:
 
+Dưới đây là đầu ra **thật**, chép từ log CI chạy trên runner Windows
+([run 32201733164](https://github.com/tsudev-tsudev/swico/actions/runs/32201733164)):
+
 ```
 [2] Đang thu thập cấu hình phần cứng...
-    ✓ Tổng quan thiết bị     0.4 s
-    ✓ CPU                    0.1 s
-    ✓ RAM                    0.2 s
-    ⠹ Toàn vẹn file hệ thống   3.1 s
+    ✓ Tổng quan thiết bị   1.3 s
+    ✓ CPU   1.0 s
+    ✓ RAM   0.0 s
+    ✓ Ổ đĩa   0.0 s
+    ✓ Phân vùng   0.0 s
+    ✓ Card đồ họa   0.0 s
+    ✓ Card mạng   0.0 s
+    ✓ Driver lỗi   0.1 s
       DISM CheckHealth đang chạy (thường dưới 5 giây, tối đa 3 phút)...
+    ✓ Toàn vẹn file hệ thống   0.9 s
+    ✓ Windows Defender   0.2 s
+    ✓ Ghi báo cáo ra đĩa   0.0 s
 ```
 
-Con quay ở dòng cuối cho biết công cụ **đang chạy chứ không treo** — đây là khác
-biệt mà một cột thời gian đứng yên không nói được. Những bước chạy lâu (DISM,
-`sfc`) còn tự báo thời gian dự kiến.
+Trên terminal thật, dòng đang chạy còn có **con quay** (`⠹`) quay tại chỗ trước
+khi được thay bằng `✓` — log CI không thể hiện được điều đó vì đầu ra bị chuyển
+hướng nên con quay tự tắt (xem đoạn dưới).
+
+Con quay cho biết công cụ **đang chạy chứ không treo** — đây là khác biệt mà một
+cột thời gian đứng yên không nói được. Những bước chạy lâu (DISM, `sfc`) còn tự
+báo thời gian dự kiến.
 
 Khi đầu ra bị **chuyển hướng** (ghi ra file log, đưa qua ống dẫn, chạy trong
 RMM/CI), công cụ tự bỏ con quay và mã màu — chỉ còn mỗi bước một dòng sạch, để

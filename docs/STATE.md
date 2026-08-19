@@ -11,13 +11,13 @@
 
 > ## ⚡ VIỆC ĐẦU TIÊN CỦA PHIÊN MỚI
 >
-> ```bash
-> git push origin main      # commit 809a253 mới chỉ nằm ở local
-> ```
+> **Xem mục 3.1** — PR winget #419878 đang vướng nhãn
+> `Validation-Executable-Error` và bot chưa giải thích nguyên nhân.
 >
-> Commit `809a253` (streaming tiến trình quét) **chưa được push**. Push xong CI
-> Windows sẽ chạy và xác nhận phần dòng-theo-bước — thứ mà máy dev Linux không
-> tự kiểm được. Sau đó xem mục 3.1 (PR winget đang vướng một nhãn lỗi mới).
+> Mọi việc khác của phiên S002 đã khép: code đã push, CI run
+> [32201733164](https://github.com/tsudev-tsudev/swico/actions/runs/32201733164)
+> **xanh cả hai job**, bước kiểm dòng-theo-bước trên Windows thật đã chạy và
+> báo **12 bước, tất cả đều có thời gian riêng**.
 
 ---
 
@@ -32,7 +32,7 @@ Repo      : ✅ github.com/tsudev-tsudev/swico — PUBLIC, 33 commit, working tr
 SDK       : ✅ ghim 8.0.424 qua global.json (dev và CI dùng CÙNG một SDK)
 Windows   : ✅ đã chạy thật, cài thật, dữ liệu đúng, đối chiếu với bản PowerShell cũ xong
 Terminal  : 🔄 streaming tiến trình quét ĐÃ VIẾT XONG, phần "dáng vẻ" chờ kiểm bằng mắt
-Git       : ⚠️ commit 809a253 CHƯA PUSH — việc đầu tiên của phiên mới
+Git       : ✅ đã push tới origin/main; CI run 32201733164 XANH cả 2 job
 ```
 
 ## 2. Sản phẩm
@@ -146,6 +146,11 @@ Xếp theo giá trị giảm dần:
 3. **Logging có cấu trúc** thay `Console.WriteLine` rải rác, kèm tuỳ chọn ghi log
    ra file cho tình huống hỗ trợ từ xa.
 4. **`--json-only`** cho tích hợp máy-đọc-máy.
+4b. **Căn cột cho dòng tiến trình** (nhỏ, tuỳ chọn). Hiện nhãn và thời gian
+   không thẳng cột: `✓ CPU   1.0 s` cạnh `✓ Tổng quan thiết bị   1.3 s`. Đệm
+   nhãn về một bề rộng cố định trong `ConsoleProgressReporter.Finish()` là xong.
+   README đang chép đúng đầu ra thật nên **không sai lệch**; đây thuần tuý là
+   thẩm mỹ.
 5. **NativeAOT** — cân nhắc, nhưng đọc mục 4 trước: cắt tỉa đã hỏng, NativeAOT
    gần như chắc chắn cũng hỏng vì cùng nguyên nhân (WMI qua COM + phản chiếu).
 
