@@ -13,22 +13,24 @@
 
 > ## ⚡ VIỆC ĐẦU TIÊN CỦA PHIÊN MỚI
 >
-> **Mục 3.0 trước đã** — phiên S003 để lại **toàn bộ commit của nó chưa push**.
-> Chúng chưa qua CI, nên mọi câu "CI xanh" trong tài liệu này đang nói về commit
-> `ff1a9ae` của phiên trước, KHÔNG phải trạng thái hiện tại.
+> **Đọc `AGENTS.md` trước, rồi tới đây.** Bàn giao gần nhất:
+> `logs/handover/20260820-02_khep-phien-S004.md`.
 >
-> Sau đó **xem mục 3.1** — PR winget #419878 đang vướng nhãn
-> `Validation-Executable-Error` và bot chưa giải thích nguyên nhân.
+> **Mục 3.0 trước đã** — phiên S004 để lại **4 commit chưa push**. Chúng chưa qua
+> CI, nên mọi câu "CI xanh" dưới đây đang nói về commit `200c0fd` của phiên S003,
+> KHÔNG phải trạng thái hiện tại.
 >
 > Phiên S004 đã **đổi quy ước đặt tên phiên bản** sang `docs/DESIGN_SYSTEM.md`
 > mục 6 (quyết định **D-S004-1**): `VersionPrefix` nay là **`26.8.1901`**, file
 > cài đặt là `tsudev-swico_26.8.1901_x64-setup.exe`. **Chưa gắn tag** — việc phát
 > hành là quyết định của người dùng, xem mục 3.6, và **đọc mục 4.7 trước**.
 >
-> Mọi việc của phiên S002 đã khép: code đã push, CI run
-> [32201733164](https://github.com/tsudev-tsudev/swico/actions/runs/32201733164)
-> **xanh cả hai job**, bước kiểm dòng-theo-bước trên Windows thật đã chạy và
-> báo **12 bước, tất cả đều có thời gian riêng**.
+> Sau đó **xem mục 3.1** — PR winget #419878 đang vướng nhãn
+> `Validation-Executable-Error` và bot chưa giải thích nguyên nhân.
+>
+> Mọi việc của phiên S003 đã khép: code **đã push**, CI run
+> [32224326731](https://github.com/tsudev-tsudev/swico/actions/runs/32224326731)
+> **xanh** cho commit `200c0fd`.
 
 ---
 
@@ -37,15 +39,15 @@
 ```
 Build     : ✅ 0 cảnh báo (TreatWarningsAsErrors bật) — đo trên máy dev Linux
 Test      : ✅ 264 PASS, 0 FAIL — đo trên máy dev Linux
-CI        : ⚠️ CHƯA chạy cho các commit của phiên S003 (chưa push). Lần xanh gần
-            nhất là run 32201733164, ứng với commit `ff1a9ae` của phiên S002.
+CI        : ⚠️ CHƯA chạy cho 4 commit của phiên S004 (chưa push). Lần xanh gần
+            nhất là run 32224326731, ứng với commit `200c0fd` của phiên S003.
 Release   : ✅ v26.8.18.2 đã phát hành chính thức (Latest)
 Repo      : ✅ github.com/tsudev-tsudev/swico — PUBLIC, working tree sạch
 SDK       : ✅ ghim 8.0.424 qua global.json (dev và CI dùng CÙNG một SDK)
 Windows   : ✅ đã chạy thật, cài thật, dữ liệu đúng, đối chiếu với bản PowerShell cũ xong
 Terminal  : 🔄 streaming tiến trình quét ĐÃ VIẾT XONG, phần "dáng vẻ" chờ kiểm bằng mắt
 Git       : ⚠️ ĐỨNG TRƯỚC origin/main — CHƯA PUSH (xem mục 3.0; đếm bằng
-            `git log --oneline origin/main..HEAD`)
+            `git log --oneline origin/main..HEAD`, đừng tin số ghi cứng)
 ```
 
 ## 2. Sản phẩm
@@ -66,29 +68,41 @@ Git       : ⚠️ ĐỨNG TRƯỚC origin/main — CHƯA PUSH (xem mục 3.0; �
 
 ## 3. VIỆC TIẾP THEO — đọc mục này rồi làm
 
-### 3.0 ⬜ Đẩy các commit của phiên S003 lên origin — **LÀM TRƯỚC TIÊN**
+### 3.0 ⬜ Đẩy các commit của phiên S004 lên origin — **LÀM TRƯỚC TIÊN**
 
-Phiên S003 commit đầy đủ nhưng **không push** (đẩy lên kho công khai là việc
+Phiên S004 commit đầy đủ nhưng **không push** (đẩy lên kho công khai là việc
 hướng ra ngoài, cần người dùng đồng ý). Hệ quả: các commit đó **chưa qua CI**,
-nên chưa ai xác nhận chúng xanh trên runner Windows.
+nên chưa ai xác nhận chúng xanh trên runner GitHub.
 
 ```bash
 git log --oneline origin/main..HEAD    # xem những commit đang chờ
 git push origin main                    # sau khi người dùng đồng ý
 ```
 
-Commit đầu tiên của phiên S003 là `3021fd1`; mọi commit từ đó trở đi đều chưa
-push. Không ghi số cứng ở đây vì mỗi lần commit thêm là con số đó sai.
+| Commit | Nội dung |
+|---|---|
+| `bd8c7e0` | áp bộ quy ước `tsudev-conventions` v1.0.0 |
+| `6d560d7` | **đổi quy ước đặt tên phiên bản** sang `YY.M.DDNN` (D-S004-1) |
+| `4584fb3` | xoá `tsudev-conventions.zip` sau khi giải nén đầy đủ |
+| *(commit khép phiên)* | bàn giao `20260820-02` — commit cuối cùng của phiên |
 
-Push xong thì **theo dõi CI** — phiên S003 có thêm hai bước CI mới chưa từng
-chạy thật lần nào:
+> Bốn commit tính tới lúc khép phiên. **Đếm bằng lệnh trên, đừng tin con số này**
+> — mỗi commit thêm vào là nó sai (bài học ghi ở mục 4.5).
 
-| Bước mới | Ở đâu | Rủi ro nếu hỏng |
-|---|---|---|
-| `Kiem tra VersionPrefix dung quy uoc dat ten` | `ci.yml`, job Linux | dùng `sed` + `dotnet run --no-build`; nếu sai đường dẫn thì job đỏ |
-| `Kiem tra quy uoc dat ten` | `release.yml` | chỉ chạy khi gắn tag, nên **CI xanh KHÔNG chứng minh bước này chạy được** |
+> ✅ **Đã kiểm chứng với remote thật** (`git ls-remote origin refs/heads/main`),
+> không chỉ dựa vào ref cục bộ: `origin/main` = `200c0fd`. Mọi commit của phiên
+> S003 **đã push** và CI của chúng **xanh** — bản cũ của mục này nói ngược lại,
+> đã sửa.
 
-Cả hai chỉ được kiểm bằng tay trên Linux, chưa chạy trên runner GitHub.
+Push xong thì **theo dõi CI**, vì phiên S004 đổi đúng thứ mà cổng CI đang canh:
+
+| Bước | Trạng thái |
+|---|---|
+| `Kiem tra VersionPrefix dung quy uoc dat ten` (`ci.yml`) | Đã chạy thật **một lần** và xanh — nhưng với `VersionPrefix` **cũ** (`26.8.19`) và luật **cũ**. Luật mới + `26.8.1901` **chưa qua runner GitHub lần nào**. |
+| `Kiem tra quy uoc dat ten` (`release.yml`) | ⛔ **Chưa từng chạy thật** — chỉ kích hoạt khi gắn tag. CI xanh KHÔNG chứng minh bước này chạy được. |
+
+Cả hai đã được thử **bằng tay trên Linux** với 10 chuỗi và đúng cả 10
+(`docs/journal/S004-2026-08-20.md` mục 16:35), nhưng đó không phải runner GitHub.
 
 ### 3.1 ⛔ PR winget #419878 — vướng `Validation-Executable-Error`
 
@@ -193,8 +207,8 @@ Chi tiết: `docs/SIGNING.md`.
 Xếp theo giá trị giảm dần:
 
 1. **Chuyển bộ test sang xUnit.** Hiện là bộ tự chế đếm pass/fail thủ công
-   (`tests/unittests/Program.cs`, ~800 dòng top-level statements). 197 ca trong
-   một file là quá nhiều cho một file. xUnit cho báo lỗi tử tế, chạy song song,
+   (`tests/unittests/Program.cs`, **1139 dòng** top-level statements). 264 ca
+   trong một file là quá nhiều cho một file. xUnit cho báo lỗi tử tế, chạy song song,
    tích hợp CI chuẩn.
 2. **Tách file gộp nhiều class thành file riêng** (`InventoryCollectors.cs` 4 class,
    `LicenseCollectors.cs` 5 class). Đã hoãn từ Phase 1 vì lúc đó chưa có test;
