@@ -8,6 +8,26 @@
 
 ### Thay đổi
 
+- **Định dạng ngày giờ trong báo cáo về đúng một luật.** Trước đây báo cáo in ra
+  ba dạng khác nhau cho cùng một khái niệm (`dd/MM/yyyy HH:mm`,
+  `dd/MM/yyyy HH:mm:ss`, `yyyy-MM-dd HH:mm:ss`). Nay theo đúng
+  [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md): ngày `DD/MM/YYYY`, ngày giờ
+  `HH:mm DD/MM/YYYY`.
+
+  | Chỗ hiển thị | Trước | Nay |
+  |---|---|---|
+  | Thời điểm quét (báo cáo + trang tổng hợp) | `19/08/2026 14:30:05` | `14:30 19/08/2026` |
+  | Ngày cài phần mềm (đọc từ registry) | `2024-01-05` | `05/01/2024` |
+  | Lần quét/phát hiện của Defender | `2026-08-19 14:30:05` | `14:30 19/08/2026` |
+  | Dòng "Thời gian" trên màn hình dòng lệnh | `19/08/2026 14:30:05` | `14:30 19/08/2026` |
+
+  - Tên file và thư mục **giữ nguyên** `yyyyMMdd_HHmmss` — chúng phải sắp xếp
+    được theo thứ tự chữ cái, và `/` trong tên file sẽ thành đường dẫn thư mục.
+  - File `.json` đi kèm báo cáo **giữ nguyên** ISO 8601 — trang tổng hợp dựng lại
+    từ đó, đây là dữ liệu máy đọc chứ không phải chữ cho người đọc.
+  - Định dạng bị khoá `InvariantCulture`: máy đặt ngôn ngữ Thái dùng Phật lịch sẽ
+    in năm **2569** thay vì 2026, và một số ngôn ngữ đổi dấu `/` thành `.`.
+
 - **⚠️ ĐỔI QUY ƯỚC ĐẶT TÊN PHIÊN BẢN** sang chuẩn chung của hệ sinh thái tsudev
   ([`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) mục 6). Quyết định D-S004-1,
   20/08/2026.

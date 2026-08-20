@@ -254,7 +254,7 @@ public static class Program
         Directory.CreateDirectory(level3);
 
         Info($"=== tsudev System Audit ===");
-        Info($"Máy: {computerName}   |   Thời gian: {scanTime.LocalDateTime:dd/MM/yyyy HH:mm:ss}");
+        Info($"Máy: {computerName}   |   Thời gian: {DateDisplay.DateTimeText(scanTime)}");
         Info($"Thư mục kết quả: {level3}");
 
         if (!WindowsEnvironment.IsElevated())

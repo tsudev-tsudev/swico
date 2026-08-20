@@ -38,16 +38,17 @@
 
 ```
 Build     : ✅ 0 cảnh báo (TreatWarningsAsErrors bật) — đo trên máy dev Linux
-Test      : ✅ 264 PASS, 0 FAIL — đo trên máy dev Linux
-CI        : ⚠️ CHƯA chạy cho 4 commit của phiên S004 (chưa push). Lần xanh gần
-            nhất là run 32224326731, ứng với commit `200c0fd` của phiên S003.
+Test      : ✅ 276 PASS, 0 FAIL — đo trên máy dev Linux
+CI        : ✅ run 32360493509 XANH cả hai job (Linux + smoke test Windows) cho
+            commit `ce24691`. Đây là lần đầu luật đặt tên MỚI + `VersionPrefix`
+            `26.8.1901` chạy trên runner GitHub. Bước `Kiem tra quy uoc dat ten`
+            của `release.yml` vẫn CHƯA từng chạy (chỉ kích hoạt khi gắn tag).
 Release   : ✅ v26.8.18.2 đã phát hành chính thức (Latest)
 Repo      : ✅ github.com/tsudev-tsudev/swico — PUBLIC, working tree sạch
 SDK       : ✅ ghim 8.0.424 qua global.json (dev và CI dùng CÙNG một SDK)
 Windows   : ✅ đã chạy thật, cài thật, dữ liệu đúng, đối chiếu với bản PowerShell cũ xong
 Terminal  : 🔄 streaming tiến trình quét ĐÃ VIẾT XONG, phần "dáng vẻ" chờ kiểm bằng mắt
-Git       : ⚠️ ĐỨNG TRƯỚC origin/main — CHƯA PUSH (xem mục 3.0; đếm bằng
-            `git log --oneline origin/main..HEAD`, đừng tin số ghi cứng)
+Git       : ✅ ngang bằng origin/main (đếm bằng `git log --oneline origin/main..HEAD`)
 ```
 
 ## 2. Sản phẩm
@@ -68,41 +69,25 @@ Git       : ⚠️ ĐỨNG TRƯỚC origin/main — CHƯA PUSH (xem mục 3.0; �
 
 ## 3. VIỆC TIẾP THEO — đọc mục này rồi làm
 
-### 3.0 ⬜ Đẩy các commit của phiên S004 lên origin — **LÀM TRƯỚC TIÊN**
+### 3.0 ✅ ĐÃ XONG — commit S004 đã push, CI xanh
 
-Phiên S004 commit đầy đủ nhưng **không push** (đẩy lên kho công khai là việc
-hướng ra ngoài, cần người dùng đồng ý). Hệ quả: các commit đó **chưa qua CI**,
-nên chưa ai xác nhận chúng xanh trên runner GitHub.
+Ngày 20/08/2026, phiên S005 đẩy 4 commit của S004 lên `origin/main` sau khi
+được chủ project đồng ý. `origin/main` = `ce24691`.
 
-```bash
-git log --oneline origin/main..HEAD    # xem những commit đang chờ
-git push origin main                    # sau khi người dùng đồng ý
-```
+CI run **32360493509** — **xanh cả hai job**:
 
-| Commit | Nội dung |
+| Job | Kết quả |
 |---|---|
-| `bd8c7e0` | áp bộ quy ước `tsudev-conventions` v1.0.0 |
-| `6d560d7` | **đổi quy ước đặt tên phiên bản** sang `YY.M.DDNN` (D-S004-1) |
-| `4584fb3` | xoá `tsudev-conventions.zip` sau khi giải nén đầy đủ |
-| *(commit khép phiên)* | bàn giao `20260820-02` — commit cuối cùng của phiên |
+| Build & test (Linux) | ✅ 25s |
+| Smoke test (Windows) | ✅ 1m57s |
 
-> Bốn commit tính tới lúc khép phiên. **Đếm bằng lệnh trên, đừng tin con số này**
-> — mỗi commit thêm vào là nó sai (bài học ghi ở mục 4.5).
+**Điều này chứng minh được gì:** bước `Kiem tra VersionPrefix dung quy uoc dat ten`
+trong `ci.yml` chạy được với luật đặt tên **mới** và `VersionPrefix` **mới**
+(`26.8.1901`) trên runner GitHub thật — trước đó nó mới chỉ xanh với luật cũ.
 
-> ✅ **Đã kiểm chứng với remote thật** (`git ls-remote origin refs/heads/main`),
-> không chỉ dựa vào ref cục bộ: `origin/main` = `200c0fd`. Mọi commit của phiên
-> S003 **đã push** và CI của chúng **xanh** — bản cũ của mục này nói ngược lại,
-> đã sửa.
-
-Push xong thì **theo dõi CI**, vì phiên S004 đổi đúng thứ mà cổng CI đang canh:
-
-| Bước | Trạng thái |
-|---|---|
-| `Kiem tra VersionPrefix dung quy uoc dat ten` (`ci.yml`) | Đã chạy thật **một lần** và xanh — nhưng với `VersionPrefix` **cũ** (`26.8.19`) và luật **cũ**. Luật mới + `26.8.1901` **chưa qua runner GitHub lần nào**. |
-| `Kiem tra quy uoc dat ten` (`release.yml`) | ⛔ **Chưa từng chạy thật** — chỉ kích hoạt khi gắn tag. CI xanh KHÔNG chứng minh bước này chạy được. |
-
-Cả hai đã được thử **bằng tay trên Linux** với 10 chuỗi và đúng cả 10
-(`docs/journal/S004-2026-08-20.md` mục 16:35), nhưng đó không phải runner GitHub.
+**Điều này KHÔNG chứng minh được:** bước `Kiem tra quy uoc dat ten` trong
+`release.yml` vẫn **chưa từng chạy thật**, vì nó chỉ kích hoạt khi gắn tag.
+Lần phát hành đầu tiên theo quy ước mới vẫn là lần chạy đầu tiên của bước đó.
 
 ### 3.1 ⛔ PR winget #419878 — vướng `Validation-Executable-Error`
 
@@ -207,12 +192,12 @@ Chi tiết: `docs/SIGNING.md`.
 Xếp theo giá trị giảm dần:
 
 1. **Chuyển bộ test sang xUnit.** Hiện là bộ tự chế đếm pass/fail thủ công
-   (`tests/unittests/Program.cs`, **1139 dòng** top-level statements). 264 ca
+   (`tests/unittests/Program.cs`, **1203 dòng** top-level statements). 276 ca
    trong một file là quá nhiều cho một file. xUnit cho báo lỗi tử tế, chạy song song,
    tích hợp CI chuẩn.
 2. **Tách file gộp nhiều class thành file riêng** (`InventoryCollectors.cs` 4 class,
    `LicenseCollectors.cs` 5 class). Đã hoãn từ Phase 1 vì lúc đó chưa có test;
-   nay có 264 test làm lưới an toàn.
+   nay có 276 test làm lưới an toàn.
 3. **Logging có cấu trúc** thay `Console.WriteLine` rải rác, kèm tuỳ chọn ghi log
    ra file cho tình huống hỗ trợ từ xa.
 4. **`--json-only`** cho tích hợp máy-đọc-máy.
@@ -251,6 +236,40 @@ Nếu hôm nay đã phát hành rồi mà cần phát hành lại **trong cùng 
 tiếp theo là `26.8.1902` — `docs/VERSIONING.md` mục 6.
 
 ---
+
+### QU-5 ✅ ĐÃ XONG — định dạng ngày giờ hiển thị về đúng một luật
+
+Trước phiên S005, báo cáo in ra **ba** định dạng khác nhau cho cùng một khái
+niệm — `dd/MM/yyyy HH:mm`, `dd/MM/yyyy HH:mm:ss`, `yyyy-MM-dd HH:mm:ss` — và
+**không có test nào chặn**. Quy ước (`docs/DESIGN_SYSTEM.md`) chỉ có một:
+
+```
+Ngày     : DD/MM/YYYY          ví dụ 01/02/2027
+Ngày giờ : HH:mm DD/MM/YYYY    ví dụ 14:30 19/08/2026
+```
+
+Luật nay nằm ở **một chỗ duy nhất**: `Core/Reports/DateDisplay.cs`. Bảy chỗ in
+ngày (2 renderer, 2 collector, CLI) đều gọi vào đó. 12 test ở mục 18 khoá lại.
+
+**Hai điều cố ý KHÔNG thống nhất — đừng "dọn cho gọn":**
+
+| Chỗ | Định dạng | Vì sao |
+|---|---|---|
+| Tên file/thư mục (`FileNaming`) | `yyyyMMdd_HHmmss` | Phải **sắp xếp được theo thứ tự chữ cái**. `DD/MM/YYYY` thì `01/12` đứng trước `02/01`, và `/` trong tên file thành đường dẫn thư mục. |
+| File `.json` đi kèm báo cáo | ISO 8601 | Máy đọc, `DashboardBuilder` dựng lại trang tổng hợp từ đó. Đổi sang chữ người đọc là hỏng trang tổng hợp. |
+
+**Culture bị khoá `InvariantCulture`** ở cả hai lớp, cùng một lý do đã ghi sẵn ở
+`FileNaming`: máy đặt ngôn ngữ Thái dùng Phật lịch → `yyyy` ra **2569** thay vì
+2026; một số ngôn ngữ đổi luôn dấu `/` thành `.`. Có test cho cả hai ca (`th-TH`,
+`de-DE`) vì báo cáo gửi cho kế toán phải giống nhau trên mọi máy.
+
+**Bỏ giây khi hiển thị.** Quy ước dừng ở phút. Giây không mất hẳn: tên file vẫn
+giữ `HHmmss`, nên hai lần quét cách nhau vài giây vẫn phân biệt được bằng tên.
+
+**Ngày cài đặt phần mềm** đọc từ registry (`FormatInstallDate`) cũng đổi theo:
+`2024-01-05` → `05/01/2024`. Hàm này **không** dùng `DateTime.ParseExact` — máy
+thật có registry ghi ngày không tồn tại (`20240230`); cắt chuỗi thì người đọc
+vẫn thấy được registry ghi gì, `ParseExact` thì ném.
 
 ## 4. CẠM BẪY ĐÃ BIẾT — đọc để khỏi vấp lại
 

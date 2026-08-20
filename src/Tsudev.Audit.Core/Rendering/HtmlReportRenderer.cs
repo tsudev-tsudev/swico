@@ -1,7 +1,7 @@
-using System.Globalization;
 using System.Net;
 using System.Text;
 using Tsudev.Audit.Core.Models;
+using Tsudev.Audit.Core.Reports;
 
 namespace Tsudev.Audit.Core.Rendering;
 
@@ -264,7 +264,7 @@ public sealed class HtmlReportRenderer
         sb.Append("<dl class=\"meta\">");
         AppendMeta(sb, "Máy", report.ComputerName);
         AppendMeta(sb, "Thời điểm quét",
-            report.ScanTime.LocalDateTime.ToString("dd/MM/yyyy HH:mm:ss", CultureInfo.GetCultureInfo("vi-VN")));
+            DateDisplay.DateTimeText(report.ScanTime));
         AppendMeta(sb, "Phiên bản dữ liệu", report.SchemaVersion);
         sb.Append("</dl>\n</div>\n</header>\n");
     }

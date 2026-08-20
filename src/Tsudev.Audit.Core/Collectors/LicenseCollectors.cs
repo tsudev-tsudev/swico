@@ -1,7 +1,7 @@
-using System.Globalization;
 using System.Text.RegularExpressions;
 using Tsudev.Audit.Core.Abstractions;
 using Tsudev.Audit.Core.Models;
+using Tsudev.Audit.Core.Reports;
 
 namespace Tsudev.Audit.Core.Collectors;
 
@@ -24,7 +24,7 @@ public static class OsInfoCollector
         {
             var raw = os.Str("InstallDate", "");
             var parsed = WmiDateParser.Parse(raw);
-            if (parsed.HasValue) installDate = parsed.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            if (parsed.HasValue) installDate = DateDisplay.Date(parsed.Value);
         }
 
         t.AddRow(
@@ -36,7 +36,7 @@ public static class OsInfoCollector
             cs?.Str("Model") ?? "-",
             bios?.Str("SerialNumber") ?? "-",
             installDate,
-            ctx.ScanTime.LocalDateTime.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
+            DateDisplay.DateTimeText(ctx.ScanTime));
 
         return t;
     }

@@ -136,6 +136,14 @@ Rồi trên Windows `git clone` như bình thường.
 | C8 | Mở `tsudev-tong-hop.html` | Bảng gom đủ các báo cáo, bấm "Mở →" nhảy đúng file | |
 | C9 | Copy thư mục kết quả từ máy khác vào cấp 2, chạy lại | Trang tổng hợp gom cả máy mới | |
 | C10 | `echo $LASTEXITCODE` sau khi chạy | Đúng quy ước 0/1/2/3 | |
+| C11 | Nhìn mọi cột ngày trong `.html` và trang tổng hợp | Ngày giờ dạng `HH:mm DD/MM/YYYY` (`14:30 19/08/2026`), ngày dạng `DD/MM/YYYY` (`05/01/2024`). **Không** còn dạng `2026-08-19` hay `19/08/2026 14:30:05` | |
+
+> **C11 — vì sao vẫn phải nhìn bằng mắt dù đã có 12 test.** Test chạy trên máy
+> dev Linux, nơi `CultureInfo.CurrentCulture` là `en-US`. Định dạng đã bị khoá
+> `InvariantCulture` nên về lý thuyết máy nào cũng ra như nhau, nhưng Windows
+> tiếng Việt là môi trường thật duy nhất chưa ai nhìn. Xem cả **cột "Ngày cài"**
+> trong bảng phần mềm — cột đó đọc thẳng từ registry của máy thật, nơi có những
+> chuỗi ngày mà máy dev không tạo ra được.
 
 > **C3 là mục quan trọng nhất trong bảng này.** Bộ ghi XLSX được viết tay theo
 > chuẩn OOXML và ở phiên S001 đã có **một lỗi đặt sai vị trí phần tử `<pane>`**

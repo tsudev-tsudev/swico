@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using Tsudev.Audit.Core.Serialization;
 using Tsudev.Audit.Core.Models;
+using Tsudev.Audit.Core.Reports;
 
 namespace Tsudev.Audit.Core.Rendering;
 
@@ -161,7 +162,7 @@ public sealed class DashboardBuilder
             table.AddRow(
                 r.ComputerName,
                 r.ReportKind == ReportKind.LicenseAudit ? "Bản quyền" : "Phần cứng",
-                r.ScanTime.LocalDateTime.ToString("dd/MM/yyyy HH:mm", CultureInfo.GetCultureInfo("vi-VN")),
+                DateDisplay.DateTimeText(r.ScanTime),
                 r.VerdictText ?? VerdictLabel(r.VerdictLevel),
                 r.RiskScore is null ? "-" : $"{r.RiskScore.Value}/100 ({r.RiskScore.Label})",
                 r.RiskFindingsCount.ToString(CultureInfo.InvariantCulture),

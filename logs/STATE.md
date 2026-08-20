@@ -15,18 +15,13 @@
 > **`docs/STATE.md` thắng**. File này chỉ trỏ tới đó, không chép lại nội dung
 > (`AGENTS.md` mục 1: mỗi tri thức ghi một lần duy nhất).
 
-- **Phiên gần nhất:** S004 — 20/08/2026
+- **Phiên gần nhất:** S005 — 20/08/2026
 - **Bàn giao gần nhất:** `logs/handover/20260820-02_khep-phien-S004.md`
 
 ## Hàng đợi task (làm từ trên xuống)
 
 Nguồn: `docs/STATE.md` mục 3. Ở đây chỉ ghi mã việc + trạng thái.
 
-- [ ] **3.0** ⬜ **LÀM TRƯỚC TIÊN** — đẩy các commit của S004 lên `origin/main`
-      (`bd8c7e0`, `6d560d7`, `4584fb3` + commit khép phiên; đếm bằng
-      `git log --oneline origin/main..HEAD`). ⛔ cần người dùng đồng ý; đẩy lên kho
-      công khai là việc hướng ra ngoài. Push xong **theo dõi CI**: luật đặt tên
-      mới + `VersionPrefix` mới **chưa qua runner GitHub lần nào**.
 - [ ] **QU-2** ⛔ Nhờ người dùng kiểm **Inno Setup** biên dịch được với
       `VersionInfoVersion=26.9.0901` (ngày một chữ số) — mục **F7/F8** trong
       `docs/WINDOWS-VERIFICATION.md`. **Rủi ro kỹ thuật còn lại duy nhất** của
@@ -39,22 +34,28 @@ Nguồn: `docs/STATE.md` mục 3. Ở đây chỉ ghi mã việc + trạng thái
 - [ ] **3.4** ⛔ Cấu hình SignPath sau khi được duyệt — chờ bên ngoài
 - [ ] **3.5** ⬜ Việc kỹ thuật (xUnit ▸ tách file gộp ▸ logging ▸ `--json-only`)
       — **làm được ngay, không cần người dùng**. Đáng giá nhất: chuyển sang xUnit
-      (`tests/unittests/Program.cs` nay **1139 dòng** trong một file).
+      (`tests/unittests/Program.cs` nay **1203 dòng** trong một file).
 - [ ] **3.6** ⬜ Quyết định có phát hành `26.8.1901` không — **đọc mục 4.7 trước**
 - [ ] **QU-4** ⬜ Áp `tokens/` vào lớp render báo cáo HTML — hiện màu/cỡ chữ đang
       hard-code, trái `AGENTS.md` mục 6. Ràng buộc: báo cáo **không được nạp tài
       nguyên ngoài**, nên token phải **nội tuyến** vào `<style>`.
-- [ ] **QU-5** ⬜ Rà định dạng ngày `DD/MM/YYYY` và `HH:mm DD/MM/YYYY` trong báo
-      cáo và `FileNaming` — quy ước bắt buộc, **chưa đối chiếu lần nào**.
 
 ## Đang thực hiện
 
 | Task | Agent | Bắt đầu |
 |---|---|---|
-| (không có — phiên S004 đã bàn giao) | | |
+| (không có) | | |
 
 ## Đã hoàn thành (mới nhất trên cùng)
 
+- 20/08/2026 — **QU-5 XONG:** gom định dạng ngày giờ hiển thị về `DateDisplay`
+  (`Core/Reports/DateDisplay.cs`) — trước đó báo cáo in **ba** dạng khác nhau và
+  không test nào chặn. +12 test (mục 18). 276 PASS, 0 FAIL. Chi tiết + hai chỗ
+  cố ý KHÔNG thống nhất: `docs/STATE.md` mục QU-5.
+- 20/08/2026 — **3.0 XONG:** push 4 commit S004 lên `origin/main` (`ce24691`).
+  CI run **32360493509 xanh cả hai job** — lần đầu luật đặt tên mới chạy trên
+  runner GitHub. Bước `Kiem tra quy uoc dat ten` của `release.yml` vẫn chưa từng
+  chạy (chỉ kích hoạt khi gắn tag).
 - 20/08/2026 — Sửa `docs/STATE.md`: mục 3.0 và khối trạng thái đang nói S003
   **chưa push**, trong khi `git ls-remote` cho thấy đã push và CI xanh.
 - 20/08/2026 — Xoá `tsudev-conventions.zip` sau khi đối chiếu đủ 11 file và

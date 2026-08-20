@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
@@ -71,7 +72,7 @@ Check(WmiDateParser.Parse("20260626120000.000000+420")?.ToString("yyyy-MM-dd") =
 Check(WmiDateParser.Parse("") is null, "chuoi rong -> null");
 Check(WmiDateParser.Parse("rac") is null, "chuoi rac -> null");
 Check(WmiDateParser.Parse("99999999999999") is null, "so khong hop le -> null");
-Check(SoftwareCollector.FormatInstallDate("20240105") == "2024-01-05", "InstallDate registry -> yyyy-MM-dd");
+Check(SoftwareCollector.FormatInstallDate("20240105") == "05/01/2024", "InstallDate registry -> DD/MM/YYYY");
 Check(SoftwareCollector.FormatInstallDate("") == "-", "InstallDate rong -> '-'");
 
 Console.WriteLine("\n=== 3. Tinh diem rui ro (bien) ===");
@@ -166,7 +167,7 @@ Check(software.Count == 3, $"doc duoc 3 phan mem (duoc {software.Count})");
 Check(software.Any(s => s.Name == "Visual Studio Code" && s.Category == "Công cụ lập trình"), "phan loai VS Code dung");
 Check(software.Any(s => s.Name == "Infatica Proxy Tool" && s.NeedsManualReview), "Infatica bi danh dau can kiem tra thu cong");
 Check(!software.First(s => s.Name == "7-Zip 22.01").NeedsManualReview, "7-Zip du thong tin -> khong can kiem tra");
-Check(software.First(s => s.Name == "Visual Studio Code").InstallDate == "2024-01-05", "ngay cai dat duoc chuan hoa");
+Check(software.First(s => s.Name == "Visual Studio Code").InstallDate == "05/01/2024", "ngay cai dat duoc chuan hoa ve DD/MM/YYYY");
 
 Console.WriteLine("\n=== 6. Dien giai ket qua DISM/SFC ===");
 Check(SystemIntegrityCollector.InterpretDism(new ProcessResult(0, "No component store corruption detected.", ""))
@@ -1092,6 +1093,69 @@ Check(ExitCodes.Combine(ExitCodes.Partial, ExitCodes.VerdictCritical) == ExitCod
     "quet xong nhung thieu du lieu thi ket luan van thang (hanh vi cu giu nguyen)");
 Check(CliOptions.UsageText.Contains("130", StringComparison.Ordinal),
     "phan tro giup co liet ke ma thoat 130");
+
+Console.WriteLine("\n=== 18. Dinh dang ngay gio hien thi (docs/DESIGN_SYSTEM.md) ===");
+
+// Quy uoc bat buoc toan he thong:
+//     Ngay     : DD/MM/YYYY        Ngay gio : HH:mm DD/MM/YYYY
+// Truoc phien nay bao cao in ra BA dinh dang khac nhau cho cung mot khai niem
+// (dd/MM/yyyy HH:mm, dd/MM/yyyy HH:mm:ss, yyyy-MM-dd HH:mm:ss) va KHONG co test
+// nao chan lai. Muc nay la cai chan do.
+
+var moc = new DateTimeOffset(2026, 8, 19, 14, 30, 5, TimeSpan.FromHours(7));
+var mocLocal = moc.LocalDateTime;
+
+Check(DateDisplay.Date(new DateTime(2027, 2, 1)) == "01/02/2027",
+    "Date -> DD/MM/YYYY dung vi du trong quy uoc");
+Check(DateDisplay.DateTimeText(new DateTime(2026, 8, 19, 14, 30, 0)) == "14:30 19/08/2026",
+    "DateTimeText -> HH:mm DD/MM/YYYY dung vi du trong quy uoc");
+Check(DateDisplay.Date(new DateTime(2026, 3, 7)) == "07/03/2026",
+    "ngay va thang MOT chu so van du hai chu so");
+Check(!DateDisplay.DateTimeText(mocLocal).Contains(":05", StringComparison.Ordinal)
+      && DateDisplay.DateTimeText(mocLocal).Length == "HH:mm DD/MM/YYYY".Length,
+    "ngay gio KHONG kem giay - quy uoc chi den phut");
+Check(DateDisplay.DateTimeText(moc) == DateDisplay.DateTimeText(mocLocal),
+    "ban DateTimeOffset quy ve gio may dang chay, khong lech mot tieng");
+
+// Vi sao khoa culture: tren may ngon ngu Thai, lich mac dinh la Phat lich va
+// "yyyy" cho ra 2569 thay vi 2026; mot so ngon ngu doi luon dau "/" thanh "."
+// hoac "-". Bao cao gui cho ke toan doc phai giong nhau tren moi may.
+var vanHoaCu = CultureInfo.CurrentCulture;
+try
+{
+    CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("th-TH");
+    Check(DateDisplay.Date(new DateTime(2026, 8, 19)) == "19/08/2026",
+        "may dat ngon ngu Thai van ra nam Duong lich 2026, khong phai 2569");
+    CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-DE");
+    Check(DateDisplay.DateTimeText(new DateTime(2026, 8, 19, 14, 30, 0)) == "14:30 19/08/2026",
+        "may dat ngon ngu Duc van dung dau '/' chu khong doi thanh '.'");
+}
+finally { CultureInfo.CurrentCulture = vanHoaCu; }
+
+// Ten FILE thi NGUOC LAI: phai sap xep duoc theo thu tu chu cai nen giu yyyyMMdd.
+// Hai luat nay khac nhau CO CHU DICH - dung "thong nhat" chung lai.
+var ctxTen = new SystemContext
+{
+    Wmi = new FakeWmiQuery(),
+    Registry = new FakeRegistryReader(),
+    Process = new FakeProcessRunner(),
+    Files = new FakeFileProbe(),
+    ComputerName = "MAY-KE-TOAN",
+    ScanTime = moc,
+    IsElevated = true
+};
+Check(FileNaming.Stamp(ctxTen) == moc.LocalDateTime.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture),
+    "ten file GIU yyyyMMdd_HHmmss - sap xep duoc theo thu tu chu cai");
+Check(!FileNaming.Stamp(ctxTen).Contains('/', StringComparison.Ordinal),
+    "ten file khong duoc chua '/' - se thanh duong dan thu muc");
+Check(FileNaming.DateOnly(moc) == moc.LocalDateTime.ToString("yyyyMMdd", CultureInfo.InvariantCulture),
+    "ten thu muc theo ngay GIU yyyyMMdd");
+
+// Ngay cai dat doc tu registry cung phai theo quy uoc hien thi.
+Check(SoftwareCollector.FormatInstallDate("20260819") == "19/08/2026",
+    "InstallDate registry -> DD/MM/YYYY");
+Check(SoftwareCollector.FormatInstallDate("khong-phai-ngay") == "khong-phai-ngay",
+    "chuoi khong phai ngay thi giu nguyen de nguoi doc thay registry ghi gi");
 
 Console.WriteLine($"\n=== KET QUA: {passed} PASS, {failed} FAIL ===");
 return failed == 0 ? 0 : 1;

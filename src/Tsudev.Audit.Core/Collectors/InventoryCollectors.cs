@@ -1,6 +1,7 @@
 using System.Globalization;
 using Tsudev.Audit.Core.Abstractions;
 using Tsudev.Audit.Core.Models;
+using Tsudev.Audit.Core.Reports;
 
 namespace Tsudev.Audit.Core.Collectors;
 
@@ -89,13 +90,19 @@ public static class SoftwareCollector
 
     private static string Fallback(string s) => string.IsNullOrWhiteSpace(s) ? "-" : s;
 
-    /// <summary>Registry luu InstallDate dang "yyyyMMdd" -> chuyen sang "yyyy-MM-dd".</summary>
+    /// <summary>
+    /// Registry luu InstallDate dang "yyyyMMdd" -> chuyen sang DD/MM/YYYY de HIEN THI
+    /// (quy uoc docs/DESIGN_SYSTEM.md, xem <see cref="DateDisplay"/>).
+    /// Cat chuoi thay vi DateTime.ParseExact vi registry cua may that co chua ngay
+    /// khong ton tai ("20240230") va nam 0 - ParseExact se nem, con nguoi doc thi
+    /// van can nhin thay con so tho de biet may minh ghi gi.
+    /// </summary>
     public static string FormatInstallDate(string raw)
     {
         if (string.IsNullOrWhiteSpace(raw)) return "-";
         raw = raw.Trim();
         if (raw.Length == 8 && raw.All(char.IsDigit))
-            return $"{raw[..4]}-{raw.Substring(4, 2)}-{raw.Substring(6, 2)}";
+            return $"{raw.Substring(6, 2)}/{raw.Substring(4, 2)}/{raw[..4]}";
         return raw;
     }
 
@@ -329,7 +336,7 @@ public static class DefenderCollector
                 s.Bool("AntivirusEnabled") == true ? "Có" : "Không",
                 s.Str("AntivirusSignatureVersion"),
                 s.Num("AntivirusSignatureAge"),
-                quick?.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) ?? "Chưa từng quét");
+                quick.HasValue ? DateDisplay.DateTimeText(quick.Value) : "Chưa từng quét");
         }
 
         var threats = DataTable.Create("Lịch sử phát hiện mối đe dọa (file .exe, .doc, ... đã bị Defender gắn cờ)",
@@ -346,7 +353,7 @@ public static class DefenderCollector
             threats.AddRow(
                 d.Str("ThreatName", d.Str("ThreatID")),
                 resources,
-                WmiDateParser.Parse(d.Str("InitialDetectionTime", ""))?.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) ?? "-",
+                WmiDateParser.Parse(d.Str("InitialDetectionTime", "")) is { } seen ? DateDisplay.DateTimeText(seen) : "-",
                 d.Bool("ActionSuccess") == true ? "Có" : "Chưa/Không rõ");
         }
         threats.AddEmptyNotice("Không phát hiện mối đe dọa nào trong lịch sử quét của Windows Defender");
