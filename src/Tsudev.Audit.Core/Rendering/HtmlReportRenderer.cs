@@ -230,10 +230,14 @@ public sealed class HtmlReportRenderer
         sb.Append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n");
         sb.Append("<link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"")
           .Append(FaviconDataUri).Append("\">\n");
-        sb.Append("<meta name=\"theme-color\" content=\"#14417F\">\n");
+        // Mau thanh dia chi trinh duyet lay tu token, khong viet cung. Dung ban
+        // SANG vi day la mau dau trang o che do mac dinh.
+        sb.Append("<meta name=\"theme-color\" content=\"")
+          .Append(DesignTokens.Color("light", "primary-active")).Append("\">\n");
         sb.Append("<meta name=\"generator\" content=\"").Append(E(ProductName)).Append("\">\n");
         sb.Append("<title>").Append(E(report.Title)).Append(" - ").Append(E(report.ComputerName)).Append("</title>\n");
-        sb.Append("<style>\n").Append(Css).Append("</style>\n</head>\n<body>\n");
+        sb.Append("<style>\n").Append(DesignTokens.RootCss).Append(Css)
+          .Append("</style>\n</head>\n<body>\n");
 
         AppendHeader(sb, report, dashboardRelativeLink);
         AppendNav(sb, report);
@@ -456,110 +460,136 @@ public sealed class HtmlReportRenderer
     /// duoc copy sang may khac ma khong keo theo file phu nao.
     /// </summary>
     private const string Css = $$"""
-        :root{
-          --bg:#eaf2fc; --surface:#ffffff; --ink:#132033; --muted:#5b6b80;
-          --line:#cbd9ea; --accent:#1c5fbf; --accent-dark:#14417f;
-          --ok:#16794a; --ok-bg:#e3f5ec; --warn:#8a5a00; --warn-bg:#fdf3dc;
-          --bad:#a51f2b; --bad-bg:#fdeaec; --neutral-bg:#eef2f7;
-        }
         *{box-sizing:border-box}
-        body{margin:0;background:var(--bg);color:var(--ink);
-             font:15px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
-        .wrap{max-width:1180px;margin:0 auto;padding:0 20px}
-        a{color:var(--accent)}
-        .muted{color:var(--muted)}
+        body{margin:0;background:var(--c-bg-base);color:var(--c-text-primary);
+             font-family:var(--font-sans);font-size:var(--fs-body-web);line-height:var(--lh-body)}
+        .wrap{max-width:1180px;margin:0 auto;padding:0 var(--sp-5)}
+        a{color:var(--c-text-link)}
+        .muted{color:var(--c-text-muted)}
+        :focus-visible{outline:2px solid var(--c-focus-ring);outline-offset:2px}
 
-        .hero{background:linear-gradient(160deg,var(--accent-dark),var(--accent));color:#fff;padding:22px 0 26px}
-        .hero-top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:14px}
+        /* Dau trang GIU nguyen dien mao o ca hai che do - xem DesignTokens. */
+        .hero{background:linear-gradient(160deg,var(--c-hero-from),var(--c-hero-to));
+              color:var(--c-hero-ink);padding:var(--sp-6) 0}
+        .hero-top{display:flex;justify-content:space-between;align-items:center;
+                  gap:var(--sp-4);margin-bottom:var(--sp-4)}
 
         /* Thuong hieu: logo + chu ky. Ca khoi la MOT lien ket toi tsudev.com. */
-        .brand{display:inline-flex;align-items:center;gap:11px;text-decoration:none;line-height:1}
+        .brand{display:inline-flex;align-items:center;gap:var(--sp-3);text-decoration:none;line-height:1}
         .brand-logo{display:block;height:44px;width:35px;flex:none;
                     background:url("{{LogoDataUri}}") no-repeat center/contain}
-        .brand-word{font-size:25px;font-weight:800;letter-spacing:-.5px}
-        /* Tren nen xanh dam cua dau trang phai dung sac SANG, neu khong chu
-           "tsu" mau xanh se chim han vao nen. */
-        .hero .bw-tsu{color:#8FD0FF}
-        .hero .bw-dev{color:#FFA94D}
+        .brand-word{font-size:var(--fs-h2);font-weight:var(--fw-bold);letter-spacing:var(--ls-heading)}
+        /* Hai sac chu ky DOI CHO nhau giua che do sang va toi - o che do toi dau
+           trang thanh nen sang con chan trang thanh nen toi. Xem DesignTokens. */
+        .hero .bw-tsu{color:var(--brand-tsu-hero)}
+        .hero .bw-dev{color:var(--brand-dev-hero)}
         .brand:hover .brand-word{filter:brightness(1.12)}
 
-        /* Ban nho dung o chan trang - nen trang nen doi sang sac DAM hon */
         .brand-sm .brand-logo{height:30px}
-        .brand-sm .brand-word{font-size:18px}
-        .foot .bw-tsu{color:#1C5FBF}
-        .foot .bw-dev{color:#D2690A}
-        .foot-brand{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+        .brand-sm .brand-word{font-size:var(--fs-h4)}
+        .foot .bw-tsu{color:var(--brand-tsu-foot)}
+        .foot .bw-dev{color:var(--brand-dev-foot)}
+        .foot-brand{display:flex;align-items:center;gap:var(--sp-4);flex-wrap:wrap}
         .foot-brand p{margin:0}
-        .back{color:#dceafd;text-decoration:none;font-size:14px}
-        .back:hover{text-decoration:underline}
-        .hero h1{margin:0 0 12px;font-size:26px;line-height:1.25}
-        .meta{display:flex;flex-wrap:wrap;gap:10px 28px;margin:0}
-        .meta dt{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:#c7dcfa;margin:0}
-        .meta dd{margin:0;font-weight:600}
+        .back{color:var(--c-hero-ink);opacity:.85;text-decoration:none;font-size:var(--fs-body-desktop)}
+        .back:hover{text-decoration:underline;opacity:1}
+        .hero h1{margin:0 0 var(--sp-3);font-size:var(--fs-h1);line-height:var(--lh-heading);
+                 letter-spacing:var(--ls-heading)}
+        .meta{display:flex;flex-wrap:wrap;gap:var(--sp-3) var(--sp-8);margin:0}
+        /* KHONG viet hoa toan bo: nhan o day dai hon 2 tu ("Thoi diem quet") va
+           tieng Viet co dau viet hoa het thi kho doc - DESIGN_SYSTEM.md muc 4. */
+        .meta dt{font-size:var(--fs-xs);font-weight:var(--fw-medium);
+                 color:var(--c-hero-ink);opacity:.78;margin:0}
+        .meta dd{margin:0;font-weight:var(--fw-semibold)}
 
-        .nav{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--line);
-             box-shadow:0 1px 3px rgba(19,32,51,.06)}
-        .nav-inner{display:flex;flex-wrap:wrap;gap:4px;overflow-x:auto}
-        .nav a{padding:11px 12px;text-decoration:none;font-size:14px;white-space:nowrap;
-               border-bottom:2px solid transparent}
-        .nav a:hover{border-bottom-color:var(--accent);background:var(--neutral-bg)}
+        .nav{position:sticky;top:0;z-index:var(--z-sticky);background:var(--c-bg-surface);
+             border-bottom:1px solid var(--c-border);box-shadow:var(--shadow-sm)}
+        .nav-inner{display:flex;flex-wrap:wrap;gap:var(--sp-1);overflow-x:auto}
+        .nav a{padding:var(--sp-3);text-decoration:none;font-size:var(--fs-body-desktop);
+               white-space:nowrap;border-bottom:2px solid transparent}
+        .nav a:hover{border-bottom-color:var(--c-primary);background:var(--c-bg-hover)}
 
-        .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin:22px 0}
-        .stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;
-              display:flex;flex-direction:column;gap:4px}
-        .stat-value{font-size:24px;font-weight:700;line-height:1.2}
-        .stat-label{font-size:13px;color:var(--muted)}
+        .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+               gap:var(--sp-4);margin:var(--sp-6) 0}
+        .stat{background:var(--c-bg-surface);border:1px solid var(--c-border);
+              border-radius:var(--radius-lg);padding:var(--sp-4);
+              display:flex;flex-direction:column;gap:var(--sp-1)}
+        .stat-value{font-size:var(--fs-h2);font-weight:var(--fw-bold);line-height:var(--lh-heading)}
+        .stat-label{font-size:var(--fs-sm);color:var(--c-text-muted)}
 
-        .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;
-              padding:22px 24px;margin:20px 0;box-shadow:0 1px 2px rgba(19,32,51,.04)}
-        .card h2{margin:0 0 14px;font-size:19px;padding-bottom:10px;border-bottom:2px solid var(--line)}
-        .card h3{margin:20px 0 8px;font-size:15px;color:var(--accent-dark)}
-        .desc{margin:0 0 12px;color:var(--muted);font-size:14px}
+        .card{background:var(--c-bg-surface);border:1px solid var(--c-border);
+              border-radius:var(--radius-lg);padding:var(--sp-6);margin:var(--sp-5) 0;
+              box-shadow:var(--shadow-sm)}
+        .card h2{margin:0 0 var(--sp-4);font-size:var(--fs-h3);padding-bottom:var(--sp-3);
+                 line-height:var(--lh-heading);border-bottom:1px solid var(--c-border)}
+        .card h3{margin:var(--sp-5) 0 var(--sp-2);font-size:var(--fs-body-web-lg);
+                 line-height:var(--lh-heading);color:var(--c-primary-active)}
+        /* 72ch: gioi han chieu rong khoi van ban dai de mat khong moi khi dao dong. */
+        .desc{margin:0 0 var(--sp-3);max-width:72ch;color:var(--c-text-secondary);
+              font-size:var(--fs-body-desktop)}
 
-        .warn-box{border-left:5px solid var(--warn)}
-        .warn-box ul{margin:0;padding-left:20px}
-        .warn-box li{margin:4px 0}
+        .warn-box{border-left:5px solid var(--c-warning)}
+        .warn-box ul{margin:0;padding-left:var(--sp-5)}
+        .warn-box li{margin:var(--sp-1) 0}
 
-        .badges{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
-        .badge{display:inline-block;padding:3px 11px;border-radius:999px;font-size:12.5px;font-weight:600;
-               border:1px solid transparent}
-        .lv-none{background:var(--neutral-bg);color:var(--muted);border-color:var(--line)}
-        .lv-low{background:var(--ok-bg);color:var(--ok);border-color:#b6e0cb}
-        .lv-medium{background:var(--warn-bg);color:var(--warn);border-color:#efd8a4}
-        .lv-high{background:var(--bad-bg);color:var(--bad);border-color:#f2c3c8}
-        .lv-critical{background:var(--bad);color:#fff;border-color:var(--bad)}
+        .badges{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-bottom:var(--sp-3)}
+        /* Nen SURFACE chu khong phai bg-subtle: mau danger tren nen subtle chi dat
+           4,3:1, duoi nguong AA 4,5:1 ma DESIGN_SYSTEM.md muc 1 bat buoc. */
+        .badge{display:inline-block;padding:var(--sp-1) var(--sp-3);border-radius:var(--radius-sm);
+               font-size:var(--fs-xs);font-weight:var(--fw-semibold);
+               background:var(--c-bg-surface);border:1px solid var(--c-border)}
+        .lv-none{color:var(--c-text-muted)}
+        .lv-low{color:var(--c-success)}
+        .lv-medium{color:var(--c-warning)}
+        .lv-high{color:var(--c-danger)}
+        .lv-critical{background:var(--c-danger);color:var(--c-on-status);border-color:var(--c-danger)}
 
-        .verdict{border-radius:10px;padding:14px 18px;margin:0 0 16px;border-left:5px solid}
-        .verdict p{margin:6px 0 0;font-size:14px}
-        .vd-ok{background:var(--ok-bg);border-color:var(--ok)}
-        .vd-warn{background:var(--warn-bg);border-color:var(--warn)}
-        .vd-bad{background:var(--bad-bg);border-color:var(--bad)}
-        .vd-unknown{background:var(--neutral-bg);border-color:var(--muted)}
+        .verdict{border-radius:var(--radius-lg);padding:var(--sp-4);margin:0 0 var(--sp-4);
+                 background:var(--c-bg-subtle);border-left:5px solid}
+        .verdict p{margin:var(--sp-2) 0 0;font-size:var(--fs-body-desktop)}
+        .vd-ok{border-color:var(--c-success)}
+        .vd-warn{border-color:var(--c-warning)}
+        .vd-bad{border-color:var(--c-danger)}
+        .vd-unknown{border-color:var(--c-border-strong)}
 
-        .filter{width:100%;max-width:340px;margin:0 0 10px;padding:8px 12px;font-size:14px;
-                border:1px solid var(--line);border-radius:8px;background:#fff;color:inherit}
-        .table-scroll{overflow-x:auto}
-        table{width:100%;border-collapse:collapse;font-size:14px}
-        th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
-        th{background:var(--neutral-bg);font-weight:600;white-space:nowrap;position:sticky;top:0}
-        tbody tr:nth-child(even){background:#f7fafd}
-        tbody tr:hover{background:#e9f1fb}
+        .filter{width:100%;max-width:340px;margin:0 0 var(--sp-3);
+                padding:var(--sp-2) var(--sp-3);font-family:inherit;font-size:var(--fs-body-desktop);
+                border:1px solid var(--c-border);border-radius:var(--radius-md);
+                background:var(--c-bg-surface);color:inherit}
+        .table-scroll{overflow-x:auto;border:1px solid var(--c-border);border-radius:var(--radius-lg)}
+        table{width:100%;border-collapse:collapse;font-size:var(--fs-body-desktop)}
+        th,td{padding:var(--sp-2) var(--sp-4);text-align:left;
+              border-bottom:1px solid var(--c-border);vertical-align:top}
+        th{background:var(--c-bg-subtle);font-weight:var(--fw-semibold);
+           white-space:nowrap;position:sticky;top:0}
+        tbody tr:nth-child(even){background:var(--c-bg-base)}
+        tbody tr:hover{background:var(--c-bg-hover)}
 
-        pre.raw{background:#0f1b2b;color:#dbe7f5;padding:14px 16px;border-radius:8px;overflow-x:auto;
-                font:13px/1.5 Consolas,"Courier New",monospace;white-space:pre-wrap;word-break:break-word}
-        details.method{margin-top:14px;font-size:14px;color:var(--muted)}
-        details.method summary{cursor:pointer;font-weight:600;color:var(--accent-dark)}
+        /* Khoi du lieu tho luon dung nen toi o CA HAI che do - chu sang tren nen
+           toi la cach doc log va khoa registry de nhat. Mau lay tu bang mau toi
+           cua chinh bo token, khong bia them mau moi. */
+        pre.raw{background:var(--c-code-bg);color:var(--c-code-ink);padding:var(--sp-4);
+                border-radius:var(--radius-md);overflow-x:auto;
+                font-family:var(--font-mono);font-size:var(--fs-sm);line-height:var(--lh-body);
+                white-space:pre-wrap;word-break:break-word}
+        details.method{margin-top:var(--sp-4);font-size:var(--fs-body-desktop);
+                       color:var(--c-text-secondary)}
+        details.method summary{cursor:pointer;font-weight:var(--fw-semibold);color:var(--c-primary-active)}
 
-        .foot{border-top:1px solid var(--line);margin-top:30px;padding:20px 0 34px;font-size:13.5px}
-        .foot p{margin:4px 0}
+        .foot{border-top:1px solid var(--c-border);margin-top:var(--sp-8);
+              padding:var(--sp-5) 0 var(--sp-10);font-size:var(--fs-sm)}
+        .foot p{margin:var(--sp-1) 0}
 
         @media print{
           .nav,.filter{display:none}
           /* In ra giay: giu logo va chu ky de ban in van co nhan dien */
           .brand-logo{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-          body{background:#fff}
+          /* Bang mau in da bi ep ve che do SANG o khoi bien do DesignTokens sinh,
+             nen khong can ep mau o day nua - chi bo nen mau cua trang. */
+          body{background:var(--c-bg-surface)}
           .card{break-inside:avoid;box-shadow:none}
-          .hero{background:var(--accent-dark) !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+          .hero{background:var(--c-hero-from) !important;
+                -webkit-print-color-adjust:exact;print-color-adjust:exact}
         }
         """;
 }

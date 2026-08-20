@@ -8,6 +8,20 @@
 
 ### Thay đổi
 
+- **Báo cáo dùng token giao diện thay cho màu viết cứng.**
+  `tokens/design-tokens.json` được nhúng vào file exe và sinh ra khối biến CSS
+  nội tuyến trong `<style>`; sửa một giá trị ở file token là báo cáo đổi theo.
+  Báo cáo vẫn **không nạp bất kỳ tài nguyên ngoài nào**.
+
+  - **Tự đổi sang nền tối** khi hệ điều hành đang ở chế độ tối. Khi **in ra
+    giấy** thì luôn ép về bảng màu sáng, nên không in ra tờ giấy đen kín mực.
+  - Đầu trang **giữ nguyên diện mạo** ở cả hai chế độ — đó là mảng thương hiệu,
+    và ở chế độ tối chữ ký `tsudev` sẽ tụt xuống 2,4:1 nếu để nó đổi theo.
+  - Bảng màu về đúng chuẩn hệ sinh thái: màu chủ đạo `#1c5fbf` → `#2563EB`.
+  - Badge đổi từ viên thuốc tròn sang bo góc 4px; nhãn ở đầu trang bỏ viết hoa
+    toàn bộ (tiếng Việt có dấu viết hoa hết thì khó đọc); bảng có viền bao ngoài.
+  - File `.xlsx` cũng lấy màu từ token, không còn lệch màu với bản HTML.
+
 - **Định dạng ngày giờ trong báo cáo về đúng một luật.** Trước đây báo cáo in ra
   ba dạng khác nhau cho cùng một khái niệm (`dd/MM/yyyy HH:mm`,
   `dd/MM/yyyy HH:mm:ss`, `yyyy-MM-dd HH:mm:ss`). Nay theo đúng

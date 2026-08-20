@@ -34,11 +34,12 @@ Nguồn: `docs/STATE.md` mục 3. Ở đây chỉ ghi mã việc + trạng thái
 - [ ] **3.4** ⛔ Cấu hình SignPath sau khi được duyệt — chờ bên ngoài
 - [ ] **3.5** ⬜ Việc kỹ thuật (xUnit ▸ tách file gộp ▸ logging ▸ `--json-only`)
       — **làm được ngay, không cần người dùng**. Đáng giá nhất: chuyển sang xUnit
-      (`tests/unittests/Program.cs` nay **1203 dòng** trong một file).
+      (`tests/unittests/Program.cs` nay **1313 dòng** trong một file).
 - [ ] **3.6** ⬜ Quyết định có phát hành `26.8.1901` không — **đọc mục 4.7 trước**
-- [ ] **QU-4** ⬜ Áp `tokens/` vào lớp render báo cáo HTML — hiện màu/cỡ chữ đang
-      hard-code, trái `AGENTS.md` mục 6. Ràng buộc: báo cáo **không được nạp tài
-      nguyên ngoài**, nên token phải **nội tuyến** vào `<style>`.
+- [ ] **QU-6** ⬜ Quyết có đưa **4 sắc chữ ký thương hiệu** `tsudev` vào
+      `tokens/design-tokens.json` không — hiện là bốn giá trị màu **duy nhất**
+      còn viết cứng (`DesignTokens.cs`). Sửa file thuộc bộ quy ước nên ⛔ **cần
+      chủ project cho phép trực tiếp**. `docs/STATE.md` mục QU-4.
 
 ## Đang thực hiện
 
@@ -48,6 +49,10 @@ Nguồn: `docs/STATE.md` mục 3. Ở đây chỉ ghi mã việc + trạng thái
 
 ## Đã hoàn thành (mới nhất trên cùng)
 
+- 20/08/2026 — **QU-4 XONG:** báo cáo HTML + `.xlsx` chạy hoàn toàn bằng
+  `tokens/` (nhúng vào assembly, sinh biến CSS nội tuyến). Thêm chế độ tối theo
+  hệ điều hành + ép bảng màu sáng khi in. +19 test (mục 19). 298 PASS, 0 FAIL.
+  Ba thay đổi nhìn thấy được + phần còn nợ: `docs/STATE.md` mục QU-4.
 - 20/08/2026 — **QU-5 XONG:** gom định dạng ngày giờ hiển thị về `DateDisplay`
   (`Core/Reports/DateDisplay.cs`) — trước đó báo cáo in **ba** dạng khác nhau và
   không test nào chặn. +12 test (mục 18). 276 PASS, 0 FAIL. Chi tiết + hai chỗ

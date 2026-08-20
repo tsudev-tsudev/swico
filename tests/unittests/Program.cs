@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.IO.Compression;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Tsudev.Audit.Core.Abstractions;
@@ -203,8 +204,14 @@ var renderer = new HtmlReportRenderer();
 var html = renderer.Render(licReport, "../tsudev-tong-hop.html");
 Check(html.Contains("<!DOCTYPE html>") && html.TrimEnd().EndsWith("</html>"), "HTML hoan chinh");
 Check(html.Contains("https://tsudev.com"), "co link tsudev.com");
-Check(html.Contains("#eaf2fc"), "dung theme xanh nhat");
-Check(!html.Contains("prefers-color-scheme"), "KHONG con dark-mode tu dong");
+// Hai cau nay TRUOC DAY khoa "theme #eaf2fc, khong dark-mode". Ca hai deu bi
+// thay o phien S005 (QU-4): mau nay lay tu tokens/design-tokens.json, va
+// DESIGN_SYSTEM.md muc 1 BAT BUOC chon che do mac dinh theo he dieu hanh.
+// Chi tiet + ly do: docs/STATE.md muc QU-4.
+Check(html.Contains(DesignTokens.Color("light", "bg-base"), StringComparison.OrdinalIgnoreCase),
+    "nen trang lay tu token color.light.bg-base");
+Check(html.Contains("prefers-color-scheme:dark", StringComparison.Ordinal),
+    "co che do toi tu dong theo he dieu hanh");
 Check(html.Contains("KMSAuto"), "noi dung phat hien xuat hien trong HTML");
 
 // Kiem tra HTML-escape: du lieu doc hai khong duoc pha vo trang
@@ -1156,6 +1163,109 @@ Check(SoftwareCollector.FormatInstallDate("20260819") == "19/08/2026",
     "InstallDate registry -> DD/MM/YYYY");
 Check(SoftwareCollector.FormatInstallDate("khong-phai-ngay") == "khong-phai-ngay",
     "chuoi khong phai ngay thi giu nguyen de nguoi doc thay registry ghi gi");
+
+Console.WriteLine("\n=== 19. Token giao dien trong bao cao HTML (AGENTS.md muc 6) ===");
+
+// AGENTS.md muc 6: cam hard-code mau / co chu / radius, chi duoc dung token.
+// Rang buoc rieng cua bao cao: KHONG duoc nap tai nguyen ngoai, nen token phai
+// duoc NHUNG thang vao the <style>. Muc nay canh ca hai dieu do.
+
+var styleStart = html.IndexOf("<style>", StringComparison.Ordinal);
+var styleEnd = html.IndexOf("</style>", StringComparison.Ordinal);
+Check(styleStart > 0 && styleEnd > styleStart, "trang co dung mot the <style> nhung san");
+var styleBlock = html[(styleStart + "<style>".Length)..styleEnd];
+
+// --- Token that su den tu file token, khong phai chep tay vao ma
+Check(styleBlock.Contains(DesignTokens.Color("light", "primary"), StringComparison.OrdinalIgnoreCase),
+    "mau primary trong CSS lay tu tokens/design-tokens.json");
+Check(styleBlock.Contains("'Inter'", StringComparison.Ordinal),
+    "font Inter lay tu token (DESIGN_SYSTEM.md muc 4)");
+Check(styleBlock.Contains("--radius-lg:8px", StringComparison.Ordinal),
+    "thang radius lay tu token");
+
+// --- Phan CSS VIET TAY khong duoc chua mot ma mau / co chu / radius nao
+var handWritten = styleBlock.Replace(DesignTokens.RootCss, "", StringComparison.Ordinal);
+Check(handWritten.Length > 0 && handWritten.Length < styleBlock.Length,
+    "tach duoc phan CSS viet tay ra khoi khoi bien do token sinh");
+
+var hex = Regex.Matches(handWritten, "#[0-9A-Fa-f]{3,8}\\b");
+Check(hex.Count == 0,
+    hex.Count == 0 ? "CSS viet tay: 0 ma mau viet cung"
+                   : $"CSS viet tay con {hex.Count} ma mau viet cung ({hex[0].Value})");
+
+Check(!Regex.IsMatch(handWritten, @"font-size:\s*(?!var\()"),
+    "CSS viet tay: moi co chu deu qua var(--fs-...)");
+Check(!Regex.IsMatch(handWritten, @"border-radius:\s*(?!var\()"),
+    "CSS viet tay: moi radius deu qua var(--radius-...)");
+
+// --- Moi bien duoc DUNG deu phai duoc DINH NGHIA. Thieu mot cai la ca thuoc
+//     tinh do bien mat am tham - trinh duyet khong bao loi.
+var dinhNghia = Regex.Matches(styleBlock, @"(--[a-z0-9-]+)\s*:")
+    .Select(m => m.Groups[1].Value).ToHashSet(StringComparer.Ordinal);
+var suDung = Regex.Matches(styleBlock, @"var\((--[a-z0-9-]+)")
+    .Select(m => m.Groups[1].Value).ToHashSet(StringComparer.Ordinal);
+var thieu = suDung.Except(dinhNghia, StringComparer.Ordinal).OrderBy(x => x, StringComparer.Ordinal).ToList();
+Check(thieu.Count == 0,
+    thieu.Count == 0 ? "moi bien CSS duoc dung deu co dinh nghia"
+                     : $"thieu dinh nghia cho: {string.Join(", ", thieu)}");
+
+// --- Khong nap tai nguyen ngoai: bao cao phai xem duoc khi khong co mang
+Check(!styleBlock.Contains("@import", StringComparison.Ordinal), "CSS khong co @import");
+Check(!styleBlock.Contains("http", StringComparison.Ordinal),
+    "CSS khong tro toi dia chi mang nao - bao cao xem duoc khi khong co mang");
+foreach (Match m in Regex.Matches(styleBlock, @"url\(\s*""?([^""')]+)"))
+{
+    Check(m.Groups[1].Value.StartsWith("data:", StringComparison.Ordinal),
+        $"url() trong CSS la du lieu nhung san, khong phai file ngoai ({m.Groups[1].Value[..Math.Min(24, m.Groups[1].Value.Length)]})");
+}
+
+// --- Ba che do: sang mac dinh, toi theo he dieu hanh, IN LUON dung bang sang
+Check(styleBlock.Contains("@media (prefers-color-scheme:dark)", StringComparison.Ordinal),
+    "co khoi che do toi theo he dieu hanh (DESIGN_SYSTEM.md muc 1)");
+
+var printIdx = styleBlock.IndexOf("@media print{\n  :root{", StringComparison.Ordinal);
+Check(printIdx > 0, "co khoi ep bang mau khi in");
+// Neu thieu khoi nay, may dat che do toi se in ra to giay den kin muc.
+var printBlock = printIdx > 0 ? styleBlock[printIdx..(printIdx + 900)] : "";
+Check(printBlock.Contains("--c-bg-base:" + DesignTokens.Color("light", "bg-base"), StringComparison.Ordinal),
+    "khi IN thi bang mau bi ep ve che do SANG du may dang o che do toi");
+Check(!printBlock.Contains(DesignTokens.Color("dark", "bg-base"), StringComparison.Ordinal),
+    "khoi in khong lot mau cua che do toi");
+
+// --- Chu ky thuong hieu doi cho giua hai che do. O che do toi, dau trang tro
+//     thanh nen SANG nen sac dung cho dau trang phai la sac danh cho nen sang.
+var darkIdx = styleBlock.IndexOf("@media (prefers-color-scheme:dark)", StringComparison.Ordinal);
+var darkBlock = styleBlock[darkIdx..(darkIdx + 900)];
+// Dau trang KHONG doi mau theo che do (mang thuong hieu), chan trang thi CO.
+Check(!darkBlock.Contains("--brand-tsu-hero", StringComparison.Ordinal)
+   && !darkBlock.Contains("--c-hero-from", StringComparison.Ordinal),
+    "dau trang giu nguyen dien mao o che do toi");
+Check(Regex.Match(styleBlock, @"--brand-tsu-foot:(#[0-9A-Fa-f]{6})").Groups[1].Value
+      != Regex.Match(darkBlock, @"--brand-tsu-foot:(#[0-9A-Fa-f]{6})").Groups[1].Value,
+    "sac chu ky o CHAN trang DOI khi sang che do toi (chan trang nam trong nen trang)");
+
+// --- Mau thanh dia chi cua trinh duyet cung phai lay tu token
+Check(html.Contains($"content=\"{DesignTokens.Color("light", "primary-active")}\"", StringComparison.Ordinal),
+    "theme-color lay tu token, khong viet cung");
+
+// --- Trang tong hop dung CHUNG bo CSS nay, khong co ban sao thu hai
+Check(DesignTokens.Version.Length > 0, $"doc duoc phien ban bo token ({DesignTokens.Version})");
+
+// --- File .xlsx cung phai theo token, khong duoc lech mau voi ban HTML
+var stylePath = Path.Combine(Path.GetTempPath(), $"tsudev-token-{Guid.NewGuid():N}.xlsx");
+new XlsxWriter().Write(stylePath, licReport.Sections.SelectMany(sec => sec.Tables)
+    .Select((t, i) => { if (string.IsNullOrWhiteSpace(t.Title)) t.Title = $"Bang {i + 1}"; return t; }));
+using (var zip = ZipFile.OpenRead(stylePath))
+{
+    var stylesXml = new StreamReader(zip.GetEntry("xl/styles.xml")!.Open()).ReadToEnd();
+    // Excel doi ARGB 8 ky tu; token ghi #RRGGBB.
+    var fill = "FF" + DesignTokens.Color("light", "bg-subtle").TrimStart('#').ToUpperInvariant();
+    Check(stylesXml.Contains(fill, StringComparison.Ordinal),
+        "nen dong tieu de trong .xlsx lay tu token bg-subtle");
+    Check(!stylesXml.Contains("FFEAF2FC", StringComparison.Ordinal),
+        "khong con mau cua bang mau CU sot lai trong .xlsx");
+}
+File.Delete(stylePath);
 
 Console.WriteLine($"\n=== KET QUA: {passed} PASS, {failed} FAIL ===");
 return failed == 0 ? 0 : 1;

@@ -247,7 +247,7 @@ assets/                     Logo gốc + biến thể sinh tự động (icon, f
 packaging/
   tools/make-assets.py      Sinh mọi biến thể của logo từ file gốc
 tests/
-  unittests/                net8.0          ← 276 test, chạy được trên mọi nền tảng
+  unittests/                net8.0          ← 298 test, chạy được trên mọi nền tảng
 ```
 
 ### Vì sao tách `Core` khỏi Windows?
@@ -256,7 +256,7 @@ tests/
 
 1. **Kiểm thử được** — toàn bộ logic nghiệp vụ (quét dấu hiệu crack, tính điểm
    rủi ro, phân loại phần mềm, dựng HTML/XLSX) unit-test được **không cần máy
-   Windows**. 276 test chạy trên Linux.
+   Windows**. 298 test chạy trên Linux.
 2. **Dễ audit** — mọi lệnh gọi hệ thống tập trung trong đúng một file
    (`WindowsAdapters.cs`). Với một công cụ đọc dữ liệu nhạy cảm và đòi quyền
    Administrator, việc rà soát bảo mật làm được nhanh là điều thiết yếu.
@@ -314,7 +314,7 @@ thật**. Cần xác nhận tên thuộc tính WMI, đặc biệt `MSFT_MpComput
 `MSFT_MpThreat`) và `MSFT_ScheduledTask`.
 
 Nếu có lỗi, hầu hết sẽ nằm gọn trong `WindowsAdapters.cs` — logic nghiệp vụ đã
-được 276 test kiểm chứng nên không cần đụng tới.
+được 298 test kiểm chứng nên không cần đụng tới.
 
 **Phần hiển thị tiến trình cũng có một khoảng chưa tự động hoá được.** Thứ tự
 các bước, việc huỷ giữa chừng và mã thoát 130 đều có test chạy trên Linux; CI

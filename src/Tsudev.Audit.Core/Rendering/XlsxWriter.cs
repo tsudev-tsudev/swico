@@ -134,12 +134,25 @@ public sealed class XlsxWriter
         return sb.ToString();
     }
 
+    // Token ghi mau dang "#RRGGBB", Excel doi "FFRRGGBB".
+    private static string Argb(string role) => "FF" + DesignTokens.Color("light", role).TrimStart('#').ToUpperInvariant();
+
+    private static readonly string HeaderInk = Argb("primary-active");
+    private static readonly string HeaderFill = Argb("bg-subtle");
+    private static readonly string HeaderLine = Argb("border");
+
     /// <summary>
     /// Bang dinh dang: chi so 0 = mac dinh, chi so 1 = tieu de (in dam, nen xam,
     /// co vien duoi). Cac o du lieu tham chieu s="0", o tieu de tham chieu s="1".
+    ///
+    /// Mau lay tu <see cref="DesignTokens"/> chu khong viet cung (AGENTS.md muc 6).
+    /// LUON dung bang mau SANG: file .xlsx la tai lieu de doc va in, khong co
+    /// khai niem "theo che do cua he dieu hanh" nhu trang HTML.
+    /// Excel doi mau dang ARGB 8 ky tu, nen phai them "FF" (duc hoan toan) vao
+    /// truoc ma mau 6 ky tu cua token.
     /// </summary>
-    private const string Styles = """
-        <?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FF14417F"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFEAF2FC"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="thin"><color rgb="FFCBD9EA"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf><xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>
+    private static readonly string Styles = $$"""
+        <?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="{{HeaderInk}}"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="{{HeaderFill}}"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="thin"><color rgb="{{HeaderLine}}"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf><xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>
         """;
 
     private static string Sheet(DataTable table)

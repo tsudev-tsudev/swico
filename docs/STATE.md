@@ -38,9 +38,10 @@
 
 ```
 Build     : ✅ 0 cảnh báo (TreatWarningsAsErrors bật) — đo trên máy dev Linux
-Test      : ✅ 276 PASS, 0 FAIL — đo trên máy dev Linux
+Test      : ✅ 298 PASS, 0 FAIL — đo trên máy dev Linux
 CI        : ✅ run 32360493509 XANH cả hai job (Linux + smoke test Windows) cho
-            commit `ce24691`. Đây là lần đầu luật đặt tên MỚI + `VersionPrefix`
+            commit `ce24691`. Commit QU-5 (`c4dec40`) và QU-4 đã đẩy sau đó —
+            xem `gh run list`, đừng tin mốc ghi cứng này. Đây là lần đầu luật đặt tên MỚI + `VersionPrefix`
             `26.8.1901` chạy trên runner GitHub. Bước `Kiem tra quy uoc dat ten`
             của `release.yml` vẫn CHƯA từng chạy (chỉ kích hoạt khi gắn tag).
 Release   : ✅ v26.8.18.2 đã phát hành chính thức (Latest)
@@ -192,12 +193,12 @@ Chi tiết: `docs/SIGNING.md`.
 Xếp theo giá trị giảm dần:
 
 1. **Chuyển bộ test sang xUnit.** Hiện là bộ tự chế đếm pass/fail thủ công
-   (`tests/unittests/Program.cs`, **1203 dòng** top-level statements). 276 ca
+   (`tests/unittests/Program.cs`, **1313 dòng** top-level statements). 298 ca
    trong một file là quá nhiều cho một file. xUnit cho báo lỗi tử tế, chạy song song,
    tích hợp CI chuẩn.
 2. **Tách file gộp nhiều class thành file riêng** (`InventoryCollectors.cs` 4 class,
    `LicenseCollectors.cs` 5 class). Đã hoãn từ Phase 1 vì lúc đó chưa có test;
-   nay có 276 test làm lưới an toàn.
+   nay có 298 test làm lưới an toàn.
 3. **Logging có cấu trúc** thay `Console.WriteLine` rải rác, kèm tuỳ chọn ghi log
    ra file cho tình huống hỗ trợ từ xa.
 4. **`--json-only`** cho tích hợp máy-đọc-máy.
@@ -234,6 +235,71 @@ bản phát hành **nháp** mang tên `tsudev-swico_26.8.1901`.
 
 Nếu hôm nay đã phát hành rồi mà cần phát hành lại **trong cùng ngày**, số hiệu
 tiếp theo là `26.8.1902` — `docs/VERSIONING.md` mục 6.
+
+---
+
+### QU-4 ✅ ĐÃ XONG — báo cáo chạy hoàn toàn bằng `tokens/`
+
+`AGENTS.md` mục 6 cấm hard-code màu/cỡ chữ/radius. Trước phiên S005, CSS của báo
+cáo có bảng màu riêng viết tay (`--accent:#1c5fbf`…) **lệch** với
+`tokens/design-tokens.json` (`primary` là `#2563EB`), cùng ~20 mã màu rải rác
+ngoài bảng đó và ba mã màu nữa trong bộ ghi `.xlsx`.
+
+**Cách làm:** `tokens/design-tokens.json` được **nhúng vào assembly**
+(`EmbeddedResource`, cùng cách `Rules/detection-rules.json` đã dùng).
+`Core/Rendering/DesignTokens.cs` đọc file đó lúc chạy và sinh ra khối biến CSS
+nội tuyến vào `<style>`. Sửa một giá trị trong `tokens/` là báo cáo đổi theo ở
+lần build sau — không ai phải đi tìm trong CSS.
+
+Không nạp tài nguyên ngoài: token nội tuyến, logo `data:` URI, font Inter chỉ
+đứng đầu chuỗi dự phòng (`'Inter', 'SF Pro Text', 'Segoe UI', …`) nên máy có thì
+dùng, không có thì rơi xuống font hệ thống — **không tải webfont**.
+
+**Ba chế độ, sinh tự động từ ba bảng màu có sẵn trong token:**
+
+| Khối | Bảng màu | Vì sao |
+|---|---|---|
+| `:root` | `light` | Mặc định |
+| `@media (prefers-color-scheme:dark)` | `dark` | `DESIGN_SYSTEM.md` mục 1 bắt buộc chọn chế độ theo hệ điều hành |
+| `@media print` | `light` | **Ép về sáng.** Thiếu khối này, máy đang ở chế độ tối sẽ in ra tờ giấy đen kín mực |
+
+> ⚠️ **Đây là đảo ngược một hành vi từng bị test khóa.** `tests/unittests/Program.cs`
+> trước có câu `"KHONG con dark-mode tu dong"`. Truy lại thì đó không phải quyết
+> định sản phẩm — `docs/journal/S001` mục "viết lại lớp Rendering" chỉ **mô tả**
+> bản dựng lại. Chủ project đã quyết theo quy ước, 20/08/2026.
+
+**Đầu trang CỐ Ý không đổi màu theo chế độ.** Ở chế độ tối, `primary` là
+`#66A3F2` nên đầu trang sẽ thành nền **sáng**, và chữ ký thương hiệu vốn chỉnh
+cho nền đậm tụt xuống **2,4:1** — dưới cả ngưỡng 3:1 dành cho chữ cỡ lớn. Đầu
+trang là mảng thương hiệu chứ không phải bề mặt đọc nội dung, nên nó dùng bộ
+biến riêng `--c-hero-*` luôn lấy từ bảng **sáng**. Chữ ký ở **chân trang** thì
+vẫn lật, vì chân trang nằm trong nền trang.
+
+**Bốn giá trị màu duy nhất còn viết cứng** là sắc chữ ký `tsudev`
+(`DesignTokens.BrandTsuOnDark` và ba giá trị cùng nhóm). Bộ token mô tả **vai
+trò giao diện**, chưa có chỗ cho **bản sắc thương hiệu** — đổi `primary` thì chữ
+ký vẫn phải giữ nguyên màu. ⬜ **Cần chủ project quyết:** đưa 4 giá trị này vào
+`tokens/design-tokens.json` (sửa file thuộc bộ quy ước — cần cho phép trực tiếp)
+hay để nguyên trong mã.
+
+**Ba thay đổi nhìn thấy được, do đi theo quy ước:**
+
+- Badge từ viên thuốc `999px` thành `radius-sm` 4px — `DESIGN_SYSTEM.md` mục 2
+  quy định badge dùng `radius-sm`.
+- Nhãn ở đầu trang **bỏ viết hoa toàn bộ** — mục 4 chỉ cho phép ALL CAPS với nhãn
+  ≤ 2 từ, mà ở đây có `"Thời điểm quét"`.
+- Bảng có viền bao ngoài bo `radius-lg` — mục "Table" của quy ước.
+
+Nền badge dùng `bg-surface` chứ không phải `bg-subtle`: màu `danger` trên nền
+`bg-subtle` chỉ đạt **4,3:1**, dưới ngưỡng AA 4,5:1 mà mục 1 bắt buộc.
+
+**Còn nợ (không nằm trong QU-4):** quy ước mục "Table" đòi **số căn phải**;
+`DataTable` hiện không mang thông tin kiểu cột nên chưa làm được. Warm Mode là
+lựa chọn **thủ công**, cần nút chuyển + chỗ lưu lựa chọn — báo cáo tĩnh chưa có.
+
+19 test ở mục 19 khóa lại: CSS viết tay **0 mã màu**, mọi `font-size`/`radius`
+đều qua `var()`, mọi biến được dùng đều có định nghĩa, không `@import`, không
+địa chỉ mạng, `url()` chỉ được là `data:`.
 
 ---
 

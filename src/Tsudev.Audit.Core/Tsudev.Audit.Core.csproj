@@ -13,5 +13,12 @@
          khi chi copy moi mot file exe. File ben ngoai (neu co) chi de GHI DE. -->
     <EmbeddedResource Include="Rules/detection-rules.json"
                       LogicalName="Tsudev.Audit.Core.Rules.detection-rules.json" />
+
+    <!-- Token giao dien duoc NHUNG vao assembly vi cung mot ly do: bao cao HTML
+         phai xem duoc khi copy sang may khac ma khong keo theo file phu nao.
+         tokens/design-tokens.json la NGUON CHAN LY DUY NHAT (AGENTS.md muc 6) -
+         sua mot gia tri o do la ca bao cao doi theo, khong phai sua trong ma. -->
+    <EmbeddedResource Include="../../tokens/design-tokens.json"
+                      LogicalName="Tsudev.Audit.Core.Rendering.design-tokens.json" />
   </ItemGroup>
 </Project>
