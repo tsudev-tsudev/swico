@@ -43,6 +43,8 @@ Nguồn: `docs/STATE.md` mục 3. Ở đây chỉ ghi mã việc + trạng thái
 
 ## Đã hoàn thành (mới nhất trên cùng)
 
+- 20/08/2026 — Xoá `tsudev-conventions.zip` sau khi đối chiếu đủ 11 file và
+  dựng lại được nguyên vẹn từ repo. Cách dựng lại: `docs/CONVENTIONS-README.md`.
 - 20/08/2026 — **QU-1 XONG:** đổi quy ước đặt tên phiên bản sang `YY.M.DDNN`
   (D-S004-1). Mã + 30 test mới + CI/CD + đóng gói + tài liệu. 264 PASS, 0 FAIL.
 - 20/08/2026 — Áp dụng bộ quy ước `tsudev-conventions` v1.0.0 vào repo
