@@ -1,11 +1,12 @@
 # STATE — Trạng thái sống của dự án
 
 > **File này là nguồn sự thật DUY NHẤT về "đang làm tới đâu".**
-> Phiên Claude Code mới **BẮT BUỘC đọc file này đầu tiên**, trước cả README.
-> Quy ước cập nhật: `docs/CONTINUITY.md`.
+> Phiên mới đọc `AGENTS.md` (quy ước bắt buộc) rồi tới **file này** — trước cả README.
+> Thứ tự đọc đầy đủ: `docs/CONTINUITY.md` mục 0.
 
-- **Cập nhật lần cuối:** 2026-08-19 (phiên S003)
-- **Phiên gần nhất:** S003 — `docs/journal/S003-2026-08-19.md`
+- **Cập nhật lần cuối:** 2026-08-20 (phiên S004)
+- **Phiên gần nhất:** S004 — `docs/journal/S004-2026-08-20.md`
+- **Quy ước bắt buộc:** `AGENTS.md` — **đọc trước cả file này**
 - **Giai đoạn:** đã phát hành `v26.8.18.2`; PR winget đang chờ gỡ một nhãn lỗi;
   `26.8.19` đã sẵn sàng trong repo nhưng **chưa gắn tag, chưa phát hành**;
   còn 4 việc chờ người dùng + 1 nhóm việc kỹ thuật
@@ -318,19 +319,56 @@ Cần người dùng xác nhận cái nào đúng rồi mới sửa.
 Đó là bản ghi những gì đã diễn ra; sửa chúng là làm sai sự thật. **Đừng "sửa cho
 đồng bộ".**
 
+### 4.7 ⛔ Hai quy ước đặt tên phiên bản đang cùng tồn tại trong repo
+
+Từ 20/08/2026, `docs/DESIGN_SYSTEM.md` mục 6 quy định dạng
+`tsudev-swico_26.8.1901_x64-setup.exe` (chuỗi version `26.8.1901`), **khác** với
+`docs/VERSIONING.md` (`swico-setup-26.8.19.exe`, version `26.8.19`).
+
+**QUYẾT ĐỊNH D-S004-1 (chủ project, 20/08/2026): chọn phương án B — đổi sang
+`docs/DESIGN_SYSTEM.md` mục 6.** Rủi ro đã được nêu trước khi quyết và vẫn được
+chấp nhận. `docs/VERSIONING.md` sẽ được viết lại theo dạng mới.
+
+> ⛔ **Ràng buộc bắt buộc khi thực hiện — đây là chỗ dễ làm hỏng nhất:**
+> `GitHubReleaseParser` phải nhận **CẢ HAI** dạng tên asset. Hai bản đã phát hành
+> (`26.8.18`, `26.8.18.2`) đang chạy trên máy người dùng và tìm file cài đặt
+> **theo tên** `swico-setup-<phiên-bản>.exe`. Nếu bản phát hành mới chỉ còn tên
+> `tsudev-swico_*_x64-setup.exe`, các máy đó **mất đường cập nhật trong im lặng**.
+
+Phân tích đầy đủ, gồm cả điểm quy ước mới **đúng** và điểm nó sai:
+`logs/handover/20260820-01_ap-dung-bo-quy-uoc.md` mục 5.3.
+
 ---
 
 ## 5. Bản đồ tài liệu
 
+### Bộ quy ước `tsudev-conventions` v1.0.0 (áp dụng 20/08/2026)
+
 | File | Nội dung |
 |---|---|
-| `docs/STATE.md` | **File này** — đọc đầu tiên |
+| `AGENTS.md` | **Quy ước bắt buộc — đọc TRƯỚC file này.** Bất khả xâm phạm |
+| `docs/DESIGN_SYSTEM.md` | Hệ màu 3 chế độ, typography, component. Bất khả xâm phạm |
+| `docs/PROJECT_STRUCTURE.md` | Cây thư mục chuẩn hệ sinh thái. Bất khả xâm phạm |
+| `docs/ARCHITECTURE.md` | Kiến trúc **của riêng repo này** + vì sao `src/` khác cây mẫu |
+| `docs/templates/HANDOVER.md` | Mẫu phiếu bàn giao |
+| `docs/CONVENTIONS-README.md` | README gốc của bộ quy ước |
+| `tokens/design-tokens.json` · `tokens/tokens.css` | Nguồn giá trị giao diện duy nhất |
+| `logs/STATE.md` | Điều phối agent — **không** phải trạng thái sản phẩm |
+| `logs/LOCKS.md` | Khóa file, kiểm tra TRƯỚC khi sửa bất kỳ file nào |
+| `logs/handover/` | Phiếu bàn giao |
+
+### Tài liệu của dự án
+
+| File | Nội dung |
+|---|---|
+| `docs/STATE.md` | **File này** — nguồn sự thật về trạng thái **sản phẩm** |
 | `docs/CONTINUITY.md` | Giao thức nối tiếp phiên, môi trường dev |
 | `docs/PLAN.md` | Lộ trình theo giai đoạn |
 | `docs/DECISIONS.md` | Đối chiếu với artifact kế hoạch, các quyết định đã chốt |
 | `docs/journal/S001-2026-08-18.md` | Toàn bộ diễn biến phiên S001, kèm **lý do** từng quyết định |
 | `docs/journal/S002-2026-08-19.md` | Phiên S002: sửa hash PR winget, streaming tiến trình quét |
 | `docs/journal/S003-2026-08-19.md` | Phiên S003: quy ước đặt tên phiên bản, cổng chặn trong CI/CD |
+| `docs/journal/S004-2026-08-20.md` | Phiên S004: áp bộ quy ước `tsudev-conventions` v1.0.0 |
 | `docs/SIGNING.md` | Ký số qua SignPath |
 | `docs/WINGET.md` | Nộp winget + cách dùng ngay |
 | `docs/UPDATES.md` | Chức năng tự cập nhật |

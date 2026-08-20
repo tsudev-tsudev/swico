@@ -7,10 +7,33 @@
 
 ## 0. Phiên mới BẮT ĐẦU TỪ ĐÂY — đọc theo đúng thứ tự này
 
-1. `docs/STATE.md` — đang ở đâu, cái gì có/thiếu, quyết định nào đã chốt.
-2. `docs/PLAN.md` — lộ trình đầy đủ, Phase nào ✅/🔄/⬜.
-3. `docs/journal/` — đọc file mới nhất (sắp theo tên) để biết **10 phút cuối
+> **Từ 20/08/2026 repo áp dụng bộ quy ước `tsudev-conventions` v1.0.0.**
+> `AGENTS.md` mục 0 cũng có một danh sách đọc đầu phiên. Hai danh sách **không
+> mâu thuẫn, chúng bổ sung nhau** — đọc theo thứ tự hợp nhất dưới đây.
+>
+> | Hỏi gì | Đọc file nào |
+> |---|---|
+> | Được phép làm gì, cấm gì | `AGENTS.md` |
+> | Sản phẩm đang tới đâu | `docs/STATE.md` |
+> | Ai đang giữ file nào | `logs/LOCKS.md` |
+> | Bàn giao gần nhất | `logs/handover/` (mới nhất theo tên) |
+
+1. `AGENTS.md` — quy ước bắt buộc, **bất khả xâm phạm**. Đọc trước tiên.
+2. `docs/STATE.md` — đang ở đâu, cái gì có/thiếu, quyết định nào đã chốt.
+   **Đây là nguồn sự thật về trạng thái sản phẩm**, thắng `logs/STATE.md` khi
+   hai file nói khác nhau (lý do: `logs/STATE.md` phần đầu).
+3. `docs/PLAN.md` — lộ trình đầy đủ, Phase nào ✅/🔄/⬜.
+4. `docs/journal/` — đọc file mới nhất (sắp theo tên) để biết **10 phút cuối
    cùng của phiên trước đã làm gì và đang định làm gì tiếp**.
+5. `logs/LOCKS.md` + `logs/handover/` — khóa file và phiếu bàn giao đang mở.
+
+**Hai hệ ghi chép, hai vai khác nhau — đừng gộp:**
+
+| | `docs/journal/SNNN-*.md` | `logs/handover/YYYYMMDD-NN_*.md` |
+|---|---|---|
+| Ghi | **theo dòng thời gian**, ngay sau mỗi mốc | **một lần**, lúc bàn giao |
+| Trả lời | "chuyện gì đã xảy ra, **vì sao** quyết vậy" | "phiên sau làm tiếp từ đâu" |
+| Sửa lại sau không | **Không** — là bản ghi lịch sử (`docs/STATE.md` mục 4.6) | Có — mục 6 điền sau khi xử lý |
 
 Sau đó chạy `git log --oneline -15` để đối chiếu lời kể với sự thật trong repo.
 
