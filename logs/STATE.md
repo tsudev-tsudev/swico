@@ -16,11 +16,14 @@
 > (`AGENTS.md` mục 1: mỗi tri thức ghi một lần duy nhất).
 
 - **Phiên gần nhất:** S005 — 20/08/2026
-- **Bàn giao gần nhất:** `logs/handover/20260820-02_khep-phien-S004.md`
+- **Bàn giao gần nhất:** `logs/handover/20260820-03_khep-phien-S005.md`
 
 ## Hàng đợi task (làm từ trên xuống)
 
 Nguồn: `docs/STATE.md` mục 3. Ở đây chỉ ghi mã việc + trạng thái.
+
+> **Việc làm được ngay, không cần ai:** `3.5`, `QU-7`. Mọi việc còn lại đều
+> chặn ở người dùng hoặc bên ngoài — xem cột lý do.
 
 - [ ] **QU-2** ⛔ Nhờ người dùng kiểm **Inno Setup** biên dịch được với
       `VersionInfoVersion=26.9.0901` (ngày một chữ số) — mục **F7/F8** trong
@@ -36,10 +39,13 @@ Nguồn: `docs/STATE.md` mục 3. Ở đây chỉ ghi mã việc + trạng thái
       — **làm được ngay, không cần người dùng**. Đáng giá nhất: chuyển sang xUnit
       (`tests/unittests/Program.cs` nay **1313 dòng** trong một file).
 - [ ] **3.6** ⬜ Quyết định có phát hành `26.8.1901` không — **đọc mục 4.7 trước**
-- [ ] **QU-6** ⬜ Quyết có đưa **4 sắc chữ ký thương hiệu** `tsudev` vào
+- [ ] **QU-6** ⛔ Quyết có đưa **4 sắc chữ ký thương hiệu** `tsudev` vào
       `tokens/design-tokens.json` không — hiện là bốn giá trị màu **duy nhất**
-      còn viết cứng (`DesignTokens.cs`). Sửa file thuộc bộ quy ước nên ⛔ **cần
+      còn viết cứng (`DesignTokens.cs`). Sửa file thuộc bộ quy ước nên **cần
       chủ project cho phép trực tiếp**. `docs/STATE.md` mục QU-4.
+- [ ] **QU-7** ⬜ Hai món quy ước còn nợ sau QU-4, **làm được ngay**: (a) số
+      **căn phải** trong bảng — `DataTable` chưa mang kiểu cột nên phải thêm;
+      (b) **Warm Mode** cần nút chuyển + chỗ lưu lựa chọn. `docs/STATE.md` mục QU-4.
 
 ## Đang thực hiện
 
