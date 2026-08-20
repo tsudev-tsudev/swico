@@ -2,7 +2,7 @@
 ;  tsudev SWICO - kich ban dong goi Inno Setup 6
 ;
 ;  Bien dich:
-;     iscc /DAppVersion=3.0.0 packaging\innosetup\swico.iss
+;     iscc /DAppVersion=26.8.1901 packaging\innosetup\swico.iss
 ;
 ;  Phien ban duoc TRUYEN VAO tu ben ngoai (/DAppVersion=...) chu khong viet
 ;  cung o day. Nguon su that duy nhat ve phien ban la Directory.Build.props;
@@ -10,7 +10,7 @@
 ; ============================================================================
 
 #ifndef AppVersion
-  #define AppVersion "26.8.19"
+  #define AppVersion "26.8.1901"
 #endif
 
 #define AppName        "tsudev SWICO"
@@ -62,7 +62,12 @@ LicenseFile=..\..\EULA.txt
 ; cac dau markdown, nen cho tro toi ban .txt sinh rieng cho trinh cai dat.
 InfoAfterFile=SAU-KHI-CAI.txt
 OutputDir=..\output
-OutputBaseFilename=swico-setup-{#AppVersion}
+;  Ten file cai dat theo docs/DESIGN_SYSTEM.md muc 6:
+;     {ten-app}_{YY}.{M}.{DD}{NN}_{arch}-setup.exe
+;  Chuc nang tu cap nhat tim file cai dat THEO TEN, nen ten o day phai khop
+;  voi ReleaseName.InstallerFileName trong ma nguon. Doi mot ben ma quen ben
+;  kia thi cap nhat hong IM LANG - xem docs/VERSIONING.md.
+OutputBaseFilename=tsudev-swico_{#AppVersion}_x64-setup
 ; Icon di kem trong repo. Neu thieu, ISCC bao loi va dung han - nen kiem tra
 ; su ton tai thay vi tin la no luon o do.
 #if FileExists(AddBackslash(SourcePath) + "..\..\assets\swico.ico")

@@ -62,7 +62,7 @@ Tải một file `.exe` từ mạng rồi chạy nó với quyền Administrator
 tra gì là **đúng mô tả của một cuộc tấn công**. Quy trình cập nhật vì thế:
 
 1. Đọc bản phát hành mới nhất từ GitHub API
-2. Tải `swico-setup-<phiên-bản>.exe`
+2. Tải file cài đặt (`tsudev-swico_<phiên-bản>_x64-setup.exe`)
 3. Tải `SHA256SUMS.txt` từ **cùng bản phát hành đó**
 4. **Đối chiếu SHA-256.** Không khớp → xoá file, dừng lại, báo lỗi
 5. Chỉ khi khớp mới chạy file cài đặt
@@ -101,23 +101,23 @@ Khi tắt, công cụ **không thực hiện bất kỳ kết nối mạng nào*
 > Quy ước đầy đủ, kèm lý do và các trường hợp bị cấm: **`docs/VERSIONING.md`**.
 > Phần dưới đây chỉ tóm tắt phần có liên quan tới chức năng cập nhật.
 
-Tên phát hành: `tsudev-swico-vYY.M.D[.N]`, trong đó `N` là **thứ tự của bản phát
-hành trong ngày** và chỉ xuất hiện từ bản thứ hai:
+Số hiệu: `YY.M.DDNN`, trong đó `NN` là **thứ tự của bản phát hành trong ngày**,
+đệm đủ hai chữ số và bắt đầu từ `01`:
 
 | Phiên bản | Nghĩa |
 |---|---|
-| `26.8.18` | bản thứ nhất ngày 18/08/2026 |
-| `26.8.18.2` | bản **thứ hai** ngày 18/08/2026 |
-| `26.8.19` | bản thứ nhất ngày 19/08/2026 |
-| `26.8.20` | bản thứ nhất ngày 20/08/2026 |
+| `26.8.1801` | bản thứ nhất ngày 18/08/2026 *(phát hành dưới tên cũ `26.8.18`)* |
+| `26.8.1802` | bản **thứ hai** ngày 18/08/2026 *(tên cũ `26.8.18.2`)* |
+| `26.8.1901` | bản thứ nhất ngày 19/08/2026 |
+| `26.8.2001` | bản thứ nhất ngày 20/08/2026 |
 
-Thứ tự so sánh: `26.8.18` < `26.8.18.2` < `26.8.19` < `26.8.20`.
+Thứ tự so sánh: `26.8.1801` < `26.8.1802` < `26.8.1901` < `26.8.2001`.
 
-Thành phần thứ tư là bắt buộc về mặt kỹ thuật: không có nó, hai bản dựng khác
+Hai chữ số `NN` là bắt buộc về mặt kỹ thuật: không có chúng, hai bản dựng khác
 nhau trong cùng một ngày sẽ mang **cùng một số hiệu** — điều không bao giờ được
 phép xảy ra với phần mềm đã phát hành.
 
-### Vì sao số đếm phải nằm sau một dấu chấm
+### Vì sao ngày và số thứ tự phải đệm đủ hai chữ số
 
 Chức năng trên trang này đứng hay đổ hoàn toàn dựa vào **một phép so sánh**:
 
@@ -127,12 +127,25 @@ else                            → chặn lại, bắt cập nhật
 ```
 
 Phép so sánh đó chỉ đúng khi thứ tự số hiệu trùng với thứ tự thời gian phát hành.
-Nếu dính số đếm liền vào ngày (`26.8.192` cho bản thứ hai ngày 19/8), thành phần
-thứ ba bị so sánh như **một số nguyên** và `192 > 20`: máy đang chạy bản đó sẽ
-**không bao giờ** nhận được bản ngày 20/8, còn máy chạy bản ngày 20/8 lại bị mời
-hạ cấp. Đó là lý do dấu chấm không phải chuyện thẩm mỹ.
+Thành phần thứ ba được đọc bằng phép chia cho 100. Đệm đủ thì giá trị của nó luôn
+bằng `DD × 100 + NN`, nên `1901 < 1902 < 2001` — đúng thứ tự. Bỏ đệm đi thì ngày 9
+bản 1 thành `91`, đọc ngược lại ra **ngày 0 bản 91**, và tên file cài đặt sinh ra
+từ đó là tên không ai tìm thấy.
 
-Điều này được khoá lại bằng test — xem mục `13b` trong `tests/unittests/Program.cs`.
+Điều này được khoá lại bằng test quét **cả tháng** (124 số hiệu) — xem mục `13b`
+trong `tests/unittests/Program.cs`.
+
+### Đọc được cả dạng cũ
+
+Hai bản `26.8.18` và `26.8.18.2` đã phát hành theo dạng cũ. Công cụ đọc được cả
+hai dạng và quy về cùng một giá trị (`26.8.18` ≡ `26.8.1801`), và
+`GitHubReleaseParser` nhận **cả hai** dạng tên tệp đính kèm.
+
+> ⛔ **Chiều ngược lại thì không.** `swico.exe` của `26.8.18` và `26.8.18.2` đã
+> nằm trên máy người dùng với bộ đọc **cũ** biên dịch sẵn bên trong; nó không đọc
+> được `26.8.1901`. Hai bản đó rơi vào nhánh *không kiểm tra được* — **vẫn quét
+> bình thường kèm ghi chú**, nhưng mất khả năng cập nhật bắt buộc. Cách gỡ:
+> `docs/VERSIONING.md` mục 5.
 
 ## Kiến trúc
 

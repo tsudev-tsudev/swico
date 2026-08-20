@@ -646,32 +646,56 @@ Check(ExitCodes.Combine(ExitCodes.Ok, ExitCodes.Ok) == ExitCodes.Ok, "moi thu bi
 Check(ExitCodes.Describe(ExitCodes.VerdictWarning).Contains("CẢNH BÁO", StringComparison.Ordinal),
     "mo ta ma thoat bang tieng Viet");
 
-Console.WriteLine("\n=== 13. So hieu phien ban (CalVer) ===");
+Console.WriteLine("\n=== 13. So hieu phien ban (CalVer YY.M.DDNN) ===");
 
 static VersionNumber V(string s) { VersionNumber.TryParse(s, out var v); return v; }
-Check(V("26.8.18") == new VersionNumber(26, 8, 18), "doc dung 26.8.18");
-Check(V("v26.8.18") == new VersionNumber(26, 8, 18), "chap nhan tien to 'v' cua tag GitHub");
-Check(V("26.8.18+9e1f2c") == new VersionNumber(26, 8, 18), "cat bam commit do SDK them");
-Check(V("26.8.20-rc1") == new VersionNumber(26, 8, 20), "cat hau to -rc1");
-Check(V("26.8.20") > V("26.8.18"), "cung thang: ngay lon hon la moi hon");
-Check(V("26.9.3") > V("26.8.20"), "sang thang moi: 26.9.3 moi hon 26.8.20");
-Check(V("27.1.1") > V("26.12.31"), "sang nam moi");
+
+// --- Dang MOI (docs/DESIGN_SYSTEM.md muc 6) ---
+Check(V("26.8.1901") == new VersionNumber(26, 8, 19), "doc dung 26.8.1901 = ngay 19 ban 01");
+Check(V("26.8.1902") == new VersionNumber(26, 8, 19, 2), "doc dung 26.8.1902 = ngay 19 ban 02");
+Check(V("v26.8.1901") == new VersionNumber(26, 8, 19), "chap nhan tien to 'v' cua tag GitHub");
+Check(V("26.8.1901+9e1f2c") == new VersionNumber(26, 8, 19), "cat bam commit do SDK them");
+Check(V("26.8.2001-rc1") == new VersionNumber(26, 8, 20), "cat hau to -rc1");
+Check(V("tsudev-swico_26.8.1902") == new VersionNumber(26, 8, 19, 2),
+    "doc duoc ca TEN PHAT HANH day du, khong chi tag");
+Check(V("TSUDEV-SWICO_26.8.1901") == new VersionNumber(26, 8, 19),
+    "tien to ten phat hanh khong phan biet hoa thuong");
+Check(V("tsudev-swico_26.8.1901_x64-setup.exe") == new VersionNumber(26, 8, 19),
+    "doc duoc so hieu tu chinh TEN FILE CAI DAT");
+
+// Ngay mot chu so: so 0 dung dau la BAT BUOC trong ten file...
+Check(V("26.9.0901") == new VersionNumber(26, 9, 9), "26.9.0901 = ngay 9 thang 9 ban 01");
+// ...nhung MSBuild chuan hoa <VersionPrefix>26.9.0901</VersionPrefix> thanh
+// AssemblyVersion 26.9.901. Ca hai cach viet PHAI ra cung mot gia tri, neu
+// khong thi exe se tu bao no la mot phien ban khac voi ten file cua chinh no.
+Check(V("26.9.901") == V("26.9.0901"), "'901' va '0901' doc ra CUNG mot so hieu");
+
+// --- DOC DUOC DANG CU: hai ban 26.8.18 va 26.8.18.2 DA PHAT HANH ra ngoai ---
+Check(V("26.8.18") == new VersionNumber(26, 8, 18), "van doc duoc dang cu 26.8.18");
+Check(V("26.8.18.2") == new VersionNumber(26, 8, 18, 2), "van doc duoc dang cu 26.8.18.2");
+Check(V("tsudev-swico-v26.8.19.2") == new VersionNumber(26, 8, 19, 2),
+    "van doc duoc TEN PHAT HANH dang cu");
+Check(V("26.8.18") == V("26.8.1801"),
+    "BAN LE CUA CA CUOC CHUYEN DOI: 26.8.18 (da phat hanh) va 26.8.1801 la MOT");
+Check(V("26.8.18.2") == V("26.8.1802"), "26.8.18.2 (da phat hanh) va 26.8.1802 la MOT");
+
+// --- Thu tu so sanh ---
+Check(V("26.8.2001") > V("26.8.1901"), "cung thang: ngay lon hon la moi hon");
+Check(V("26.9.0301") > V("26.8.2001"), "sang thang moi");
+Check(V("27.1.0101") > V("26.12.3101"), "sang nam moi");
 Check(!V("linh tinh").IsValid && !V("").IsValid && !V("26.8").IsValid,
     "chuoi la / rong / thieu thanh phan -> khong hop le");
-Check(!V("26.13.1").IsValid && !V("26.8.99").IsValid, "thang/ngay ngoai pham vi -> khong hop le");
+Check(!V("26.13.0101").IsValid, "thang ngoai pham vi -> khong hop le");
+Check(!V("26.8.3201").IsValid && !V("26.8.0001").IsValid, "ngay ngoai pham vi -> khong hop le");
+Check(!V("26.8.1900").IsValid, "so thu tu 00 -> khong hop le (dem tu 01)");
 
-// Thanh phan thu tu cho truong hop phat hanh lai TRONG CUNG MOT NGAY.
-// Thieu no thi hai ban dung khac nhau se mang cung mot so hieu.
-// So dem bat dau tu .2 - xem docs/VERSIONING.md muc 2.1.
-Check(V("26.8.18.2") > V("26.8.18"), "26.8.18.2 moi hon 26.8.18");
-Check(V("26.8.18.3") > V("26.8.18.2"), "so lan phat hanh lai tang dan");
-Check(V("26.8.19") > V("26.8.18.5"), "sang ngay moi van thang moi lan phat hanh lai");
-Check(V("26.8.18.2").ToString() == "26.8.18.2" && V("26.8.18").ToString() == "26.8.18",
-    "chi hien thanh phan thu tu khi khac 0");
-Check(V("tsudev-swico-v26.8.19.2") == new VersionNumber(26, 8, 19, 2),
-    "doc duoc ca TEN PHAT HANH day du, khong chi tag");
-Check(V("TSUDEV-SWICO-V26.8.19") == new VersionNumber(26, 8, 19),
-    "tien to ten phat hanh khong phan biet hoa thuong");
+// --- Viet ra chuoi ---
+Check(V("26.8.1901").ToString() == "26.8.1901", "viet ra dung dang YY.M.DDNN");
+Check(V("26.8.1902").ToString() == "26.8.1902", "ban thu hai giu nguyen so thu tu");
+Check(V("26.8.18").ToString() == "26.8.1801", "so hieu dang cu duoc viet ra theo dang MOI");
+Check(V("26.9.0901").ToString() == "26.9.0901", "GIU so 0 dung dau: ngay 9 ban 1 -> '0901'");
+Check(new VersionNumber(26, 9, 9).ToString() == "26.9.0901",
+    "dem du hai chu so - '26.9.91' se doc nguoc lai thanh ngay 0 ban 91");
 
 Console.WriteLine("\n=== 13b. Quy uoc dat ten phien ban (docs/VERSIONING.md) ===");
 
@@ -679,45 +703,59 @@ static bool Ok(string? s) { return ReleaseName.Validate(s, out _, out _); }
 static string? Why(string s) { ReleaseName.Validate(s, out _, out var p); return p; }
 
 // --- Dung quy uoc ---
-Check(Ok("26.8.19") && Ok("v26.8.19") && Ok("tsudev-swico-v26.8.19"),
+Check(Ok("26.8.1901") && Ok("v26.8.1901") && Ok("tsudev-swico_26.8.1901"),
     "nhan ca ba dang viet cua ban thu nhat trong ngay");
-Check(Ok("26.8.19.2") && Ok("tsudev-swico-v26.8.19.3"),
-    "nhan so dem cua ban thu hai va thu ba trong ngay");
-Check(Ok("26.9.1") && Ok("26.12.31") && Ok("27.1.1"),
-    "thang/ngay mot chu so, va ranh gioi cuoi nam");
+Check(Ok("26.8.1902") && Ok("tsudev-swico_26.8.1903"),
+    "nhan so thu tu cua ban thu hai va thu ba trong ngay");
+Check(Ok("26.9.0101") && Ok("26.12.3101") && Ok("27.1.0101"),
+    "thang mot chu so, ngay mot chu so, va ranh gioi cuoi nam");
+Check(Ok("26.9.0901"), "NHAN so 0 dung dau o thanh phan thu ba - o do no BAT BUOC");
 
-// --- Sai quy uoc: ".1" ---
-// Ban thu nhat da co ten la 26.8.19 roi; cho phep .1 nghia la MOT ban phat
-// hanh co HAI cai ten.
-Check(!Ok("26.8.19.1"), "TU CHOI so dem '.1'");
-Check(Why("26.8.19.1")!.Contains("bắt đầu từ '.2'", StringComparison.Ordinal),
-    "loi cua '.1' noi ro so dem bat dau tu dau");
-Check(!Ok("26.8.19.0"), "TU CHOI so dem '.0' - cung la mot cach viet khac cua ban thu nhat");
+// --- Sai quy uoc: dang CU ---
+// Day la loi hay gap nhat trong giai doan chuyen doi: nguoi go dang chep tu
+// mot ban phat hanh cu. Bao loi phai chi ra cach viet moi TUONG DUONG.
+Check(!Ok("26.8.19") && !Ok("26.8.19.2"), "TU CHOI dang CU (YY.M.D va YY.M.D.N)");
+Check(Why("26.8.19.2")!.Contains("26.8.1902", StringComparison.Ordinal),
+    "loi cua dang cu chi thang ra cach viet moi tuong duong");
 
-// --- Sai quy uoc: so 0 dung dau ---
-// 26.08.09 va 26.8.9 la CUNG mot so hieu nhung KHAC chuoi -> hai ten file cai
-// dat cho cung mot ban, trong khi cong cu tim file cai dat THEO TEN.
-Check(!Ok("26.08.19") && !Ok("26.8.09"), "TU CHOI so 0 dung dau");
-Check(Why("26.08.19")!.Contains("0 đứng đầu", StringComparison.Ordinal),
+// --- Sai quy uoc: thanh phan thu ba khong du bon chu so ---
+// '901' va '0901' cung doc ra ngay 9 ban 1, nhung o khau phat hanh thi mot so
+// hieu phai co DUNG MOT cach viet - neu khong se thanh hai ten file cai dat.
+Check(!Ok("26.9.901"), "TU CHOI thanh phan thu ba chi co 3 chu so");
+Check(Why("26.9.901")!.Contains("4 chữ số", StringComparison.Ordinal),
+    "loi noi ro phai du 4 chu so");
+Check(!Ok("26.8.1900"), "TU CHOI so thu tu '00' - ban thu nhat la '01'");
+
+// --- Sai quy uoc: so 0 dung dau o NAM/THANG ---
+// 26.08.1901 va 26.8.1901 la CUNG mot so hieu nhung KHAC chuoi -> hai ten file
+// cai dat cho cung mot ban, trong khi cong cu tim file cai dat THEO TEN.
+Check(!Ok("26.08.1901"), "TU CHOI so 0 dung dau o thang");
+Check(Why("26.08.1901")!.Contains("0 đứng đầu", StringComparison.Ordinal),
     "loi so 0 dung dau noi dung ban chat");
 
 // --- Sai quy uoc: hau to, thieu/thua thanh phan ---
 // Luu y su khac biet co chu dich voi VersionNumber.TryParse: no CAT hau to vi
 // no doc du lieu tu mang; con Validate gac cong khau phat hanh nen KHAT KHE.
-Check(V("26.8.19-rc1").IsValid && !Ok("26.8.19-rc1"),
+Check(V("26.8.1901-rc1").IsValid && !Ok("26.8.1901-rc1"),
     "TryParse de dai voi '-rc1', Validate thi khong");
-Check(!Ok("26.8") && !Ok("26.8.19.2.1"), "TU CHOI thieu hoac thua thanh phan");
+Check(!Ok("26.8") && !Ok("26.8.1901.2.1"), "TU CHOI thieu hoac thua thanh phan");
 Check(!Ok("") && !Ok(null) && !Ok("   "), "TU CHOI chuoi rong");
-Check(!Ok("26.13.1") && !Ok("26.8.99"), "TU CHOI thang/ngay ngoai pham vi");
-Check(!Ok("2026.8.19"), "TU CHOI nam bon chu so - CalVer dung nam hai chu so");
+Check(!Ok("26.13.0101") && !Ok("26.8.3201"), "TU CHOI thang/ngay ngoai pham vi");
+Check(!Ok("2026.8.1901"), "TU CHOI nam bon chu so - CalVer dung nam hai chu so");
 
 // --- Dung ten ---
-Check(ReleaseName.For(new VersionNumber(26, 8, 19)) == "tsudev-swico-v26.8.19",
+Check(ReleaseName.For(new VersionNumber(26, 8, 19)) == "tsudev-swico_26.8.1901",
     "dung ten phat hanh cua ban thu nhat");
-Check(ReleaseName.For(new VersionNumber(26, 8, 19, 2)) == "tsudev-swico-v26.8.19.2",
+Check(ReleaseName.For(new VersionNumber(26, 8, 19, 2)) == "tsudev-swico_26.8.1902",
     "dung ten phat hanh cua ban thu hai");
-Check(ReleaseName.TagFor(new VersionNumber(26, 8, 19, 2)) == "v26.8.19.2",
+Check(ReleaseName.TagFor(new VersionNumber(26, 8, 19, 2)) == "v26.8.1902",
     "tag git dung dang ngan de release.yml bat duoc mau 'v*'");
+Check(ReleaseName.InstallerFileName(new VersionNumber(26, 8, 19)) == "tsudev-swico_26.8.1901_x64-setup.exe",
+    "ten file cai dat dung dinh dang cua DESIGN_SYSTEM muc 6");
+Check(ReleaseName.PortableFileName(new VersionNumber(26, 8, 19, 2)) == "tsudev-swico_26.8.1902_x64-portable.zip",
+    "ten ban portable dung dinh dang");
+Check(ReleaseName.InstallerFileName(new VersionNumber(26, 9, 9)) == "tsudev-swico_26.9.0901_x64-setup.exe",
+    "ngay mot chu so van ra ten file du hai chu so");
 
 // --- Dem thu tu trong ngay ---
 Check(ReleaseName.OrdinalOfDay(new VersionNumber(26, 8, 19)) == 1,
@@ -725,9 +763,9 @@ Check(ReleaseName.OrdinalOfDay(new VersionNumber(26, 8, 19)) == 1,
 Check(ReleaseName.OrdinalOfDay(new VersionNumber(26, 8, 19, 2)) == 2,
     "so dem CHINH LA thu tu cua ban trong ngay");
 Check(ReleaseName.NextSameDay(new VersionNumber(26, 8, 19)) == new VersionNumber(26, 8, 19, 2),
-    "phat hanh lai lan dau trong ngay -> .2");
+    "phat hanh lai lan dau trong ngay -> ban 02");
 Check(ReleaseName.NextSameDay(new VersionNumber(26, 8, 19, 2)) == new VersionNumber(26, 8, 19, 3),
-    "phat hanh lai tiep -> .3");
+    "phat hanh lai tiep -> ban 03");
 Check(ReleaseName.ForDate(new DateOnly(2026, 8, 19)) == new VersionNumber(26, 8, 19),
     "sinh so hieu tu ngay thang");
 Check(ReleaseName.ForDate(new DateOnly(2027, 1, 1)) == new VersionNumber(27, 1, 1),
@@ -735,23 +773,45 @@ Check(ReleaseName.ForDate(new DateOnly(2027, 1, 1)) == new VersionNumber(27, 1, 
 
 // --- CA QUAN TRONG NHAT CUA CA MUC NAY ---
 //
-// Day dung la cho ma phuong an "dinh so dem lien vao ngay" (26.8.192) lam
-// hong: 192 > 20 nen ban thu 2 ngay 19/8 se duoc coi la MOI HON ban ngay 20/8,
-// va may dang chay no se KHONG BAO GIO nhan duoc ban cap nhat sau.
+// Quet CA THANG: moi ngay, moi so thu tu deu phai (a) viet ra roi doc lai duoc
+// nguyen ven, (b) qua duoc cong Validate, va (c) giu dung thu tu tang dan.
 //
-// Neu mot phien sau doi lai cach danh so, chinh ca kiem tra nay se do.
-Check(V("26.8.19") < V("26.8.19.2") && V("26.8.19.2") < V("26.8.19.3")
-   && V("26.8.19.3") < V("26.8.20"),
-    "THU TU TRONG CHUOI: 26.8.19 < 26.8.19.2 < 26.8.19.3 < 26.8.20");
-Check(new UpdateChecker(new FakeFeed(Rel("v26.8.20"))).Check("26.8.19.3").MustUpdate,
+// Quet toan bo thay vi kiem vai ca le chinh la cach bat duoc loi cua ngay 1-9,
+// noi ma so 0 dung dau quyet dinh dung/sai. Neu mot phien sau doi lai cach danh
+// so, ca kiem tra nay se do.
+var everyRelease = new List<VersionNumber>();
+for (var day = 1; day <= 31; day++)
+    for (var ord = 1; ord <= 4; ord++)
+        everyRelease.Add(new VersionNumber(26, 9, day, ord == 1 ? 0 : ord));
+
+Check(everyRelease.All(v => V(v.ToString()) == v),
+    "CA THANG: viet ra roi doc lai duoc nguyen ven (124 so hieu)");
+Check(everyRelease.All(v => Ok(v.ToString())),
+    "CA THANG: moi so hieu sinh ra deu qua duoc cong Validate");
+Check(everyRelease.Zip(everyRelease.Skip(1)).All(pair => pair.First < pair.Second),
+    "CA THANG: thu tu tang dan lien tuc, khong dut o ranh gioi ngay nao");
+Check(V("26.9.0901") < V("26.9.1001") && V("26.9.0904") < V("26.9.1001"),
+    "ranh gioi ngay 9 -> 10: cho de sai nhat khi dem so 0");
+
+Check(V("26.8.1901") < V("26.8.1902") && V("26.8.1902") < V("26.8.1903")
+   && V("26.8.1903") < V("26.8.2001"),
+    "THU TU TRONG CHUOI: 26.8.1901 < 26.8.1902 < 26.8.1903 < 26.8.2001");
+Check(new UpdateChecker(new FakeFeed(Rel("v26.8.2001"))).Check("26.8.1903").MustUpdate,
     "may chay ban thu 3 ngay 19/8 VAN nhan duoc ban ngay 20/8");
-Check(!new UpdateChecker(new FakeFeed(Rel("v26.8.19.2"))).Check("26.8.20").MustUpdate,
+Check(!new UpdateChecker(new FakeFeed(Rel("v26.8.1902"))).Check("26.8.2001").MustUpdate,
     "may chay ban ngay 20/8 KHONG bi moi ha cap ve ban 19/8");
+
+// Ban DA PHAT HANH theo dang cu van phai nhan duoc ban moi theo dang moi.
+Check(new UpdateChecker(new FakeFeed(Rel("v26.8.2001"))).Check("26.8.18.2").MustUpdate,
+    "may dang chay 26.8.18.2 (dang cu) VAN nhan duoc ban 26.8.2001 (dang moi)");
+Check(new UpdateChecker(new FakeFeed(Rel("v26.8.1801"))).Check("26.8.18").Status
+        == UpdateStatus.UpToDate,
+    "26.8.1801 KHONG bi moi cap nhat khi dang chay 26.8.18 - cung mot ban");
 
 Console.WriteLine("\n=== 14. Cong kiem tra cap nhat ===");
 
-static ReleaseInfo Rel(string tag, string? installer = "https://x/swico-setup.exe",
-                      string? portable = "https://x/swico-portable.zip")
+static ReleaseInfo Rel(string tag, string? installer = "https://x/tsudev-swico_x64-setup.exe",
+                      string? portable = "https://x/tsudev-swico_x64-portable.zip")
     => new(V(tag), tag, "https://x/releases/" + tag, installer, "https://x/SHA256SUMS.txt",
            DateTimeOffset.Now, portable);
 
@@ -795,7 +855,7 @@ var portable = new UpdateChecker(new FakeFeed(Rel("v26.8.20"))).Check("26.8.19",
 Check(portable.MustUpdate, "ban portable co ban moi -> VAN chan quet (bo luat cu van la bo luat cu)");
 Check(!portable.CanSelfInstall && portable.MustUpdateManually,
     "ban portable KHONG tu cai duoc -> phai cap nhat thu cong");
-Check(portable.Message!.Contains("swico-portable.zip", StringComparison.Ordinal),
+Check(portable.Message!.Contains("tsudev-swico_x64-portable.zip", StringComparison.Ordinal),
     "chi ro cho tai ban portable moi, khong phai file setup");
 
 var installed = new UpdateChecker(new FakeFeed(Rel("v26.8.20"))).Check("26.8.19", InstallKind.Installed);
@@ -822,12 +882,12 @@ Console.WriteLine("\n=== 15. Doc du lieu ban phat hanh tu GitHub ===");
 
 const string releaseJson = """
 {
-  "tag_name": "v26.8.20",
-  "html_url": "https://github.com/tsudev-tsudev/swico/releases/tag/v26.8.20",
+  "tag_name": "v26.8.2001",
+  "html_url": "https://github.com/tsudev-tsudev/swico/releases/tag/v26.8.2001",
   "published_at": "2026-08-20T10:00:00Z",
   "assets": [
-    { "name": "swico-setup-26.8.20.exe", "browser_download_url": "https://x/swico-setup-26.8.20.exe" },
-    { "name": "swico-portable-26.8.20.zip", "browser_download_url": "https://x/portable.zip" },
+    { "name": "tsudev-swico_26.8.2001_x64-setup.exe", "browser_download_url": "https://x/tsudev-swico_26.8.2001_x64-setup.exe" },
+    { "name": "tsudev-swico_26.8.2001_x64-portable.zip", "browser_download_url": "https://x/portable.zip" },
     { "name": "SHA256SUMS.txt", "browser_download_url": "https://x/SHA256SUMS.txt" },
     { "name": "swico.exe", "browser_download_url": "https://x/swico.exe" }
   ]
@@ -835,8 +895,8 @@ const string releaseJson = """
 """;
 var parsed = GitHubReleaseParser.Parse(releaseJson, out var perr);
 Check(parsed is not null && perr is null, "doc duoc JSON ban phat hanh");
-Check(parsed!.Version == V("26.8.20"), "lay dung phien ban tu tag_name");
-Check(parsed.InstallerUrl == "https://x/swico-setup-26.8.20.exe",
+Check(parsed!.Version == V("26.8.2001"), "lay dung phien ban tu tag_name");
+Check(parsed.InstallerUrl == "https://x/tsudev-swico_26.8.2001_x64-setup.exe",
     "chon dung file cai dat, KHONG nham sang swico.exe hay ban portable");
 Check(parsed.ChecksumsUrl == "https://x/SHA256SUMS.txt", "tim thay file ma bam");
 Check(parsed.PublishedAt is not null, "doc duoc thoi diem phat hanh");
@@ -849,17 +909,47 @@ Check(parsed.PortableUrl == "https://x/portable.zip",
     "nhan ra ban portable .zip trong danh sach tep dinh kem");
 Check(GitHubReleaseParser.Parse("""{"tag_name":"v26.8.20"}""", out _)!.PortableUrl is null,
     "khong co tep dinh kem -> khong co ban portable");
-Check(GitHubReleaseParser.Parse("""{"tag_name":"v26.8.20"}""", out _)!.InstallerUrl is null,
+Check(GitHubReleaseParser.Parse("""{"tag_name":"v26.8.2001"}""", out _)!.InstallerUrl is null,
     "khong co danh sach tep dinh kem -> khong co file cai dat");
+
+// NHAN CA HAI DANG TEN - bu tru bat buoc cua viec doi quy uoc dat ten.
+// Mot ban phat hanh CU (hoac mot ban moi vi ly do nao do con kem tep ten cu)
+// van phai duoc nhan ra. Bo ve nay thi cap nhat hong IM LANG: nguoi dung nhan
+// duoc thong bao "phai tu cap nhat" thay vi duoc cap nhat.
+const string oldNamesJson = """
+{
+  "tag_name": "v26.8.18.2",
+  "assets": [
+    { "name": "swico-setup-26.8.18.2.exe", "browser_download_url": "https://x/old-setup.exe" },
+    { "name": "swico-portable-26.8.18.2.zip", "browser_download_url": "https://x/old-portable.zip" }
+  ]
+}
+""";
+var oldNames = GitHubReleaseParser.Parse(oldNamesJson, out _);
+Check(oldNames!.InstallerUrl == "https://x/old-setup.exe",
+    "VAN nhan ra file cai dat ten DANG CU (swico-setup-*.exe)");
+Check(oldNames.PortableUrl == "https://x/old-portable.zip",
+    "VAN nhan ra ban portable ten DANG CU (swico-portable-*.zip)");
+Check(oldNames.Version == V("26.8.1802"), "doc duoc tag dang cu, quy ve dang moi");
+
+Check(GitHubReleaseParser.IsInstallerAsset("tsudev-swico_26.8.2001_x64-setup.exe") &&
+      GitHubReleaseParser.IsInstallerAsset("swico-setup-26.8.18.exe"),
+    "IsInstallerAsset nhan ca hai dang ten");
+Check(!GitHubReleaseParser.IsInstallerAsset("swico.exe") &&
+      !GitHubReleaseParser.IsInstallerAsset("tsudev-swico_26.8.2001_x64-portable.zip"),
+    "IsInstallerAsset KHONG nham sang swico.exe hay ban portable");
+Check(GitHubReleaseParser.IsPortableAsset("tsudev-swico_26.8.2001_x64-portable.zip") &&
+      GitHubReleaseParser.IsPortableAsset("swico-portable-26.8.18.zip"),
+    "IsPortableAsset nhan ca hai dang ten");
 
 Console.WriteLine("\n=== 16. Doi chieu ma bam truoc khi chay file tai ve ===");
 
 const string sums = """
-06a284ef82dc8b78c278e8053ffb028914e896b48d1b36505ecb13a24caa9c82  swico-portable-26.8.20.zip
-997bd2318999d0fd7fe82238cecfe51ab7ee7c08c0bcd4b9fe1910aa5e884abb  swico-setup-26.8.20.exe
+06a284ef82dc8b78c278e8053ffb028914e896b48d1b36505ecb13a24caa9c82  tsudev-swico_26.8.2001_x64-portable.zip
+997bd2318999d0fd7fe82238cecfe51ab7ee7c08c0bcd4b9fe1910aa5e884abb  tsudev-swico_26.8.2001_x64-setup.exe
 c23bb0ae0b7d02fe90736f762a7ecdd6a13a199c85f8243c344095f7488d80d7  swico.exe
 """;
-Check(ChecksumFile.Find(sums, "swico-setup-26.8.20.exe") == "997bd2318999d0fd7fe82238cecfe51ab7ee7c08c0bcd4b9fe1910aa5e884abb",
+Check(ChecksumFile.Find(sums, "tsudev-swico_26.8.2001_x64-setup.exe") == "997bd2318999d0fd7fe82238cecfe51ab7ee7c08c0bcd4b9fe1910aa5e884abb",
     "tim dung ma bam theo ten tep");
 Check(ChecksumFile.Find(sums, "swico.exe") == "c23bb0ae0b7d02fe90736f762a7ecdd6a13a199c85f8243c344095f7488d80d7",
     "khong khop nham dong khac co ten la tien to");

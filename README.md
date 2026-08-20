@@ -15,23 +15,27 @@ Kiểm tra tình trạng bản quyền Windows/Office và thu thập cấu hình
 
 ## Đánh số phiên bản
 
-Mỗi bản phát hành mang tên `tsudev-swico-vYY.M.D[.N]` — **CalVer**, phiên bản
-chính là ngày phát hành:
+Mỗi bản phát hành mang tên `tsudev-swico_YY.M.DDNN_x64-setup.exe` — **CalVer**,
+phiên bản chính là ngày phát hành, hai chữ số cuối là **thứ tự bản trong ngày**:
 
-| Tên bản phát hành | Nghĩa |
+| Tên file cài đặt | Nghĩa |
 |---|---|
-| `tsudev-swico-v26.8.19` | bản thứ nhất ngày 19/08/2026 |
-| `tsudev-swico-v26.8.19.2` | bản **thứ hai** cùng ngày 19/08/2026 |
-| `tsudev-swico-v26.9.3` | bản thứ nhất ngày 03/09/2026 |
+| `tsudev-swico_26.8.1901_x64-setup.exe` | bản thứ **01** ngày 19/08/2026 |
+| `tsudev-swico_26.8.1902_x64-setup.exe` | bản thứ **02** cùng ngày 19/08/2026 |
+| `tsudev-swico_26.9.0301_x64-setup.exe` | bản thứ 01 ngày 03/09/2026 |
 
-Số cuối chỉ xuất hiện từ bản thứ hai trong ngày, và nó **chính là thứ tự** của
-bản đó trong ngày. Không có số 0 thừa ở đầu (`26.8.19`, không phải `26.08.19`)
-để khớp cách .NET và Inno Setup diễn giải số hiệu. Ưu điểm: nhìn tên file
-`swico-setup-26.8.19.exe` là biết ngay bản đó cũ hay mới, không cần tra bảng.
+Ngày và số thứ tự đều **đệm đủ hai chữ số**. Đó không phải chuyện thẩm mỹ: thành
+phần thứ ba được đọc bằng phép chia cho 100, nên `26.9.0901` là ngày 9 bản 1, còn
+`26.9.91` sẽ đọc ra ngày 0 bản 91 — một số hiệu không tồn tại. Nhờ đệm đủ, thứ tự
+so sánh `1901 < 1902 < 2001` luôn khớp thứ tự thời gian.
 
-Số đếm nằm **sau một dấu chấm** chứ không dính liền vào ngày, vì `26.8.192` sẽ
-được so sánh như số nguyên `192 > 20` và làm hỏng chính chức năng tự cập nhật.
+Ưu điểm: nhìn tên file là biết ngay bản đó cũ hay mới, không cần tra bảng.
+
+> Hai bản phát hành đầu tiên (`26.8.18`, `26.8.18.2`) dùng quy ước cũ và **giữ
+> nguyên tên**. Công cụ đọc được cả hai dạng.
+
 Quy ước đầy đủ, kèm những gì bị cấm và vì sao: [`docs/VERSIONING.md`](docs/VERSIONING.md).
+Quy ước gốc của hệ sinh thái: [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) mục 6.
 
 ## Cài đặt
 
@@ -39,8 +43,8 @@ Tải từ [Releases](https://github.com/tsudev-tsudev/swico/releases):
 
 | Cách | Tệp | Dùng khi |
 |---|---|---|
-| **Cài đặt** | `swico-setup-<phiên-bản>.exe` | Cài cố định, có mục gỡ cài đặt, hỗ trợ `/VERYSILENT` để triển khai hàng loạt |
-| **Portable** | `swico-portable-<phiên-bản>.zip` | Cắm USB đi từng máy — giải nén chạy thẳng, không đụng registry |
+| **Cài đặt** | `tsudev-swico_<phiên-bản>_x64-setup.exe` | Cài cố định, có mục gỡ cài đặt, hỗ trợ `/VERYSILENT` để triển khai hàng loạt |
+| **Portable** | `tsudev-swico_<phiên-bản>_x64-portable.zip` | Cắm USB đi từng máy — giải nén chạy thẳng, không đụng registry |
 | **Chỉ file exe** | `swico.exe` | Nhúng vào script hoặc RMM |
 
 Cả ba chứa **cùng một chương trình**; chỉ khác cách giao đến máy đích. Đối chiếu
@@ -53,8 +57,8 @@ cũng xoá luôn bước giải nén runtime mỗi lần khởi động.
 
 | Tệp | 26.8.18 | 26.8.18.2 | |
 |---|---|---|---|
-| `swico-setup-*.exe` | 29,8 MB | **24,9 MB** | giảm 16,4% |
-| `swico-portable-*.zip` | 29,1 MB | 30,3 MB | tăng 4,2% |
+| file cài đặt | 29,8 MB | **24,9 MB** | giảm 16,4% |
+| bản portable `.zip` | 29,1 MB | 30,3 MB | tăng 4,2% |
 | `swico.exe` tải trực tiếp | 34,0 MB | 75,8 MB | **tăng 123%** |
 
 Trình cài đặt nén bằng LZMA2 nên hưởng lợi trọn vẹn. `.zip` chỉ có Deflate nên
@@ -243,7 +247,7 @@ assets/                     Logo gốc + biến thể sinh tự động (icon, f
 packaging/
   tools/make-assets.py      Sinh mọi biến thể của logo từ file gốc
 tests/
-  unittests/                net8.0          ← 234 test, chạy được trên mọi nền tảng
+  unittests/                net8.0          ← 264 test, chạy được trên mọi nền tảng
 ```
 
 ### Vì sao tách `Core` khỏi Windows?
@@ -252,7 +256,7 @@ tests/
 
 1. **Kiểm thử được** — toàn bộ logic nghiệp vụ (quét dấu hiệu crack, tính điểm
    rủi ro, phân loại phần mềm, dựng HTML/XLSX) unit-test được **không cần máy
-   Windows**. 234 test chạy trên Linux.
+   Windows**. 264 test chạy trên Linux.
 2. **Dễ audit** — mọi lệnh gọi hệ thống tập trung trong đúng một file
    (`WindowsAdapters.cs`). Với một công cụ đọc dữ liệu nhạy cảm và đòi quyền
    Administrator, việc rà soát bảo mật làm được nhanh là điều thiết yếu.
@@ -290,10 +294,10 @@ trên máy không có mạng. Chi tiết: [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY
 | XLSX: quy đổi tên cột, nhận diện số, tên sheet | ✅ Đã test |
 | Dashboard đọc sâu đa máy | ✅ Đã test |
 | Logo, favicon & chữ ký thương hiệu | ✅ 11 test |
-| So sánh phiên bản CalVer | ✅ 15 test |
-| Quy ước đặt tên phiên bản (`ReleaseName`) | ✅ 25 test |
+| So sánh phiên bản CalVer | ✅ 27 test (đọc được cả dạng cũ lẫn dạng mới) |
+| Quy ước đặt tên phiên bản (`ReleaseName`) | ✅ 33 test, gồm ca quét **cả tháng** 124 số hiệu |
 | Cổng kiểm tra cập nhật (gồm nhánh bản portable) | ✅ 17 test |
-| Đọc bản phát hành GitHub + đối chiếu mã băm | ✅ 18 test |
+| Đọc bản phát hành GitHub + đối chiếu mã băm | ✅ 24 test, gồm nhận **cả hai** dạng tên tệp |
 | Bộ luật tách rời (nạp, kiểm tra, quay về mặc định) | ✅ Đã test |
 | CLI parse tham số | ✅ 21 test |
 | Mã thoát (gồm ca hồi quy Office chưa kích hoạt) | ✅ 11 test |
@@ -310,7 +314,7 @@ thật**. Cần xác nhận tên thuộc tính WMI, đặc biệt `MSFT_MpComput
 `MSFT_MpThreat`) và `MSFT_ScheduledTask`.
 
 Nếu có lỗi, hầu hết sẽ nằm gọn trong `WindowsAdapters.cs` — logic nghiệp vụ đã
-được 234 test kiểm chứng nên không cần đụng tới.
+được 264 test kiểm chứng nên không cần đụng tới.
 
 **Phần hiển thị tiến trình cũng có một khoảng chưa tự động hoá được.** Thứ tự
 các bước, việc huỷ giữa chừng và mã thoát 130 đều có test chạy trên Linux; CI

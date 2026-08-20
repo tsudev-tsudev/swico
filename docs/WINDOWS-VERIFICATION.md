@@ -168,12 +168,14 @@ Chạy tối thiểu trên 3 máy khác nhau. Càng khác nhau càng tốt.
 
 | # | Việc cần làm | Kỳ vọng | Kết quả thật |
 |---|---|---|---|
-| F1 | Chạy `swico-setup-3.0.0.exe` | Hiện EULA, cài được, hiện tiếng Việt | |
+| F1 | Chạy `tsudev-swico_<phiên-bản>_x64-setup.exe` | Hiện EULA, cài được, hiện tiếng Việt | |
 | F2 | Mở Command Prompt mới, gõ `swico --help` | Chạy được (nếu đã chọn thêm vào PATH) | |
 | F3 | Bảng điều khiển → Programs | Có mục "tsudev SWICO", gỡ được | |
 | F4 | Sau khi gỡ: kiểm tra biến PATH | Đường dẫn đã bị rút ra, không để lại rác | |
 | F5 | Cài đè phiên bản cũ | Nâng cấp tại chỗ, **không** tạo mục thứ hai | |
-| F6 | `swico-setup-3.0.0.exe /VERYSILENT` | Cài im lặng, không hiện cửa sổ nào | |
+| **F7** | Biên dịch `swico.iss` với `/DAppVersion=26.8.1901` | `ISCC` không lỗi; file ra tên `tsudev-swico_26.8.1901_x64-setup.exe` | ⚠️ **CHƯA kiểm** |
+| **F8** | Biên dịch với `/DAppVersion=26.9.0901` (**ngày một chữ số**) | `ISCC` **không** báo lỗi số 0 đứng đầu ở `VersionInfoVersion` | ⚠️ **CHƯA kiểm — rủi ro còn lại của việc đổi quy ước** |
+| F6 | `tsudev-swico_<phiên-bản>_x64-setup.exe /VERYSILENT` | Cài im lặng, không hiện cửa sổ nào | |
 
 ## G. Phần mềm diệt virus
 
@@ -191,7 +193,7 @@ dấu hiệu crack, đọc trạng thái Defender — mô tả gần trùng kh�
 ## H. Hiển thị tiến trình quét trên terminal thật
 
 **Vì sao mục này phải làm bằng mắt người:** thứ tự các bước, việc huỷ và mã thoát
-đều đã có test tự động (234 test trên Linux + kiểm tra dòng-theo-bước trong CI
+đều đã có test tự động (264 test trên Linux + kiểm tra dòng-theo-bước trong CI
 Windows). Nhưng *dáng vẻ* của nó thì không: một con quay đứng im, một dòng bị vỡ
 vì cửa sổ hẹp, hay một con trỏ không được trả về sau Ctrl+C đều **không** làm test
 nào đỏ — chỉ có người ngồi trước màn hình mới thấy.

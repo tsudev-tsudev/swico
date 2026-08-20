@@ -3,8 +3,8 @@
 Sinh manifest winget tu template, dien phien ban va SHA256 THAT cua file setup.
 
     python3 packaging/tools/make-winget-manifest.py \
-        --version 26.8.18 \
-        --installer packaging/output/swico-setup-26.8.18.exe \
+        --version 26.8.1901 \
+        --installer packaging/output/tsudev-swico_26.8.1901_x64-setup.exe \
         --out packaging/output/winget
 
 Vi sao KHONG cam ket san manifest vao repo: manifest bat buoc phai chua SHA256

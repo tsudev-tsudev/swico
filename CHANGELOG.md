@@ -6,22 +6,46 @@
 
 ## [Chưa phát hành]
 
+### Thay đổi
+
+- **⚠️ ĐỔI QUY ƯỚC ĐẶT TÊN PHIÊN BẢN** sang chuẩn chung của hệ sinh thái tsudev
+  ([`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) mục 6). Quyết định D-S004-1,
+  20/08/2026.
+
+  | | Trước | Nay |
+  |---|---|---|
+  | Chuỗi phiên bản | `26.8.19`, `26.8.19.2` | `26.8.1901`, `26.8.1902` |
+  | File cài đặt | `swico-setup-26.8.19.exe` | `tsudev-swico_26.8.1901_x64-setup.exe` |
+  | Bản portable | `swico-portable-26.8.19.zip` | `tsudev-swico_26.8.1901_x64-portable.zip` |
+  | Tên bản phát hành | `tsudev-swico-v26.8.19` | `tsudev-swico_26.8.1901` |
+
+  - Ngày (`DD`) và số thứ tự trong ngày (`NN`) đều **đệm đủ hai chữ số**. Thành
+    phần thứ ba được đọc bằng phép chia cho 100, nên bỏ đệm đi thì ngày 9 bản 1
+    (`26.9.91`) sẽ đọc ngược lại thành **ngày 0 bản 91**.
+  - Thứ tự so sánh vẫn đúng ở mọi nơi: `1901 < 1902 < 2001`.
+  - **Đọc được cả dạng cũ.** `26.8.18` ≡ `26.8.1801` và `26.8.18.2` ≡ `26.8.1802`;
+    `GitHubReleaseParser` nhận **cả hai** dạng tên tệp đính kèm. Bỏ dạng cũ đi thì
+    một bản phát hành cũ sẽ bị coi là "không có file cài đặt" — hỏng **im lặng**.
+  - **Giới hạn không sửa được bằng mã:** `swico.exe` của `26.8.18` và `26.8.18.2`
+    đã nằm trên máy người dùng với bộ đọc **cũ** biên dịch sẵn bên trong, nên
+    chúng không đọc được `26.8.1901`. Hai bản đó **vẫn quét bình thường** nhưng
+    mất khả năng cập nhật bắt buộc. Cách gỡ (một bản cầu nối mang số hiệu dạng
+    cũ): [`docs/VERSIONING.md`](docs/VERSIONING.md) mục 5.
+  - Đã **đo, không phỏng đoán**: với `VersionPrefix` là `26.9.0901`, MSBuild giữ
+    `26.9.0901` ở `AssemblyInformationalVersion` nhưng chuẩn hoá `AssemblyVersion`
+    thành `26.9.901`. Bộ đọc chấp nhận cả hai và cho ra cùng một giá trị.
+
 ### Thêm
 
-- **Quy ước đặt tên phiên bản phát hành, được thực thi bằng mã.** Mỗi bản phát
-  hành mang tên `tsudev-swico-vYY.M.D[.N]`, trong đó `N` là **thứ tự của bản
-  trong ngày** và chỉ xuất hiện từ bản thứ hai
-  (`tsudev-swico-v26.8.19` → `tsudev-swico-v26.8.19.2` → `…v26.8.19.3`).
-  - Quy ước **không chỉ nằm trong tài liệu**: `ReleaseName.Validate` từ chối mọi
-    số hiệu sai, và `release.yml` gọi chính hàm đó để **dừng hẳn quy trình phát
-    hành** trước khi build. `ci.yml` kiểm luôn `VersionPrefix` ở mỗi PR.
-  - Bị cấm: `.1` (bản thứ nhất đã có tên rồi, `.1` là cái tên thứ hai cho cùng
-    một bản), số 0 đứng đầu (`26.08.09` và `26.8.9` cùng số hiệu nhưng khác tên
-    file, mà công cụ tìm file cài đặt **theo tên**), và hậu tố `-rc1`.
-  - Tag git vẫn dùng dạng ngắn `v26.8.19.2` để `release.yml` bắt được mẫu `v*`;
-    **tên bản phát hành** trên GitHub nay là tên đầy đủ.
-  - Lý do số đếm phải nằm sau dấu chấm: [`docs/VERSIONING.md`](docs/VERSIONING.md)
-    mục 3.
+- **Bộ quy ước `tsudev-conventions` v1.0.0** áp vào repo: `AGENTS.md`,
+  `docs/DESIGN_SYSTEM.md`, `docs/PROJECT_STRUCTURE.md`, `docs/ARCHITECTURE.md`,
+  `tokens/`, `logs/` (STATE + LOCKS + handover), `.gitignore` hợp nhất.
+- **Quy ước đặt tên phiên bản được thực thi bằng mã**, không chỉ nằm trong tài
+  liệu: `ReleaseName.Validate` từ chối mọi số hiệu sai, `release.yml` gọi chính
+  hàm đó để **dừng hẳn quy trình phát hành** trước khi build, `ci.yml` kiểm
+  `VersionPrefix` ở mỗi PR.
+  - Bị cấm: bỏ đệm số 0 ở `DD`/`NN`, số 0 đứng đầu ở `YY`/`M`, và hậu tố `-rc1`.
+  - Tag git vẫn dùng dạng ngắn `v26.8.1901` để `release.yml` bắt được mẫu `v*`.
 
 ### Sửa
 
@@ -70,14 +94,19 @@
 
 ### Kiểm thử
 
-- 173 → **234 test**, chia làm ba đợt:
+- 173 → **264 test**, chia làm bốn đợt:
   - **+24** cho tiến trình quét: thứ tự các bước của cả hai loại báo cáo, huỷ
     trước khi chạy, huỷ *giữa chừng* (giữ nguyên các bước đã xong), `ScanStep`
     không nuốt ngoại lệ, ghi chú thời gian của DISM/sfc, và mã thoát 130.
-  - **+25** cho quy ước đặt tên phiên bản, trong đó ca quan trọng nhất khoá lại
-    thứ tự `26.8.19 < 26.8.19.2 < 26.8.19.3 < 26.8.20` — đúng chỗ mà cách đánh
-    số dính liền làm hỏng. Đổi cách đánh số thì ca này đỏ.
+  - **+25** cho quy ước đặt tên phiên bản.
   - **+10** cho nhánh bản portable của cổng kiểm tra cập nhật.
+  - **+30** cho việc đổi quy ước đặt tên sang `YY.M.DDNN`. Ca quan trọng nhất
+    quét **cả tháng** — 31 ngày × 4 bản = 124 số hiệu — và đòi mỗi số hiệu phải
+    viết-ra-đọc-lại nguyên vẹn, qua được `Validate`, và giữ đúng thứ tự tăng dần
+    liên tục. Quét toàn bộ thay vì vài ca lẻ chính là cách bắt được lỗi của
+    **ngày 1–9**, nơi số 0 đệm quyết định đúng/sai. Kèm các ca khoá lại việc
+    **đọc được dạng cũ** (`26.8.18` ≡ `26.8.1801`) và nhận **cả hai** dạng tên
+    tệp đính kèm — đổi cách đánh số mà quên hai điều đó thì các ca này đỏ.
 - CI Windows kiểm thêm rằng lần quét thật in **≥ 10 dòng bước, mỗi dòng kèm thời
   gian riêng** — bắt được trường hợp tiến trình lặng lẽ quay về kiểu in dồn.
 - ⚠️ **Chưa tự động hoá được:** con quay có quay mượt không, màu có đúng không,

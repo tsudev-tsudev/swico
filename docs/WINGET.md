@@ -36,8 +36,8 @@ Sinh lại thủ công khi cần:
 
 ```bash
 python3 packaging/tools/make-winget-manifest.py \
-    --version 26.8.18 \
-    --installer packaging/output/swico-setup-26.8.18.exe \
+    --version 26.8.1901 \
+    --installer packaging/output/tsudev-swico_26.8.1901_x64-setup.exe \
     --out packaging/winget-out
 ```
 
@@ -93,7 +93,7 @@ winget install Microsoft.WingetCreate
 
 wingetcreate submit `
   --token <GitHub personal access token> `
-  packaging\winget-out\manifests\t\tsudev\SWICO\26.8.18
+  packaging\winget-out\manifests\t\tsudev\SWICO\26.8.1901
 ```
 
 Công cụ tự fork `microsoft/winget-pkgs`, tạo nhánh và mở pull request.
@@ -109,8 +109,8 @@ Công cụ tự fork `microsoft/winget-pkgs`, tạo nhánh và mở pull request
 ### Kiểm tra trước khi nộp
 
 ```powershell
-winget validate --manifest packaging\winget-out\manifests\t\tsudev\SWICO\26.8.18
-winget install --manifest packaging\winget-out\manifests\t\tsudev\SWICO\26.8.18
+winget validate --manifest packaging\winget-out\manifests\t\tsudev\SWICO\26.8.1901
+winget install --manifest packaging\winget-out\manifests\t\tsudev\SWICO\26.8.1901
 ```
 
 Lệnh thứ hai cài **từ manifest cục bộ** — cách duy nhất kiểm chứng manifest đúng

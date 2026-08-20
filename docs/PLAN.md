@@ -167,6 +167,25 @@ Làm ở phiên S003, sau khi rà lại chức năng cập nhật đã phát hà
 - ⛔ Giả định "Inno Setup luôn đặt `unins000.exe` cạnh ứng dụng" **chưa kiểm
       chứng trên Windows thật** — `docs/STATE.md` mục 3.2
 
+## Phase 6e — Áp bộ quy ước hệ sinh thái + đổi quy ước đặt tên ✅
+
+Làm ở phiên S004 (20/08/2026).
+
+- ✅ Áp `tsudev-conventions` v1.0.0: `AGENTS.md`, `docs/DESIGN_SYSTEM.md`,
+      `docs/PROJECT_STRUCTURE.md`, `docs/ARCHITECTURE.md`, `tokens/`, `logs/`
+- ✅ `.gitignore` **hợp nhất** (giữ `tsudev-bao-cao-ra-quet-*/` — dữ liệu audit thật)
+- ✅ **D-S004-1** — đổi quy ước đặt tên sang `YY.M.DDNN`:
+      `26.8.19` → `26.8.1901`, `swico-setup-*.exe` → `tsudev-swico_*_x64-setup.exe`
+- ✅ `VersionNumber` đọc **cả hai dạng**, `26.8.18` ≡ `26.8.1801`
+- ✅ `GitHubReleaseParser` nhận **cả hai dạng tên tệp** đính kèm
+- ✅ Đo thật: MSBuild giữ `26.9.0901` ở `AssemblyInformationalVersion` nhưng
+      chuẩn hoá `AssemblyVersion` thành `26.9.901` — bộ đọc chấp nhận cả hai
+- ✅ 30 test mới → 234 → **264 PASS, 0 FAIL**, gồm ca quét **cả tháng** 124 số hiệu
+- ⛔ **Chưa kiểm được:** Inno Setup có nuốt `VersionInfoVersion=26.9.0901`
+      (ngày một chữ số) không — `docs/STATE.md` mục 3.2
+- ⛔ **Giới hạn không sửa được bằng mã:** `26.8.18`/`26.8.18.2` đã cài trên máy
+      người dùng không đọc được số hiệu dạng mới — `docs/STATE.md` mục 4.7
+
 ## Phase 7 — Ký số ⛔ **CHỜ NGƯỜI DÙNG**
 
 - ⛔ **Nộp hồ sơ SignPath Foundation** — duyệt mất vài ngày tới vài tuần,

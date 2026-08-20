@@ -28,11 +28,12 @@ Nguồn: `docs/STATE.md` mục 3. Ở đây chỉ ghi mã việc + trạng thái
 - [ ] **3.4** Cấu hình SignPath sau khi được duyệt — ⛔ chờ bên ngoài
 - [ ] **3.5** Việc kỹ thuật (xUnit ▸ tách file gộp ▸ logging ▸ `--json-only`) — làm được ngay
 - [ ] **3.6** Quyết định có phát hành `26.8.19` không — ⛔ cần người dùng
-- [ ] **QU-1** **Đổi quy ước đặt tên phiên bản sang `DESIGN_SYSTEM.md` mục 6**
-      — ✅ chủ project đã chốt **phương án B** (20/08/2026). Đang thực hiện.
-      Ràng buộc sống còn: `GitHubReleaseParser` phải nhận **cả hai** dạng tên
-      asset, nếu không hai bản đã phát hành mất đường cập nhật.
-      Chi tiết: `logs/handover/20260820-01_ap-dung-bo-quy-uoc.md` mục 5.3.
+- [ ] **QU-2** Nhờ người dùng kiểm **Inno Setup** biên dịch được với
+      `VersionInfoVersion=26.9.0901` (ngày một chữ số) — ⛔ cần Windows.
+      Rủi ro kỹ thuật còn lại duy nhất của việc đổi quy ước; `docs/STATE.md` mục 3.2.
+- [ ] **QU-3** Quyết có phát hành **bản cầu nối** dạng cũ không, để hai bản đã
+      cài (`26.8.18`, `26.8.18.2`) không mất đường cập nhật — ⛔ cần người dùng;
+      `docs/STATE.md` mục 4.7.
 
 ## Đang thực hiện
 
@@ -42,6 +43,8 @@ Nguồn: `docs/STATE.md` mục 3. Ở đây chỉ ghi mã việc + trạng thái
 
 ## Đã hoàn thành (mới nhất trên cùng)
 
+- 20/08/2026 — **QU-1 XONG:** đổi quy ước đặt tên phiên bản sang `YY.M.DDNN`
+  (D-S004-1). Mã + 30 test mới + CI/CD + đóng gói + tài liệu. 264 PASS, 0 FAIL.
 - 20/08/2026 — Áp dụng bộ quy ước `tsudev-conventions` v1.0.0 vào repo
   (`AGENTS.md`, `docs/DESIGN_SYSTEM.md`, `docs/PROJECT_STRUCTURE.md`,
   `docs/ARCHITECTURE.md`, `tokens/`, `logs/`, hợp nhất `.gitignore`).

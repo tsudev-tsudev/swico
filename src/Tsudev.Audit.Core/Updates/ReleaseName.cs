@@ -3,43 +3,94 @@ using System.Globalization;
 namespace Tsudev.Audit.Core.Updates;
 
 /// <summary>
-/// Quy uoc dat ten phien ban phat hanh cua du an - DUA THANH MA, khong de o
-/// dang van ban.
+/// Quy uoc dat ten phien ban phat hanh - DUA THANH MA, khong de o dang van ban.
 ///
-/// Dang chuan:  <c>tsudev-swico-vYY.M.D[.N]</c>
+/// Nguon quy uoc: <c>docs/DESIGN_SYSTEM.md</c> muc 6 (ap dung cho toan he sinh
+/// thai tsudev). Dang chuan:
 ///
 /// <code>
-///   tsudev-swico-v26.8.19      ban thu 1 ngay 19/08/2026
-///   tsudev-swico-v26.8.19.2    ban thu 2 CUNG NGAY
-///   tsudev-swico-v26.8.19.3    ban thu 3 CUNG NGAY
-///   tsudev-swico-v26.8.20      ban thu 1 ngay 20/08/2026
+///   {ten-app}_{YY}.{M}.{DD}{NN}_{arch}-setup.{ext}
+///
+///   tsudev-swico_26.8.1901_x64-setup.exe   ban thu 01 ngay 19/08/2026
+///   tsudev-swico_26.8.1902_x64-setup.exe   ban thu 02 CUNG NGAY
+///   tsudev-swico_26.8.2001_x64-setup.exe   ban thu 01 ngay 20/08/2026
 /// </code>
 ///
-/// VI SAO SO DEM PHAI NAM SAU MOT DAU CHAM. Neu dinh lien vao ngay
-/// (<c>26.8.192</c>), thanh phan thu ba bi so sanh nhu MOT SO NGUYEN va
-/// <c>192 &gt; 20</c> - ban thu 2 ngay 19/8 se duoc coi la MOI HON ban ngay
-/// 20/8. May dang chay ban do se khong bao gio nhan duoc ban cap nhat sau, va
-/// Inno Setup cung nhan nham chieu cai de. Voi dau cham thi
-/// <c>26.8.19 &lt; 26.8.19.2 &lt; 26.8.19.3 &lt; 26.8.20</c> dung thu tu o MOI
-/// noi so sanh - khong can bo giai ma rieng, nen khong co cho nao de lech.
+/// Chuoi phien ban trong ma nguon va manifest la <c>26.8.1901</c> - DONG BO voi
+/// ten file, dung nhu quy uoc yeu cau.
+///
+/// <para>VI SAO <c>DD</c> VA <c>NN</c> DEU PHAI DU HAI CHU SO.</para>
+/// Thanh phan thu ba duoc so sanh nhu MOT SO NGUYEN. Dem du hai chu so thi gia
+/// tri cua no luon bang <c>DD * 100 + NN</c>, nen thu tu so sanh trung khop voi
+/// thu tu thoi gian:
+/// <code>
+///   26.8.1901 (19/8 ban 1)  ->  1901
+///   26.8.1902 (19/8 ban 2)  ->  1902
+///   26.8.2001 (20/8 ban 1)  ->  2001      1901 &lt; 1902 &lt; 2001  DUNG
+/// </code>
+/// Bo phan dem di thi ngay 9 ban 1 thanh <c>26.9.91</c>, doc nguoc lai ra ngay 0
+/// ban 91 - va do la mot ten file cai dat khong ai tim thay.
+///
+/// <para>QUAN HE VOI DANG CU (<c>26.8.19</c>, <c>26.8.19.2</c>).</para>
+/// Hai ban <c>26.8.18</c> va <c>26.8.18.2</c> DA PHAT HANH ra ngoai theo dang cu.
+/// <see cref="VersionNumber.TryParse"/> vi vay van doc duoc dang cu - de dai la
+/// bat buoc o do. Con ham <see cref="Validate"/> nay thi KHAT KHE: no gac cong
+/// khau phat hanh, chi chap nhan dang moi.
 ///
 /// Toan bo tai lieu: <c>docs/VERSIONING.md</c>.
 /// </summary>
 public static class ReleaseName
 {
-    /// <summary>Tien to cua ten phat hanh day du.</summary>
-    public const string Prefix = "tsudev-swico-v";
+    /// <summary>Ten ung dung trong ten file phat hanh.</summary>
+    public const string AppName = "tsudev-swico";
 
-    /// <summary>So dem nho nhat duoc phep. Xem <see cref="Validate"/>.</summary>
-    public const int FirstRevisionOfSameDay = 2;
+    /// <summary>Kien truc mac dinh. Du an hien chi phat hanh win-x64.</summary>
+    public const string DefaultArch = "x64";
 
-    /// <summary>Ten phat hanh day du, vi du <c>tsudev-swico-v26.8.19.2</c>.</summary>
-    public static string For(VersionNumber version) => Prefix + version;
+    /// <summary>Tien to cua ten phat hanh dang moi: <c>tsudev-swico_</c>.</summary>
+    public const string NamePrefix = AppName + "_";
 
-    /// <summary>Tag git, vi du <c>v26.8.19.2</c>. Ngan hon ten phat hanh co chu
+    /// <summary>
+    /// Tien to cua ten phat hanh DANG CU (<c>tsudev-swico-v26.8.19</c>).
+    /// Giu lai CHI de doc duoc cac ban phat hanh cu - khong sinh ra ten moi
+    /// theo dang nay nua.
+    /// </summary>
+    public const string Prefix = AppName + "-v";
+
+    /// <summary>Ten ban phat hanh, vi du <c>tsudev-swico_26.8.1901</c>.</summary>
+    public static string For(VersionNumber version) => NamePrefix + version;
+
+    /// <summary>Tag git, vi du <c>v26.8.1901</c>. Ngan hon ten phat hanh co chu
     /// dich: <c>release.yml</c> kich hoat theo mau <c>v*</c>.</summary>
     public static string TagFor(VersionNumber version)
         => string.Create(CultureInfo.InvariantCulture, $"v{version}");
+
+    /// <summary>
+    /// Ten file cai dat, vi du <c>tsudev-swico_26.8.1901_x64-setup.exe</c>.
+    ///
+    /// Chuc nang tu cap nhat tim file cai dat THEO TEN, nen ham nay va
+    /// <see cref="GitHubReleaseParser"/> phai luon noi cung mot thu tieng.
+    /// </summary>
+    public static string InstallerFileName(VersionNumber version, string arch = DefaultArch)
+        => string.Create(CultureInfo.InvariantCulture, $"{NamePrefix}{version}_{arch}-setup.exe");
+
+    /// <summary>Ten ban portable, vi du <c>tsudev-swico_26.8.1901_x64-portable.zip</c>.</summary>
+    public static string PortableFileName(VersionNumber version, string arch = DefaultArch)
+        => string.Create(CultureInfo.InvariantCulture, $"{NamePrefix}{version}_{arch}-portable.zip");
+
+    /// <summary>
+    /// Bo moi tien to duoc cong nhan khoi mot chuoi phien ban. Dung chung boi
+    /// <see cref="Validate"/> va <see cref="VersionNumber.TryParse"/> de hai noi
+    /// khong the lech nhau.
+    /// </summary>
+    public static string StripPrefix(string text)
+    {
+        var s = text.Trim();
+        if (s.StartsWith(NamePrefix, StringComparison.OrdinalIgnoreCase)) return s[NamePrefix.Length..];
+        if (s.StartsWith(Prefix, StringComparison.OrdinalIgnoreCase)) return s[Prefix.Length..];
+        if (s.StartsWith('v') || s.StartsWith('V')) return s[1..];
+        return s;
+    }
 
     /// <summary>
     /// Kiem tra mot chuoi phien ban co DUNG quy uoc khong.
@@ -50,7 +101,7 @@ public static class ReleaseName
     /// hieu sai quy uoc o day la phat tan cai sai do ra may nguoi dung.
     /// </summary>
     /// <param name="text">Chuoi can kiem tra. Chap nhan ca ba dang:
-    /// <c>26.8.19.2</c>, <c>v26.8.19.2</c>, <c>tsudev-swico-v26.8.19.2</c>.</param>
+    /// <c>26.8.1901</c>, <c>v26.8.1901</c>, <c>tsudev-swico_26.8.1901</c>.</param>
     /// <param name="version">So hieu doc duoc, khi hop le.</param>
     /// <param name="problem">Ly do khong hop le, bang tieng Viet, khi khong hop le.</param>
     public static bool Validate(string? text, out VersionNumber version, out string? problem)
@@ -64,31 +115,43 @@ public static class ReleaseName
             return false;
         }
 
-        var s = text.Trim();
-        if (s.StartsWith(Prefix, StringComparison.OrdinalIgnoreCase)) s = s[Prefix.Length..];
-        else if (s.StartsWith('v') || s.StartsWith('V')) s = s[1..];
+        var s = StripPrefix(text);
 
         // Khong chap nhan hau to o khau phat hanh. VersionNumber.TryParse cat
         // "-rc1" va "+bam-commit" vi no doc du lieu tu ben ngoai; o day thi mot
         // hau to nghia la so hieu chua o dang cuoi cung.
         if (s.AsSpan().IndexOfAny('-', '+', ' ') >= 0)
         {
-            problem = $"'{text}' chứa hậu tố. Phiên bản phát hành phải ở dạng thuần số: {Prefix}26.8.19.2";
+            problem = $"'{text}' chứa hậu tố. Phiên bản phát hành phải ở dạng thuần số: {NamePrefix}26.8.1901";
             return false;
         }
 
         var parts = s.Split('.');
-        if (parts.Length is < 3 or > 4)
+
+        // Dang CU co 4 thanh phan. Bao thang ra cach viet moi tuong duong thay
+        // vi chi noi "sai" - nguoi go vao thuong dang chep tu mot ban cu.
+        if (parts.Length == 4)
         {
-            problem = $"'{text}' phải có 3 hoặc 4 thành phần (YY.M.D hoặc YY.M.D.N), đang có {parts.Length}.";
+            problem = $"'{text}' viết theo dạng CŨ (YY.M.D.N). Dạng hiện hành là YY.M.DDNN: " +
+                      (VersionNumber.TryParse(s, out var conv)
+                          ? $"viết {NamePrefix}{conv}."
+                          : $"ví dụ {NamePrefix}26.8.1902.");
             return false;
         }
 
-        // Bat so 0 dung dau: "26.08.19" va "26.8.19" la CUNG mot so hieu nhung
-        // KHAC chuoi - se sinh ra hai ten tag, hai ten file cai dat cho cung
-        // mot ban phat hanh. Chan tu day cho khoi phai go ve sau.
-        foreach (var p in parts)
+        if (parts.Length != 3)
         {
+            problem = $"'{text}' phải có đúng 3 thành phần (YY.M.DDNN), đang có {parts.Length}.";
+            return false;
+        }
+
+        // So 0 dung dau bi cam o NAM va THANG - "26.08.1901" va "26.8.1901" la
+        // cung mot so hieu nhung khac chuoi, se sinh ra hai ten file cai dat cho
+        // cung mot ban phat hanh. Rieng thanh phan thu ba thi so 0 dung dau la
+        // BAT BUOC (ngay 9 ban 1 = '0901'), nen no khong chiu luat nay.
+        for (var i = 0; i < 2; i++)
+        {
+            var p = parts[i];
             if (p.Length == 0)
             {
                 problem = $"'{text}' có thành phần rỗng.";
@@ -96,18 +159,30 @@ public static class ReleaseName
             }
             if (p.Length > 1 && p[0] == '0')
             {
-                // Neu duoc thi bao luon cach viet DUNG cua chinh chuoi nguoi
-                // dung vua go - de ho sua ngay, khong phai doi chieu vi du.
-                var canonical = string.Join('.', parts.Select(x => x.TrimStart('0') is { Length: > 0 } t ? t : "0"));
-                problem = $"'{text}' có số 0 đứng đầu ('{p}'). Viết {Prefix}{canonical}.";
+                var fixedParts = (string[])parts.Clone();
+                fixedParts[i] = p.TrimStart('0') is { Length: > 0 } t ? t : "0";
+                problem = $"'{text}' có số 0 đứng đầu ('{p}') ở {(i == 0 ? "năm" : "tháng")}. " +
+                          $"Viết {NamePrefix}{string.Join('.', fixedParts)}.";
                 return false;
             }
         }
 
+        // Thanh phan thu ba phai du BON chu so. '901' cung ra ngay 9 ban 1 khi
+        // doc bang TryParse, nhung o khau phat hanh thi mot so hieu phai co DUNG
+        // MOT cach viet - neu khong, '26.9.901' va '26.9.0901' se thanh hai ten
+        // file cai dat khac nhau cho cung mot ban.
+        var ddnn = parts[2];
+        if (ddnn.Length != 4 || !ddnn.All(char.IsAsciiDigit))
+        {
+            problem = $"'{text}' có thành phần thứ ba là '{ddnn}'. Phải là DDNN đúng 4 chữ số " +
+                      "(DD = ngày 2 chữ số, NN = số thứ tự trong ngày 2 chữ số), ví dụ '1901' hoặc '0901'.";
+            return false;
+        }
+
         if (!VersionNumber.TryParse(s, out version))
         {
-            problem = $"'{text}' không đọc được thành phiên bản YY.M.D[.N] hợp lệ " +
-                      "(tháng phải là 1–12, ngày phải là 1–31).";
+            problem = $"'{text}' không đọc được thành phiên bản YY.M.DDNN hợp lệ " +
+                      "(tháng phải là 1–12, ngày phải là 01–31, số thứ tự phải từ 01).";
             return false;
         }
 
@@ -117,22 +192,12 @@ public static class ReleaseName
             return false;
         }
 
-        // .1 bi CAM. Ban thu nhat trong ngay KHONG mang so dem, nen ".1" se la
-        // cai ten thu hai cho dung mot ban phat hanh - va hai cai ten cho mot
-        // thu la nguon goc cua moi nham lan ve sau.
-        if (version.Revision == 1)
+        // Sau khi qua het cac buoc tren, chuoi da o DANG CHUAN DUY NHAT. Kiem
+        // lai bang chinh ToString de bat moi truong hop con sot - neu viet ra
+        // khac voi cai doc vao thi con mot cho nao do chua duoc chuan hoa.
+        if (!string.Equals(version.ToString(), s, StringComparison.Ordinal))
         {
-            problem = $"'{text}' dùng số đếm '.1'. Bản thứ nhất trong ngày không mang số đếm " +
-                      $"({Prefix}{version.Year}.{version.Month}.{version.Day}); " +
-                      $"bản thứ hai bắt đầu từ '.{FirstRevisionOfSameDay}'.";
-            return false;
-        }
-
-        // ".0" cung bi cam vi cung ly do: no la mot cach viet khac cua ban thu nhat.
-        if (parts.Length == 4 && version.Revision == 0)
-        {
-            problem = $"'{text}' dùng số đếm '.0'. Bản thứ nhất trong ngày viết gọn là " +
-                      $"{Prefix}{version.Year}.{version.Month}.{version.Day}.";
+            problem = $"'{text}' không ở dạng chuẩn. Viết {NamePrefix}{version}.";
             return false;
         }
 
@@ -142,15 +207,14 @@ public static class ReleaseName
     /// <summary>
     /// Ban phat hanh nay la ban thu may trong ngay. Ban thu nhat -> 1.
     /// </summary>
-    public static int OrdinalOfDay(VersionNumber version)
-        => version.Revision == 0 ? 1 : version.Revision;
+    public static int OrdinalOfDay(VersionNumber version) => version.OrdinalOfDay;
 
     /// <summary>
     /// So hieu cho ban phat hanh TIEP THEO trong CUNG ngay voi
     /// <paramref name="version"/>. Dung khi phai phat hanh lai trong ngay.
     /// </summary>
     public static VersionNumber NextSameDay(VersionNumber version)
-        => version with { Revision = OrdinalOfDay(version) + 1 };
+        => version with { Revision = version.OrdinalOfDay + 1 };
 
     /// <summary>
     /// So hieu cho ban phat hanh dau tien cua mot ngay.

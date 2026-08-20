@@ -15,13 +15,49 @@ namespace Tsudev.Audit.Core.Updates;
 /// </summary>
 public static class GitHubReleaseParser
 {
-    /// <summary>Tien to ten file cai dat trong danh sach tep dinh kem.</summary>
+    /// <summary>
+    /// Tien to ten file cai dat theo DANG CU (<c>swico-setup-26.8.19.exe</c>).
+    /// </summary>
     public const string InstallerPrefix = "swico-setup-";
 
-    /// <summary>Tien to ten ban portable (.zip).</summary>
+    /// <summary>Tien to ten ban portable theo DANG CU (<c>swico-portable-26.8.19.zip</c>).</summary>
     public const string PortablePrefix = "swico-portable-";
 
     public const string ChecksumsFileName = "SHA256SUMS.txt";
+
+    /// <summary>
+    /// Mot tep dinh kem co phai FILE CAI DAT khong - nhan ca hai dang ten.
+    ///
+    /// <code>
+    ///   swico-setup-26.8.19.exe                 dang CU
+    ///   tsudev-swico_26.8.1901_x64-setup.exe    dang MOI (docs/DESIGN_SYSTEM.md muc 6)
+    /// </code>
+    ///
+    /// VI SAO PHAI NHAN CA HAI. Chuc nang tu cap nhat tim file cai dat THEO TEN.
+    /// Bo dang cu di thi mot ban phat hanh cu - hoac mot ban phat hanh moi ma
+    /// vi ly do nao do con kem tep ten cu - se bi coi la "khong co file cai
+    /// dat", va nguoi dung nhan duoc thong bao phai tu cap nhat thay vi duoc
+    /// cap nhat. Do la kieu hong IM LANG, khong ai bao loi.
+    /// </summary>
+    public static bool IsInstallerAsset(string name)
+        => name.EndsWith("-setup.exe", StringComparison.OrdinalIgnoreCase)
+               ? name.StartsWith(ReleaseName.NamePrefix, StringComparison.OrdinalIgnoreCase)
+               : name.StartsWith(InstallerPrefix, StringComparison.OrdinalIgnoreCase) &&
+                 name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Mot tep dinh kem co phai BAN PORTABLE khong - nhan ca hai dang ten.
+    ///
+    /// <code>
+    ///   swico-portable-26.8.19.zip                 dang CU
+    ///   tsudev-swico_26.8.1901_x64-portable.zip    dang MOI
+    /// </code>
+    /// </summary>
+    public static bool IsPortableAsset(string name)
+        => name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) &&
+           (name.StartsWith(PortablePrefix, StringComparison.OrdinalIgnoreCase) ||
+            (name.StartsWith(ReleaseName.NamePrefix, StringComparison.OrdinalIgnoreCase) &&
+             name.EndsWith("-portable.zip", StringComparison.OrdinalIgnoreCase)));
 
     public static ReleaseInfo? Parse(string json, out string? failureReason)
     {
@@ -63,12 +99,13 @@ public static class GitHubReleaseParser
                     var url = a.TryGetProperty("browser_download_url", out var u) ? u.GetString() : null;
                     if (string.IsNullOrWhiteSpace(url)) continue;
 
-                    if (name.StartsWith(InstallerPrefix, StringComparison.OrdinalIgnoreCase) &&
-                        name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
-                        installer = url;
-                    else if (name.StartsWith(PortablePrefix, StringComparison.OrdinalIgnoreCase) &&
-                             name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                    // Thu tu kiem tra: ban portable TRUOC file cai dat. Ten dang
+                    // moi cua ca hai deu bat dau bang "tsudev-swico_", nen phai
+                    // loai .zip ra truoc thi phep thu ".exe" moi khong nhap nhang.
+                    if (IsPortableAsset(name))
                         portable = url;
+                    else if (IsInstallerAsset(name))
+                        installer = url;
                     else if (name.Equals(ChecksumsFileName, StringComparison.OrdinalIgnoreCase))
                         checksums = url;
                 }

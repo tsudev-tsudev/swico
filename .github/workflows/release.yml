@@ -76,7 +76,7 @@ jobs:
             throw "Tag la v$v nhung Directory.Build.props ghi $props. " +
                   "Sua Directory.Build.props roi gan tag lai - do la nguon su that duy nhat."
           }
-          Write-Host "Ten ban phat hanh: tsudev-swico-v$v"
+          Write-Host "Ten ban phat hanh: tsudev-swico_$v"
 
       # Bo test PHAI chay truoc khi dong goi. Phat hanh mot ban chua qua test
       # la cach nhanh nhat de mat long tin vao ca quy trinh.
@@ -130,7 +130,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: swico-setup-unsigned
-          path: packaging/output/swico-setup-*.exe
+          path: packaging/output/tsudev-swico_*_x64-setup.exe
 
       - name: Ky installer (SignPath)
         if: env.SIGNPATH_CONFIGURED == 'true'
@@ -152,7 +152,7 @@ jobs:
           # Kiem tra CA chu ky LAN dau thoi gian. Chu ky khong co dau thoi gian
           # se het hieu luc khi chung chi het han - loi nay chi lo ra sau nhieu
           # thang, nen phai chan ngay tai day.
-          foreach ($f in @('publish/swico.exe') + (Get-ChildItem packaging/output/swico-setup-*.exe).FullName) {
+          foreach ($f in @('publish/swico.exe') + (Get-ChildItem packaging/output/tsudev-swico_*_x64-setup.exe).FullName) {
             $sig = Get-AuthenticodeSignature $f
             Write-Host "$f -> $($sig.Status)"
             if ($sig.Status -ne 'Valid')     { throw "Chu ky KHONG hop le: $f ($($sig.Status))" }
@@ -176,7 +176,7 @@ jobs:
           # cua Compress-Archive yeu hon han - do duoc 34,2 MB so voi ~32 MB.
           # Van giu dinh dang .zip Deflate chuan de Explorer cua Windows mo
           # truc tiep duoc, khong bat nguoi dung cai them cong cu giai nen.
-          $zip = "packaging/output/swico-portable-${{ steps.ver.outputs.version }}.zip"
+          $zip = "packaging/output/tsudev-swico_${{ steps.ver.outputs.version }}_x64-portable.zip"
           $7z = "$env:ProgramFiles\7-Zip\7z.exe"
           if (Test-Path $7z) {
             & $7z a -tzip -mx=9 -mm=Deflate $zip ".\packaging\portable\*" | Out-Null
@@ -211,7 +211,7 @@ jobs:
       - name: Sinh manifest winget
         shell: pwsh
         run: |
-          $setup = (Get-ChildItem packaging/output/swico-setup-*.exe)[0].FullName
+          $setup = (Get-ChildItem packaging/output/tsudev-swico_*_x64-setup.exe)[0].FullName
           python packaging/tools/make-winget-manifest.py `
             --version ${{ steps.ver.outputs.version }} `
             --installer $setup `
@@ -245,14 +245,14 @@ jobs:
           # Ten ban phat hanh - thu nguoi dung thuc su nhin thay - dung ten day
           # du theo quy uoc trong docs/VERSIONING.md.
           tag_name: v${{ steps.ver.outputs.version }}
-          name: tsudev-swico-v${{ steps.ver.outputs.version }}
+          name: tsudev-swico_${{ steps.ver.outputs.version }}
           files: packaging/output/*
           generate_release_notes: true
           draft: true
           body: |
             ## Cài đặt
 
-            Tải **`swico-setup-${{ steps.ver.outputs.version }}.exe`** bên dưới rồi chạy.
+            Tải **`tsudev-swico_${{ steps.ver.outputs.version }}_x64-setup.exe`** bên dưới rồi chạy.
 
             Hoặc dùng bản **portable** (`.zip`): giải nén và chạy trực tiếp,
             không cần cài đặt, không đụng tới registry.
@@ -268,7 +268,7 @@ jobs:
             Đối chiếu với `SHA256SUMS.txt`:
 
             ```powershell
-            Get-FileHash .\swico-setup-${{ steps.ver.outputs.version }}.exe -Algorithm SHA256
+            Get-FileHash .\tsudev-swico_${{ steps.ver.outputs.version }}_x64-setup.exe -Algorithm SHA256
             ```
 
             ## Lưu ý

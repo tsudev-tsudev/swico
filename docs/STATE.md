@@ -8,7 +8,7 @@
 - **Phiên gần nhất:** S004 — `docs/journal/S004-2026-08-20.md`
 - **Quy ước bắt buộc:** `AGENTS.md` — **đọc trước cả file này**
 - **Giai đoạn:** đã phát hành `v26.8.18.2`; PR winget đang chờ gỡ một nhãn lỗi;
-  `26.8.19` đã sẵn sàng trong repo nhưng **chưa gắn tag, chưa phát hành**;
+  `26.8.1901` đã sẵn sàng trong repo nhưng **chưa gắn tag, chưa phát hành**;
   còn 4 việc chờ người dùng + 1 nhóm việc kỹ thuật
 
 > ## ⚡ VIỆC ĐẦU TIÊN CỦA PHIÊN MỚI
@@ -20,9 +20,10 @@
 > Sau đó **xem mục 3.1** — PR winget #419878 đang vướng nhãn
 > `Validation-Executable-Error` và bot chưa giải thích nguyên nhân.
 >
-> Phiên S003 đã chốt **quy ước đặt tên phiên bản** (`docs/VERSIONING.md`) và
-> nâng `VersionPrefix` lên `26.8.19`. **Chưa gắn tag `v26.8.19`** — việc phát
-> hành là quyết định của người dùng, xem mục 3.6.
+> Phiên S004 đã **đổi quy ước đặt tên phiên bản** sang `docs/DESIGN_SYSTEM.md`
+> mục 6 (quyết định **D-S004-1**): `VersionPrefix` nay là **`26.8.1901`**, file
+> cài đặt là `tsudev-swico_26.8.1901_x64-setup.exe`. **Chưa gắn tag** — việc phát
+> hành là quyết định của người dùng, xem mục 3.6, và **đọc mục 4.7 trước**.
 >
 > Mọi việc của phiên S002 đã khép: code đã push, CI run
 > [32201733164](https://github.com/tsudev-tsudev/swico/actions/runs/32201733164)
@@ -35,7 +36,7 @@
 
 ```
 Build     : ✅ 0 cảnh báo (TreatWarningsAsErrors bật) — đo trên máy dev Linux
-Test      : ✅ 234 PASS, 0 FAIL — đo trên máy dev Linux
+Test      : ✅ 264 PASS, 0 FAIL — đo trên máy dev Linux
 CI        : ⚠️ CHƯA chạy cho các commit của phiên S003 (chưa push). Lần xanh gần
             nhất là run 32201733164, ứng với commit `ff1a9ae` của phiên S002.
 Release   : ✅ v26.8.18.2 đã phát hành chính thức (Latest)
@@ -54,8 +55,8 @@ Git       : ⚠️ ĐỨNG TRƯỚC origin/main — CHƯA PUSH (xem mục 3.0; �
 | Tên | `tsudev SWICO` |
 | Assembly | `swico.exe` |
 | Winget ID | `tsudev.SWICO` |
-| Phiên bản | trong repo: **26.8.19** · đã phát hành: **26.8.18.2** |
-| Đặt tên phát hành | `tsudev-swico-vYY.M.D[.N]` — `docs/VERSIONING.md`, có 25 test |
+| Phiên bản | trong repo: **26.8.1901** · đã phát hành: **26.8.18.2** (dạng cũ) |
+| Đặt tên phát hành | `tsudev-swico_YY.M.DDNN_x64-setup.exe` — `docs/VERSIONING.md`, có 33 test |
 | Namespace | `Tsudev.Audit.*` — **giữ nguyên**, chi tiết nội bộ |
 | Tên miền | `https://tsudev.com` (bộ test khẳng định điều này) |
 | Giấy phép | Apache-2.0 |
@@ -153,6 +154,16 @@ Chạy nó và kiểm:
 > sai, bản đã cài sẽ bị coi nhầm là portable — phiền chứ không hỏng, nhưng vẫn
 > phải biết.
 
+**Thêm ở phiên S004 — hai điều CHỈ kiểm được trên Windows thật:**
+
+| Việc | Kỳ vọng | Vì sao chưa ai biết |
+|---|---|---|
+| Inno Setup biên dịch được với `VersionInfoVersion=26.8.1901` | `ISCC` không báo lỗi, file ra đúng tên `tsudev-swico_26.8.1901_x64-setup.exe` | Máy dev Linux **không có Inno Setup**; chuỗi 4 chữ số ở thành phần thứ ba là mới |
+| Thử `VersionInfoVersion=26.9.0901` (ngày một chữ số) | Không báo lỗi số 0 đứng đầu | Đây là dạng **chưa từng đưa qua `ISCC`** lần nào |
+
+> Điều thứ hai là chỗ rủi ro còn lại của cả việc đổi quy ước. Phía .NET đã **đo
+> xong** (xem `docs/VERSIONING.md` mục 4), phía Inno Setup thì **chưa**.
+
 ### 3.3 ⛔ Kiểm bằng mắt phần hiển thị tiến trình — **cần người dùng**
 
 Phiên S002 đã thêm streaming tiến trình quét: mỗi bước một dòng, có con quay,
@@ -187,7 +198,7 @@ Xếp theo giá trị giảm dần:
    tích hợp CI chuẩn.
 2. **Tách file gộp nhiều class thành file riêng** (`InventoryCollectors.cs` 4 class,
    `LicenseCollectors.cs` 5 class). Đã hoãn từ Phase 1 vì lúc đó chưa có test;
-   nay có 234 test làm lưới an toàn.
+   nay có 264 test làm lưới an toàn.
 3. **Logging có cấu trúc** thay `Console.WriteLine` rải rác, kèm tuỳ chọn ghi log
    ra file cho tình huống hỗ trợ từ xa.
 4. **`--json-only`** cho tích hợp máy-đọc-máy.
@@ -199,26 +210,31 @@ Xếp theo giá trị giảm dần:
 5. **NativeAOT** — cân nhắc, nhưng đọc mục 4 trước: cắt tỉa đã hỏng, NativeAOT
    gần như chắc chắn cũng hỏng vì cùng nguyên nhân (WMI qua COM + phản chiếu).
 
-### 3.6 ⬜ Phát hành `26.8.19` — sẵn sàng, chờ quyết định
+### 3.6 ⬜ Phát hành `26.8.1901` — sẵn sàng, chờ quyết định
 
-`Directory.Build.props` đã ghi `26.8.19`, nhưng **chưa gắn tag và chưa phát
+`Directory.Build.props` đã ghi `26.8.1901`, nhưng **chưa gắn tag và chưa phát
 hành**. Repo đang ở trạng thái build được, test xanh, chỉ thiếu một quyết định.
 
 Khi muốn phát hành:
 
 ```bash
-git tag v26.8.19
-git push origin v26.8.19
+git tag v26.8.1901
+git push origin v26.8.1901
 ```
 
 `release.yml` sẽ tự kiểm quy ước đặt tên → chạy test → publish → đóng gói → tạo
-bản phát hành **nháp** mang tên `tsudev-swico-v26.8.19`.
+bản phát hành **nháp** mang tên `tsudev-swico_26.8.1901`.
+
+> ⚠️ **Cân nhắc bản cầu nối trước.** Phát hành thẳng `26.8.1901` thì hai bản đã
+> cài trên máy người dùng (`26.8.18`, `26.8.18.2`) **không đọc được** số hiệu đó
+> và mất đường cập nhật — xem mục 4.7. Nếu điều đó quan trọng, phát hành
+> `26.8.20` (dạng cũ) làm cầu nối **trước**, rồi mới sang dạng mới.
 
 > ⛔ Việc này **không đụng gì tới `v26.8.18.2`**, nên PR winget #419878 (mục 3.1)
 > không bị ảnh hưởng. Đừng chạy lại `release.yml` cho `26.8.18.2` — xem mục 4.4.
 
-Nếu hôm nay đã phát hành `26.8.19` rồi mà cần phát hành lại **trong cùng ngày**,
-số hiệu tiếp theo là `26.8.19.2` (không phải `.1`) — `docs/VERSIONING.md` mục 2.1.
+Nếu hôm nay đã phát hành rồi mà cần phát hành lại **trong cùng ngày**, số hiệu
+tiếp theo là `26.8.1902` — `docs/VERSIONING.md` mục 6.
 
 ---
 
@@ -319,24 +335,34 @@ Cần người dùng xác nhận cái nào đúng rồi mới sửa.
 Đó là bản ghi những gì đã diễn ra; sửa chúng là làm sai sự thật. **Đừng "sửa cho
 đồng bộ".**
 
-### 4.7 ⛔ Hai quy ước đặt tên phiên bản đang cùng tồn tại trong repo
+### 4.7 ⛔ Hai bản đã phát hành KHÔNG đọc được số hiệu dạng mới
 
-Từ 20/08/2026, `docs/DESIGN_SYSTEM.md` mục 6 quy định dạng
-`tsudev-swico_26.8.1901_x64-setup.exe` (chuỗi version `26.8.1901`), **khác** với
-`docs/VERSIONING.md` (`swico-setup-26.8.19.exe`, version `26.8.19`).
+Ngày 20/08/2026, quyết định **D-S004-1** đổi quy ước đặt tên sang
+`docs/DESIGN_SYSTEM.md` mục 6: `26.8.19` → **`26.8.1901`**,
+`swico-setup-26.8.19.exe` → **`tsudev-swico_26.8.1901_x64-setup.exe`**.
 
-**QUYẾT ĐỊNH D-S004-1 (chủ project, 20/08/2026): chọn phương án B — đổi sang
-`docs/DESIGN_SYSTEM.md` mục 6.** Rủi ro đã được nêu trước khi quyết và vẫn được
-chấp nhận. `docs/VERSIONING.md` sẽ được viết lại theo dạng mới.
+Mã mới đọc được **cả hai** dạng (`26.8.18` ≡ `26.8.1801`) và
+`GitHubReleaseParser` nhận **cả hai** dạng tên tệp đính kèm. **Chiều ngược lại
+thì không sửa được bằng mã:**
 
-> ⛔ **Ràng buộc bắt buộc khi thực hiện — đây là chỗ dễ làm hỏng nhất:**
-> `GitHubReleaseParser` phải nhận **CẢ HAI** dạng tên asset. Hai bản đã phát hành
-> (`26.8.18`, `26.8.18.2`) đang chạy trên máy người dùng và tìm file cài đặt
-> **theo tên** `swico-setup-<phiên-bản>.exe`. Nếu bản phát hành mới chỉ còn tên
-> `tsudev-swico_*_x64-setup.exe`, các máy đó **mất đường cập nhật trong im lặng**.
+> `swico.exe` của `26.8.18` và `26.8.18.2` **đã nằm trên máy người dùng** với bộ
+> đọc phiên bản **cũ** biên dịch sẵn bên trong. Bộ đọc đó gặp tag `v26.8.1901`
+> sẽ thấy ngày `1901 > 31` và **không đọc được**.
 
-Phân tích đầy đủ, gồm cả điểm quy ước mới **đúng** và điểm nó sai:
-`logs/handover/20260820-01_ap-dung-bo-quy-uoc.md` mục 5.3.
+Hệ quả cụ thể, đã truy theo mã (`UpdateChecker`): hai bản đó rơi vào nhánh
+`CheckFailed` → **vẫn quét bình thường kèm ghi chú**, không sập, không chặn —
+nhưng **mất khả năng cập nhật bắt buộc**.
+
+**Cách gỡ, nếu muốn:** phát hành **một bản cầu nối** mang số hiệu dạng **cũ**
+(ví dụ tag `v26.8.20`, `VersionPrefix` `26.8.20`) chứa exe đã có bộ đọc hai dạng.
+Máy đang chạy bản cũ đọc được tag đó → tự cập nhật → từ đó hiểu được cả dạng mới.
+Sau bản cầu nối, mọi bản phát hành dùng dạng mới.
+
+> ⚠️ Bản cầu nối đòi **tạm nới cổng chặn** `ReleaseName.Validate` (nó từ chối
+> dạng cũ). Đừng nới bằng cách sửa `Validate` — thêm một biến môi trường
+> `ALLOW_LEGACY_VERSION` cho đúng một lần chạy, rồi bỏ đi.
+
+Chi tiết đầy đủ: `docs/VERSIONING.md` mục 5.
 
 ---
 

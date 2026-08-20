@@ -3,9 +3,15 @@
        NGUON SU THAT DUY NHAT cho metadata cua toan bo giai phap.
        Doi version O DAY -> exe, installer va winget manifest deu
        lay theo. Khong khai bao Version trong tung .csproj nua.
+
+       Dang so hieu: YY.M.DDNN (docs/DESIGN_SYSTEM.md muc 6)
+         26.8.1901 = ban thu 01 ngay 19/08/2026
+         26.8.1902 = ban thu 02 CUNG ngay
+         26.8.2001 = ban thu 01 ngay 20/08/2026
+       DD va NN deu PHAI du hai chu so - xem docs/VERSIONING.md.
        ============================================================ -->
   <PropertyGroup>
-    <VersionPrefix>26.8.19</VersionPrefix>
+    <VersionPrefix>26.8.1901</VersionPrefix>
     <Company>tsudev</Company>
     <Authors>tsudev</Authors>
     <Product>tsudev SWICO</Product>

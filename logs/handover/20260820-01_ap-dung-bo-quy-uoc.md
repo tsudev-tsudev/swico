@@ -3,7 +3,7 @@
 - **Mã phiếu**: 20260820-01
 - **Từ**: phiên S004 (Claude Code) — **Đến**: phiên sau / chủ project
 - **Thời điểm**: 16:20 20/08/2026
-- **Trạng thái**: ĐANG XỬ LÝ (quyết định mục 5.3 đã có — xem mục 6)
+- **Trạng thái**: HOÀN THÀNH (xem mục 6)
 
 ## 1. Việc đã làm xong
 
@@ -132,6 +132,25 @@ Ports & Adapters vốn là thứ cho phép 234 test chạy được trên Linux.
 ## 6. Kết quả xử lý (agent nhận điền sau khi thực hiện)
 
 **20/08/2026 — chủ project chọn phương án B: đổi sang `DESIGN_SYSTEM.md` mục 6.**
-
 Rủi ro ở mục 5.3 đã được nêu đầy đủ trước khi quyết và vẫn được chấp nhận.
-Việc thực hiện ghi trong `docs/journal/S004-2026-08-20.md`.
+
+**ĐÃ THỰC HIỆN XONG** — diễn biến đầy đủ: `docs/journal/S004-2026-08-20.md`
+mục 16:35 và 16:52.
+
+| Việc | Kết quả |
+|---|---|
+| `VersionNumber` đọc **cả hai** dạng | ✅ `26.8.18` ≡ `26.8.1801` |
+| `GitHubReleaseParser` nhận **cả hai** dạng tên tệp | ✅ ràng buộc sống còn ở mục 5.3, đã làm |
+| `ReleaseName.Validate` + cổng CI/CD | ✅ thử tay 10 chuỗi, đúng cả 10 |
+| Đóng gói (Inno Setup, winget, release.yml) | ✅ |
+| Test | ✅ 234 → **264 PASS, 0 FAIL** |
+| Tài liệu | ✅ VERSIONING (viết lại), README, UPDATES, CHANGELOG, STATE, PLAN |
+
+**Hai việc mở ra từ phiếu này** (đã vào hàng đợi `logs/STATE.md`):
+
+- **QU-2** — Inno Setup với `26.9.0901`: **chưa kiểm được**, máy dev không có `ISCC`.
+  Phía .NET đã đo xong; phía Inno Setup là rủi ro còn lại.
+- **QU-3** — hai bản đã phát hành mất đường cập nhật. **Không sửa được bằng mã**
+  (bộ đọc cũ đã biên dịch sẵn trong exe trên máy người dùng). Hệ quả thật đã truy
+  theo mã: `CheckFailed` → vẫn quét bình thường kèm ghi chú, không sập. Cách gỡ:
+  một bản cầu nối mang số hiệu dạng cũ — quyết định của chủ project.
