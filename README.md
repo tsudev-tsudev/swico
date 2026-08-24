@@ -3,7 +3,7 @@
 <img src="assets/tsudev-logo-144.png" alt="tsudev" align="right" height="120">
 
 
-Kiểm tra tình trạng bản quyền Windows/Office và thu thập cấu hình phần cứng —
+Kiểm tra tình trạng bản quyền Windows/Office và thu thập cấu hình phần cứng -
 **một file `.exe` duy nhất**, không cần cài .NET Runtime.
 
 [![CI](https://github.com/tsudev-tsudev/swico/actions/workflows/ci.yml/badge.svg)](https://github.com/tsudev-tsudev/swico/actions/workflows/ci.yml)
@@ -15,7 +15,7 @@ Kiểm tra tình trạng bản quyền Windows/Office và thu thập cấu hình
 
 ## Đánh số phiên bản
 
-Mỗi bản phát hành mang tên `tsudev-swico_YY.M.DDNN_x64-setup.exe` — **CalVer**,
+Mỗi bản phát hành mang tên `tsudev-swico_YY.M.DDNN_x64-setup.exe` - **CalVer**,
 phiên bản chính là ngày phát hành, hai chữ số cuối là **thứ tự bản trong ngày**:
 
 | Tên file cài đặt | Nghĩa |
@@ -26,7 +26,7 @@ phiên bản chính là ngày phát hành, hai chữ số cuối là **thứ t�
 
 Ngày và số thứ tự đều **đệm đủ hai chữ số**. Đó không phải chuyện thẩm mỹ: thành
 phần thứ ba được đọc bằng phép chia cho 100, nên `26.9.0901` là ngày 9 bản 1, còn
-`26.9.91` sẽ đọc ra ngày 0 bản 91 — một số hiệu không tồn tại. Nhờ đệm đủ, thứ tự
+`26.9.91` sẽ đọc ra ngày 0 bản 91 - một số hiệu không tồn tại. Nhờ đệm đủ, thứ tự
 so sánh `1901 < 1902 < 2001` luôn khớp thứ tự thời gian.
 
 Ưu điểm: nhìn tên file là biết ngay bản đó cũ hay mới, không cần tra bảng.
@@ -44,14 +44,14 @@ Tải từ [Releases](https://github.com/tsudev-tsudev/swico/releases):
 | Cách | Tệp | Dùng khi |
 |---|---|---|
 | **Cài đặt** | `tsudev-swico_<phiên-bản>_x64-setup.exe` | Cài cố định, có mục gỡ cài đặt, hỗ trợ `/VERYSILENT` để triển khai hàng loạt |
-| **Portable** | `tsudev-swico_<phiên-bản>_x64-portable.zip` | Cắm USB đi từng máy — giải nén chạy thẳng, không đụng registry |
+| **Portable** | `tsudev-swico_<phiên-bản>_x64-portable.zip` | Cắm USB đi từng máy - giải nén chạy thẳng, không đụng registry |
 | **Chỉ file exe** | `swico.exe` | Nhúng vào script hoặc RMM |
 
 Cả ba chứa **cùng một chương trình**; chỉ khác cách giao đến máy đích. Đối chiếu
 tệp tải về với `SHA256SUMS.txt` đính kèm mỗi bản phát hành.
 
 **Về dung lượng:** từ bản 26.8.18.2, file `swico.exe` không còn được nén sẵn bên
-trong. Nghe ngược trực giác, nhưng nén hai lần là phản tác dụng — payload đã nén
+trong. Nghe ngược trực giác, nhưng nén hai lần là phản tác dụng - payload đã nén
 thì trình cài đặt không nén thêm được nữa, nên **file setup lại to hơn**. Bỏ nén
 cũng xoá luôn bước giải nén runtime mỗi lần khởi động.
 
@@ -62,14 +62,14 @@ cũng xoá luôn bước giải nén runtime mỗi lần khởi động.
 | `swico.exe` tải trực tiếp | 34,0 MB | 75,8 MB | **tăng 123%** |
 
 Trình cài đặt nén bằng LZMA2 nên hưởng lợi trọn vẹn. `.zip` chỉ có Deflate nên
-gần như hoà. Còn `swico.exe` tải trực tiếp thì **to hơn gấp đôi** — vì trước đây
+gần như hoà. Còn `swico.exe` tải trực tiếp thì **to hơn gấp đôi** - vì trước đây
 nó tự nén bên trong, giờ thì không.
 
 **Nên chọn gì:**
 
-- **File setup** — nhỏ nhất, và là cách hầu hết người dùng nên dùng
-- **Bản portable** — khi không muốn cài đặt
-- **`swico.exe` trực tiếp** — chỉ khi thật cần một file đơn cho script; hãy biết
+- **File setup** - nhỏ nhất, và là cách hầu hết người dùng nên dùng
+- **Bản portable** - khi không muốn cài đặt
+- **`swico.exe` trực tiếp** - chỉ khi thật cần một file đơn cho script; hãy biết
   rằng bạn đang tải nhiều hơn gấp đôi
 
 Đổi lại ở cả ba dạng: không còn bước giải nén runtime ở lần chạy đầu, và mã máy
@@ -101,7 +101,7 @@ chạy DISM/SFC. Windows sẽ tự hiện hộp thoại UAC.
 
 Một lần quét đầy đủ mất từ vài chục giây tới hơn 15 phút (nếu bật `--sfc`).
 Công cụ in **từng bước một, ngay khi bước đó chạy xong**, kèm thời gian thật của
-chính nó — không dồn lại tới cuối:
+chính nó - không dồn lại tới cuối:
 
 Dưới đây là đầu ra **thật**, chép từ log CI chạy trên runner Windows
 ([run 32201733164](https://github.com/tsudev-tsudev/swico/actions/runs/32201733164)):
@@ -123,15 +123,15 @@ Dưới đây là đầu ra **thật**, chép từ log CI chạy trên runner Wi
 ```
 
 Trên terminal thật, dòng đang chạy còn có **con quay** (`⠹`) quay tại chỗ trước
-khi được thay bằng `✓` — log CI không thể hiện được điều đó vì đầu ra bị chuyển
+khi được thay bằng `✓` - log CI không thể hiện được điều đó vì đầu ra bị chuyển
 hướng nên con quay tự tắt (xem đoạn dưới).
 
-Con quay cho biết công cụ **đang chạy chứ không treo** — đây là khác biệt mà một
+Con quay cho biết công cụ **đang chạy chứ không treo** - đây là khác biệt mà một
 cột thời gian đứng yên không nói được. Những bước chạy lâu (DISM, `sfc`) còn tự
 báo thời gian dự kiến.
 
 Khi đầu ra bị **chuyển hướng** (ghi ra file log, đưa qua ống dẫn, chạy trong
-RMM/CI), công cụ tự bỏ con quay và mã màu — chỉ còn mỗi bước một dòng sạch, để
+RMM/CI), công cụ tự bỏ con quay và mã màu - chỉ còn mỗi bước một dòng sạch, để
 không có ký tự điều khiển nào lọt vào file log.
 
 **Ctrl+C dừng ngay lập tức**, kể cả khi `sfc` đang chạy dở: tiến trình con bị
@@ -143,7 +143,7 @@ nằm nguyên trên màn hình, và công cụ thoát với mã `130`.
 Chia hai nhóm **có chủ đích**, vì hệ thống giám sát cần phân biệt *"công cụ đọc
 thiếu dữ liệu"* với *"máy này có vấn đề bản quyền"*.
 
-**Sức khoẻ công cụ** — công cụ chạy có trọn vẹn không:
+**Sức khoẻ công cụ** - công cụ chạy có trọn vẹn không:
 
 | Mã | Ý nghĩa |
 |----|---------|
@@ -152,7 +152,7 @@ thiếu dữ liệu"* với *"máy này có vấn đề bản quyền"*.
 | 2 | Lỗi nghiêm trọng, không tạo được báo cáo |
 | 3 | Tham số dòng lệnh không hợp lệ |
 
-**Kết luận đánh giá** — máy được quét có vấn đề không:
+**Kết luận đánh giá** - máy được quét có vấn đề không:
 
 | Mã | Ý nghĩa |
 |----|---------|
@@ -188,7 +188,7 @@ Quét nhiều máy: copy các thư mục **cấp 3** từ máy khác vào cấp 
 
 Các dấu hiệu kích hoạt trái phép nằm trong một **file dữ liệu riêng có phiên
 bản**, không nằm cứng trong mã. Khi có biến thể mới, chỉ cần thay file
-`detection-rules.json` đặt cạnh `swico.exe` — không cần cài lại, không cần chờ
+`detection-rules.json` đặt cạnh `swico.exe` - không cần cài lại, không cần chờ
 bản phát hành mới.
 
 ```powershell
@@ -199,20 +199,20 @@ Thứ tự ưu tiên: `--rules` → file cạnh exe → bộ luật đóng kèm 
 File hỏng hoặc thiếu sẽ tự quay về bộ luật đóng kèm kèm cảnh báo, **không làm
 hỏng lần quét**. Chi tiết: [`docs/DETECTION-RULES.md`](docs/DETECTION-RULES.md).
 
-> Đây **không phải** bảo mật bằng che giấu — mã nguồn công khai nên luật cũng
+> Đây **không phải** bảo mật bằng che giấu - mã nguồn công khai nên luật cũng
 > công khai. Thứ thay đổi là **tốc độ cập nhật**.
 
 ## Tự động cập nhật
 
 Khi khởi động, công cụ hỏi GitHub xem đã có phiên bản mới chưa. Nếu có, hiện hộp
-thoại một nút **"Cập nhật"** — tải, **đối chiếu SHA-256**, rồi chạy trình cài đặt.
+thoại một nút **"Cập nhật"** - tải, **đối chiếu SHA-256**, rồi chạy trình cài đặt.
 Phải cập nhật xong mới quét tiếp, vì kết luận dựa trên bộ luật phát hiện và một
 bộ luật lỗi thời có thể bỏ sót dấu hiệu mới.
 
 **Nếu không kiểm tra được** (mất mạng, tường lửa chặn) thì công cụ **vẫn quét
 bình thường** kèm ghi chú. Chặn ở đây sẽ làm công cụ vô dụng đúng ở nơi cần nhất.
 
-Ở chế độ `--silent` không hiện hộp thoại — thoát với mã `30` để hệ thống triển
+Ở chế độ `--silent` không hiện hộp thoại - thoát với mã `30` để hệ thống triển
 khai tự xử lý. Tắt hẳn bằng `--no-update-check`.
 
 Chi tiết: [`docs/UPDATES.md`](docs/UPDATES.md).
@@ -220,7 +220,7 @@ Chi tiết: [`docs/UPDATES.md`](docs/UPDATES.md).
 ## Quyền riêng tư
 
 **Không dữ liệu nào của máy được quét rời khỏi máy.** Công cụ thực hiện đúng
-**một** kết nối mạng — kiểm tra phiên bản mới — và kết nối đó chỉ để lộ địa chỉ
+**một** kết nối mạng - kiểm tra phiên bản mới - và kết nối đó chỉ để lộ địa chỉ
 IP cùng số hiệu phiên bản, như mọi yêu cầu HTTP. Tắt bằng `--no-update-check`.
 
 Toàn bộ mã chạm tới mạng nằm gọn trong một file để bạn tự kiểm chứng:
@@ -254,18 +254,18 @@ tests/
 
 Đây là quyết định kiến trúc quan trọng nhất (mô hình **Ports & Adapters**):
 
-1. **Kiểm thử được** — toàn bộ logic nghiệp vụ (quét dấu hiệu crack, tính điểm
+1. **Kiểm thử được** - toàn bộ logic nghiệp vụ (quét dấu hiệu crack, tính điểm
    rủi ro, phân loại phần mềm, dựng HTML/XLSX) unit-test được **không cần máy
    Windows**. 298 test chạy trên Linux.
-2. **Dễ audit** — mọi lệnh gọi hệ thống tập trung trong đúng một file
+2. **Dễ audit** - mọi lệnh gọi hệ thống tập trung trong đúng một file
    (`WindowsAdapters.cs`). Với một công cụ đọc dữ liệu nhạy cảm và đòi quyền
    Administrator, việc rà soát bảo mật làm được nhanh là điều thiết yếu.
-3. **Dễ mở rộng** — thêm nền tảng khác chỉ cần viết adapter mới, tái dùng
+3. **Dễ mở rộng** - thêm nền tảng khác chỉ cần viết adapter mới, tái dùng
    nguyên vẹn lớp render báo cáo.
 
 ## Build từ mã nguồn
 
-Yêu cầu: **.NET 8 SDK**. Build được trên cả Windows lẫn Linux/macOS — kể cả
+Yêu cầu: **.NET 8 SDK**. Build được trên cả Windows lẫn Linux/macOS - kể cả
 bước publish `win-x64` (cross-compile được), chỉ không chạy thử được file exe.
 
 ```powershell
@@ -277,10 +277,10 @@ Kết quả: `publish/swico.exe`.
 
 Không có phụ thuộc NuGet nào ngoài `System.Management` (gói chính thức của
 Microsoft để truy vấn WMI). XLSX được **tự ghi theo chuẩn OOXML** và trang báo
-cáo HTML **không nạp thư viện JavaScript nào từ bên ngoài** — báo cáo mở được
+cáo HTML **không nạp thư viện JavaScript nào từ bên ngoài** - báo cáo mở được
 trên máy không có mạng. Chi tiết: [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).
 
-## Tình trạng kiểm thử — trung thực
+## Tình trạng kiểm thử - trung thực
 
 | Thành phần | Trạng thái |
 |---|---|
@@ -302,8 +302,8 @@ trên máy không có mạng. Chi tiết: [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY
 | CLI parse tham số | ✅ 21 test |
 | Mã thoát (gồm ca hồi quy Office chưa kích hoạt) | ✅ 11 test |
 | Tiến trình quét: thứ tự bước, huỷ giữa chừng, mã 130 | ✅ 24 test |
-| **Con quay & màu trên terminal thật** | ⚠️ **CHƯA tự động hoá** — cần mắt người |
-| **XLSX mở bằng Excel thật** | ⚠️ **CHƯA kiểm chứng** — môi trường dev không có Excel |
+| **Con quay & màu trên terminal thật** | ⚠️ **CHƯA tự động hoá** - cần mắt người |
+| **XLSX mở bằng Excel thật** | ⚠️ **CHƯA kiểm chứng** - môi trường dev không có Excel |
 | **Adapter WMI/Registry thực tế** | ⚠️ **CHƯA chạy thử trên Windows** |
 
 ### Giới hạn cần biết
@@ -313,14 +313,14 @@ thật**. Cần xác nhận tên thuộc tính WMI, đặc biệt `MSFT_MpComput
 `MSFT_MpThreatDetection` (trường `ThreatName` có thể phải tra chéo qua
 `MSFT_MpThreat`) và `MSFT_ScheduledTask`.
 
-Nếu có lỗi, hầu hết sẽ nằm gọn trong `WindowsAdapters.cs` — logic nghiệp vụ đã
+Nếu có lỗi, hầu hết sẽ nằm gọn trong `WindowsAdapters.cs` - logic nghiệp vụ đã
 được 298 test kiểm chứng nên không cần đụng tới.
 
 **Phần hiển thị tiến trình cũng có một khoảng chưa tự động hoá được.** Thứ tự
 các bước, việc huỷ giữa chừng và mã thoát 130 đều có test chạy trên Linux; CI
 trên Windows còn kiểm rằng mỗi bước in ra một dòng riêng kèm thời gian của chính
 nó. Nhưng *con quay có quay mượt không*, *màu có đúng không*, *con trỏ có được
-trả về sau Ctrl+C không* thì *chưa* có cách kiểm tự động — những thứ đó cần một
+trả về sau Ctrl+C không* thì *chưa* có cách kiểm tự động - những thứ đó cần một
 người ngồi trước terminal thật. Xem `docs/WINDOWS-VERIFICATION.md`.
 
 Kịch bản kiểm chứng đầy đủ: [`docs/WINDOWS-VERIFICATION.md`](docs/WINDOWS-VERIFICATION.md).
@@ -329,7 +329,7 @@ Kịch bản kiểm chứng đầy đủ: [`docs/WINDOWS-VERIFICATION.md`](docs/
 
 | File | Nội dung |
 |---|---|
-| [`docs/STATE.md`](docs/STATE.md) | Trạng thái sống — **đọc đầu tiên** |
+| [`docs/STATE.md`](docs/STATE.md) | Trạng thái sống - **đọc đầu tiên** |
 | [`docs/PLAN.md`](docs/PLAN.md) | Lộ trình theo giai đoạn |
 | [`docs/DECISIONS.md`](docs/DECISIONS.md) | Các quyết định đã chốt và lý do |
 | [`docs/CONTINUITY.md`](docs/CONTINUITY.md) | Giao thức nối tiếp giữa các phiên làm việc |

@@ -22,14 +22,14 @@ curl -s -o /dev/null -w "%{http_code}\n" \
 
 ## Manifest được sinh tự động, không cam kết sẵn
 
-Manifest **bắt buộc** phải chứa `InstallerSha256` của chính file setup — mà giá
+Manifest **bắt buộc** phải chứa `InstallerSha256` của chính file setup - mà giá
 trị đó chỉ biết **sau khi** đóng gói và ký. Vì vậy repo chỉ giữ **template**
 (`packaging/winget/template/`), còn manifest thật được sinh trong quy trình phát
 hành và **đính kèm mỗi bản phát hành** dưới dạng `winget-manifest-<phiên-bản>.zip`.
 
 > Một manifest cam kết sẵn trong repo sẽ luôn mang hash cũ hoặc hash giả. Đó là
 > một cái bẫy: nhìn như đã sẵn sàng nộp, nhưng nộp lên sẽ bị từ chối ngay ở khâu
-> kiểm tra. Dự án này **đã từng** có đúng lỗi đó — manifest mang hash
+> kiểm tra. Dự án này **đã từng** có đúng lỗi đó - manifest mang hash
 > `0000…0000` suốt nhiều bản dựng.
 
 Sinh lại thủ công khi cần:
@@ -78,7 +78,7 @@ winget install  --manifest .\manifests\t\tsudev\SWICO\<phiên-bản>
 | Có bản phát hành công khai, URL tải ổn định | ✅ |
 | `InstallerSha256` khớp đúng file tại URL đó | ✅ (sinh tự động) |
 | Giấy phép rõ ràng | ✅ Apache-2.0 |
-| **Installer đã được ký số** | ⚠️ **chưa** — chờ SignPath |
+| **Installer đã được ký số** | ⚠️ **chưa** - chờ SignPath |
 
 Chưa ký **không phải** điều kiện bắt buộc của winget. Chủ dự án đã quyết định nộp
 ngay ở giai đoạn dùng nội bộ, chấp nhận cảnh báo SmartScreen; khi SignPath duyệt
@@ -86,7 +86,7 @@ và có bản đã ký sẽ nộp bản cập nhật để phổ biến rộng.
 
 ## Cách nộp
 
-### Cách 1 — `wingetcreate` (khuyến nghị)
+### Cách 1 - `wingetcreate` (khuyến nghị)
 
 ```powershell
 winget install Microsoft.WingetCreate
@@ -98,7 +98,7 @@ wingetcreate submit `
 
 Công cụ tự fork `microsoft/winget-pkgs`, tạo nhánh và mở pull request.
 
-### Cách 2 — thủ công
+### Cách 2 - thủ công
 
 1. Fork `microsoft/winget-pkgs`.
 2. Chép thư mục manifest vào đúng đường dẫn
@@ -113,7 +113,7 @@ winget validate --manifest packaging\winget-out\manifests\t\tsudev\SWICO\26.8.19
 winget install --manifest packaging\winget-out\manifests\t\tsudev\SWICO\26.8.1901
 ```
 
-Lệnh thứ hai cài **từ manifest cục bộ** — cách duy nhất kiểm chứng manifest đúng
+Lệnh thứ hai cài **từ manifest cục bộ** - cách duy nhất kiểm chứng manifest đúng
 trước khi nộp lên kho công khai.
 
 ### ⚠️ Nộp XONG rồi thì ĐỪNG chạy lại `release.yml` cho phiên bản đó
@@ -127,7 +127,7 @@ manifest nộp lúc 16:41 mang hash của bản dựng 16:33, còn asset bị l�
 ghi đè lúc 16:43. Chi tiết: `docs/journal/S002-2026-08-19.md`.
 
 Quy tắc: **chốt asset trên release trước, nộp manifest sau.** Và ngay trước khi
-nộp, tải file từ chính `InstallerUrl` rồi tính lại hash — đừng tin giá trị đã ghi
+nộp, tải file từ chính `InstallerUrl` rồi tính lại hash - đừng tin giá trị đã ghi
 sẵn ở bất kỳ đâu:
 
 ```powershell
@@ -147,6 +147,6 @@ Lúc đó **mới** cập nhật README và nội dung bản phát hành để g
 
 ## Mỗi lần phát hành phiên bản mới
 
-Phải nộp manifest mới cho **từng phiên bản** — winget lưu lịch sử theo phiên bản,
+Phải nộp manifest mới cho **từng phiên bản** - winget lưu lịch sử theo phiên bản,
 không tự cập nhật. `wingetcreate update tsudev.SWICO --version <mới> --urls <url>`
 làm việc này gọn hơn là nộp lại từ đầu.

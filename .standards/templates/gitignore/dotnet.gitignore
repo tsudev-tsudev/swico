@@ -1,0 +1,17 @@
+# Bổ sung cho project .NET/C# - đặt SAU nội dung base.gitignore
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+*.pdb
+*.cache
+*.VisualState.xml
+TestResult.xml
+BenchmarkDotNet.Artifacts/
+publish/
+PublishProfiles/*.pubxml.user
+*.nupkg
+*.snupkg
+.nuget/packages/
+msbuild.log
+msbuild.binlog

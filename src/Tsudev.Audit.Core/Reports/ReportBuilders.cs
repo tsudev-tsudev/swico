@@ -163,7 +163,7 @@ public static class LicenseReportBuilder
         report.SummaryCards.Add(new SummaryCard { Value = $"{license.Ok}/{license.Total}", Label = "SKU Windows hợp lệ / tổng số" });
         report.SummaryCards.Add(new SummaryCard
         {
-            Value = office.IsInstalled ? $"{office.Ok}/{office.Total}" : "—",
+            Value = office.IsInstalled ? $"{office.Ok}/{office.Total}" : "-",
             Label = office.IsInstalled ? "Sản phẩm Office hợp lệ / tổng số" : "Office (không phát hiện)"
         });
         report.SummaryCards.Add(new SummaryCard { Value = findings.Count.ToString(CultureInfo.InvariantCulture), Label = "Dấu hiệu kích hoạt trái phép" });
