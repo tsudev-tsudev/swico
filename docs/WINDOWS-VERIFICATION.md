@@ -12,7 +12,7 @@ như chắc chắn lỗi nằm gọn trong `src/Tsudev.Audit.Windows/WindowsAdap
 
 ---
 
-## Chuẩn bị — đọc kỹ mục này trước
+## Chuẩn bị - đọc kỹ mục này trước
 
 > ⚠️ **Repo `github.com/tsudev-tsudev/swico` CHƯA TỒN TẠI.** Đó là URL điền tạm,
 > dùng trước cho tài liệu và manifest. Mã nguồn hiện **chỉ nằm trên máy dev
@@ -20,10 +20,10 @@ như chắc chắn lỗi nằm gọn trong `src/Tsudev.Audit.Windows/WindowsAdap
 
 ### Phần lớn kịch bản này KHÔNG cần mã nguồn
 
-Chỉ mục **A1** và **A2** cần build trên Windows. Mọi mục còn lại — gồm cả ba
-mục then chốt **B2, C3, D1** — chỉ cần **một file `swico.exe`**.
+Chỉ mục **A1** và **A2** cần build trên Windows. Mọi mục còn lại - gồm cả ba
+mục then chốt **B2, C3, D1** - chỉ cần **một file `swico.exe`**.
 
-### Cách 1 (nhanh nhất) — chỉ copy file exe
+### Cách 1 (nhanh nhất) - chỉ copy file exe
 
 Trên máy dev, file đã publish sẵn tại `dist/swico-portable.zip` (~29 MB).
 Copy sang Windows bằng USB hoặc chia sẻ mạng, giải nén, rồi:
@@ -33,7 +33,7 @@ cd <thư mục đã giải nén>
 .\swico.exe --help
 ```
 
-Không cần cài .NET Runtime — bản publish là self-contained.
+Không cần cài .NET Runtime - bản publish là self-contained.
 
 **Đối chiếu sau khi copy** (phòng file hỏng trên đường truyền):
 
@@ -45,11 +45,11 @@ So với giá trị trong `dist/SHA256SUMS.txt` trên máy dev.
 
 Bỏ qua A1, A2. Làm được toàn bộ phần còn lại.
 
-### Cách 2 — chuyển cả kho mã kèm lịch sử git
+### Cách 2 - chuyển cả kho mã kèm lịch sử git
 
 Nếu muốn làm cả A1/A2, hoặc muốn sửa mã trên Windows. Cần **.NET 8 SDK**.
 
-Trên máy dev đã tạo sẵn `dist/swico-repo.bundle` (116 KB) — một file duy nhất
+Trên máy dev đã tạo sẵn `dist/swico-repo.bundle` (116 KB) - một file duy nhất
 chứa **nguyên vẹn cả 7 commit và toàn bộ lịch sử**. Copy sang Windows rồi:
 
 ```powershell
@@ -62,12 +62,12 @@ Kỳ vọng: test báo `64 PASS, 0 FAIL`, rồi sinh ra `publish\swico.exe`.
 
 > Dùng `git bundle` thay vì zip thư mục vì nó giữ nguyên lịch sử git. Nếu sau
 > này bạn tạo repo GitHub thật, chỉ cần `git remote add` rồi `git push` là toàn
-> bộ 7 commit lên đúng như cũ — không mất mốc lùi nào.
+> bộ 7 commit lên đúng như cũ - không mất mốc lùi nào.
 
-### Cách 3 — tạo repo GitHub thật
+### Cách 3 - tạo repo GitHub thật
 
 Sớm muộn cũng phải làm, vì **SignPath Foundation bắt buộc repo công khai**
-(xem `docs/SIGNING.md`). Tôi không tạo repo thay bạn được — cần tài khoản của
+(xem `docs/SIGNING.md`). Tôi không tạo repo thay bạn được - cần tài khoản của
 bạn. Sau khi bạn tạo repo rỗng trên GitHub:
 
 ```bash
@@ -95,7 +95,7 @@ Rồi trên Windows `git clone` như bình thường.
 | A4 | `.\publish\swico.exe --help` | In danh sách tham số bằng tiếng Việt có dấu, không lỗi font | |
 | A5 | Chạy **không** quyền Administrator | Hiện cảnh báo, vẫn chạy, không sập | |
 
-## B. Tên thuộc tính WMI — chỗ dễ sai nhất
+## B. Tên thuộc tính WMI - chỗ dễ sai nhất
 
 > ⚠️ **Các lệnh dưới đây là PowerShell, chạy TRÊN MÁY WINDOWS.** Không phải bash,
 > không phải trên máy Linux. Dấu hiệu nhận biết bạn đang ở sai chỗ:
@@ -109,7 +109,7 @@ Rồi trên Windows `git clone` như bình thường.
 > **Run as administrator**.
 >
 > Khi chép lệnh, gõ dấu ống `|` **trơn**. Nếu thấy `\|` (có gạch chéo ngược) thì
-> đó là cách escape của bash — PowerShell sẽ báo lỗi cú pháp.
+> đó là cách escape của bash - PowerShell sẽ báo lỗi cú pháp.
 
 | # | Lệnh kiểm tra | Cần xác nhận | Kết quả thật |
 |---|---|---|---|
@@ -128,7 +128,7 @@ Rồi trên Windows `git clone` như bình thường.
 |---|---|---|---|
 | C1 | `.\publish\swico.exe --silent` | Tạo đủ 3 cấp thư mục theo quy ước | |
 | C2 | Mở file `.html` sinh ra | Hiển thị đúng, tiếng Việt có dấu, không vỡ trang | |
-| C3 | **Mở file `.xlsx` bằng Excel thật** | **Excel KHÔNG báo "file hỏng, cần sửa"** | ❌ **ĐÃ LỖI (18/08) — đã sửa, cần thử lại** |
+| C3 | **Mở file `.xlsx` bằng Excel thật** | **Excel KHÔNG báo "file hỏng, cần sửa"** | ❌ **ĐÃ LỖI (18/08) - đã sửa, cần thử lại** |
 | C4 | Kiểm tra `.xlsx`: dòng tiêu đề | Đóng băng khi cuộn, in đậm, nền xanh nhạt | |
 | C5 | Kiểm tra `.xlsx`: cột mã số | `"007"` giữ nguyên số 0 ở đầu, **không** thành `7` | |
 | C6 | Mở file `.json` | Đọc được, đúng `SchemaVersion` | |
@@ -141,22 +141,22 @@ Rồi trên Windows `git clone` như bình thường.
 | C14 | Mở `.xlsx`, nhìn dòng tiêu đề | Nền xanh nhạt cùng tông với bản HTML, không lệch màu | |
 | C11 | Nhìn mọi cột ngày trong `.html` và trang tổng hợp | Ngày giờ dạng `HH:mm DD/MM/YYYY` (`14:30 19/08/2026`), ngày dạng `DD/MM/YYYY` (`05/01/2024`). **Không** còn dạng `2026-08-19` hay `19/08/2026 14:30:05` | |
 
-> **C12/C13 — vì sao phải thử thật.** Chế độ tối và khối ép màu khi in là thứ
+> **C12/C13 - vì sao phải thử thật.** Chế độ tối và khối ép màu khi in là thứ
 > mới có từ phiên S005, và **chưa máy nào chạy thật**. Test chỉ đọc được chuỗi
 > CSS sinh ra, không dựng trang. Riêng C13 đáng để mất một trang giấy: nếu khối
 > `@media print` không ăn, người dùng in báo cáo lúc máy đang ở chế độ tối sẽ ra
 > tờ giấy đen kín mực.
 
-> **C11 — vì sao vẫn phải nhìn bằng mắt dù đã có 12 test.** Test chạy trên máy
+> **C11 - vì sao vẫn phải nhìn bằng mắt dù đã có 12 test.** Test chạy trên máy
 > dev Linux, nơi `CultureInfo.CurrentCulture` là `en-US`. Định dạng đã bị khoá
 > `InvariantCulture` nên về lý thuyết máy nào cũng ra như nhau, nhưng Windows
 > tiếng Việt là môi trường thật duy nhất chưa ai nhìn. Xem cả **cột "Ngày cài"**
-> trong bảng phần mềm — cột đó đọc thẳng từ registry của máy thật, nơi có những
+> trong bảng phần mềm - cột đó đọc thẳng từ registry của máy thật, nơi có những
 > chuỗi ngày mà máy dev không tạo ra được.
 
 > **C3 là mục quan trọng nhất trong bảng này.** Bộ ghi XLSX được viết tay theo
 > chuẩn OOXML và ở phiên S001 đã có **một lỗi đặt sai vị trí phần tử `<pane>`**
-> — file vẫn là XML hợp lệ nhưng Excel sẽ từ chối. Lỗi đó đã sửa, nhưng **chưa
+> - file vẫn là XML hợp lệ nhưng Excel sẽ từ chối. Lỗi đó đã sửa, nhưng **chưa
 > ai mở bằng Excel thật lần nào**. Môi trường phát triển không có Excel,
 > LibreOffice, cũng không cài được `openpyxl`.
 
@@ -166,7 +166,7 @@ Rồi trên Windows `git clone` như bình thường.
 
 | # | Việc cần làm | Kỳ vọng | Kết quả thật |
 |---|---|---|---|
-| D1 | Chạy bộ PowerShell cũ và `swico.exe` trên **cùng một máy** | Kết luận bản quyền giống nhau | ❌ **ĐÃ LỖI (18/08): swico báo hợp lệ, PowerShell báo không — đã sửa, cần thử lại** |
+| D1 | Chạy bộ PowerShell cũ và `swico.exe` trên **cùng một máy** | Kết luận bản quyền giống nhau | ❌ **ĐÃ LỖI (18/08): swico báo hợp lệ, PowerShell báo không - đã sửa, cần thử lại** |
 | D2 | So danh sách phần mềm phát hiện được | Không thiếu mục nào so với bản cũ | |
 | D3 | So điểm rủi ro và số phát hiện | Cùng thang, cùng kết luận | |
 
@@ -179,7 +179,7 @@ Chạy tối thiểu trên 3 máy khác nhau. Càng khác nhau càng tốt.
 | 1 | Win 11 | Có | Đã kích hoạt | Admin | |
 | 2 | Win 10 | Không | Đã kích hoạt | Admin | |
 | 3 | Win 10/11 | Có | **Chưa** kích hoạt | Admin | |
-| 4 | bất kỳ | — | — | **Không** admin | |
+| 4 | bất kỳ | - | - | **Không** admin | |
 
 ## F. Kiểm tra installer (sau khi có file setup)
 
@@ -191,13 +191,13 @@ Chạy tối thiểu trên 3 máy khác nhau. Càng khác nhau càng tốt.
 | F4 | Sau khi gỡ: kiểm tra biến PATH | Đường dẫn đã bị rút ra, không để lại rác | |
 | F5 | Cài đè phiên bản cũ | Nâng cấp tại chỗ, **không** tạo mục thứ hai | |
 | **F7** | Biên dịch `swico.iss` với `/DAppVersion=26.8.1901` | `ISCC` không lỗi; file ra tên `tsudev-swico_26.8.1901_x64-setup.exe` | ⚠️ **CHƯA kiểm** |
-| **F8** | Biên dịch với `/DAppVersion=26.9.0901` (**ngày một chữ số**) | `ISCC` **không** báo lỗi số 0 đứng đầu ở `VersionInfoVersion` | ⚠️ **CHƯA kiểm — rủi ro còn lại của việc đổi quy ước** |
+| **F8** | Biên dịch với `/DAppVersion=26.9.0901` (**ngày một chữ số**) | `ISCC` **không** báo lỗi số 0 đứng đầu ở `VersionInfoVersion` | ⚠️ **CHƯA kiểm - rủi ro còn lại của việc đổi quy ước** |
 | F6 | `tsudev-swico_<phiên-bản>_x64-setup.exe /VERYSILENT` | Cài im lặng, không hiện cửa sổ nào | |
 
 ## G. Phần mềm diệt virus
 
 Rủi ro đặc thù: công cụ đòi quyền Administrator, đọc registry bản quyền, quét
-dấu hiệu crack, đọc trạng thái Defender — mô tả gần trùng khớp phần mềm độc hại.
+dấu hiệu crack, đọc trạng thái Defender - mô tả gần trùng khớp phần mềm độc hại.
 
 | # | Việc cần làm | Kỳ vọng | Kết quả thật |
 |---|---|---|---|
@@ -213,7 +213,7 @@ dấu hiệu crack, đọc trạng thái Defender — mô tả gần trùng kh�
 đều đã có test tự động (264 test trên Linux + kiểm tra dòng-theo-bước trong CI
 Windows). Nhưng *dáng vẻ* của nó thì không: một con quay đứng im, một dòng bị vỡ
 vì cửa sổ hẹp, hay một con trỏ không được trả về sau Ctrl+C đều **không** làm test
-nào đỏ — chỉ có người ngồi trước màn hình mới thấy.
+nào đỏ - chỉ có người ngồi trước màn hình mới thấy.
 
 | # | Việc cần làm | Kỳ vọng | Kết quả thật |
 |---|---|---|---|

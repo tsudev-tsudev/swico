@@ -1,12 +1,12 @@
-# STATE — Trạng thái sống của dự án
+# STATE - Trạng thái sống của dự án
 
 > **File này là nguồn sự thật DUY NHẤT về "đang làm tới đâu".**
-> Phiên mới đọc `AGENTS.md` (quy ước bắt buộc) rồi tới **file này** — trước cả README.
+> Phiên mới đọc `AGENTS.md` (quy ước bắt buộc) rồi tới **file này** - trước cả README.
 > Thứ tự đọc đầy đủ: `docs/CONTINUITY.md` mục 0.
 
 - **Cập nhật lần cuối:** 2026-08-20 (phiên S004)
-- **Phiên gần nhất:** S004 — `docs/journal/S004-2026-08-20.md`
-- **Quy ước bắt buộc:** `AGENTS.md` — **đọc trước cả file này**
+- **Phiên gần nhất:** S004 - `docs/journal/S004-2026-08-20.md`
+- **Quy ước bắt buộc:** `AGENTS.md` - **đọc trước cả file này**
 - **Giai đoạn:** đã phát hành `v26.8.18.2`; PR winget đang chờ gỡ một nhãn lỗi;
   `26.8.1901` đã sẵn sàng trong repo nhưng **chưa gắn tag, chưa phát hành**;
   còn 4 việc chờ người dùng + 1 nhóm việc kỹ thuật
@@ -16,16 +16,16 @@
 > **Đọc `AGENTS.md` trước, rồi tới đây.** Bàn giao gần nhất:
 > `logs/handover/20260820-02_khep-phien-S004.md`.
 >
-> **Mục 3.0 trước đã** — phiên S004 để lại **4 commit chưa push**. Chúng chưa qua
+> **Mục 3.0 trước đã** - phiên S004 để lại **4 commit chưa push**. Chúng chưa qua
 > CI, nên mọi câu "CI xanh" dưới đây đang nói về commit `200c0fd` của phiên S003,
 > KHÔNG phải trạng thái hiện tại.
 >
 > Phiên S004 đã **đổi quy ước đặt tên phiên bản** sang `docs/DESIGN_SYSTEM.md`
 > mục 6 (quyết định **D-S004-1**): `VersionPrefix` nay là **`26.8.1901`**, file
-> cài đặt là `tsudev-swico_26.8.1901_x64-setup.exe`. **Chưa gắn tag** — việc phát
+> cài đặt là `tsudev-swico_26.8.1901_x64-setup.exe`. **Chưa gắn tag** - việc phát
 > hành là quyết định của người dùng, xem mục 3.6, và **đọc mục 4.7 trước**.
 >
-> Sau đó **xem mục 3.1** — PR winget #419878 đang vướng nhãn
+> Sau đó **xem mục 3.1** - PR winget #419878 đang vướng nhãn
 > `Validation-Executable-Error` và bot chưa giải thích nguyên nhân.
 >
 > Mọi việc của phiên S003 đã khép: code **đã push**, CI run
@@ -37,15 +37,15 @@
 ## 1. Tình trạng kỹ thuật
 
 ```
-Build     : ✅ 0 cảnh báo (TreatWarningsAsErrors bật) — đo trên máy dev Linux
-Test      : ✅ 298 PASS, 0 FAIL — đo trên máy dev Linux
+Build     : ✅ 0 cảnh báo (TreatWarningsAsErrors bật) - đo trên máy dev Linux
+Test      : ✅ 298 PASS, 0 FAIL - đo trên máy dev Linux
 CI        : ✅ run 32360493509 XANH cả hai job (Linux + smoke test Windows) cho
-            commit `ce24691`. Commit QU-5 (`c4dec40`) và QU-4 đã đẩy sau đó —
+            commit `ce24691`. Commit QU-5 (`c4dec40`) và QU-4 đã đẩy sau đó -
             xem `gh run list`, đừng tin mốc ghi cứng này. Đây là lần đầu luật đặt tên MỚI + `VersionPrefix`
             `26.8.1901` chạy trên runner GitHub. Bước `Kiem tra quy uoc dat ten`
             của `release.yml` vẫn CHƯA từng chạy (chỉ kích hoạt khi gắn tag).
 Release   : ✅ v26.8.18.2 đã phát hành chính thức (Latest)
-Repo      : ✅ github.com/tsudev-tsudev/swico — PUBLIC, working tree sạch
+Repo      : ✅ github.com/tsudev-tsudev/swico - PUBLIC, working tree sạch
 SDK       : ✅ ghim 8.0.424 qua global.json (dev và CI dùng CÙNG một SDK)
 Windows   : ✅ đã chạy thật, cài thật, dữ liệu đúng, đối chiếu với bản PowerShell cũ xong
 Terminal  : 🔄 streaming tiến trình quét ĐÃ VIẾT XONG, phần "dáng vẻ" chờ kiểm bằng mắt
@@ -60,22 +60,22 @@ Git       : ✅ ngang bằng origin/main (đếm bằng `git log --oneline origi
 | Assembly | `swico.exe` |
 | Winget ID | `tsudev.SWICO` |
 | Phiên bản | trong repo: **26.8.1901** · đã phát hành: **26.8.18.2** (dạng cũ) |
-| Đặt tên phát hành | `tsudev-swico_YY.M.DDNN_x64-setup.exe` — `docs/VERSIONING.md`, có 33 test |
-| Namespace | `Tsudev.Audit.*` — **giữ nguyên**, chi tiết nội bộ |
+| Đặt tên phát hành | `tsudev-swico_YY.M.DDNN_x64-setup.exe` - `docs/VERSIONING.md`, có 33 test |
+| Namespace | `Tsudev.Audit.*` - **giữ nguyên**, chi tiết nội bộ |
 | Tên miền | `https://tsudev.com` (bộ test khẳng định điều này) |
 | Giấy phép | Apache-2.0 |
-| Ký số | SignPath Foundation — **đang chờ duyệt** |
+| Ký số | SignPath Foundation - **đang chờ duyệt** |
 
 ---
 
-## 3. VIỆC TIẾP THEO — đọc mục này rồi làm
+## 3. VIỆC TIẾP THEO - đọc mục này rồi làm
 
-### 3.0 ✅ ĐÃ XONG — commit S004 đã push, CI xanh
+### 3.0 ✅ ĐÃ XONG - commit S004 đã push, CI xanh
 
 Ngày 20/08/2026, phiên S005 đẩy 4 commit của S004 lên `origin/main` sau khi
 được chủ project đồng ý. `origin/main` = `ce24691`.
 
-CI run **32360493509** — **xanh cả hai job**:
+CI run **32360493509** - **xanh cả hai job**:
 
 | Job | Kết quả |
 |---|---|
@@ -84,13 +84,13 @@ CI run **32360493509** — **xanh cả hai job**:
 
 **Điều này chứng minh được gì:** bước `Kiem tra VersionPrefix dung quy uoc dat ten`
 trong `ci.yml` chạy được với luật đặt tên **mới** và `VersionPrefix` **mới**
-(`26.8.1901`) trên runner GitHub thật — trước đó nó mới chỉ xanh với luật cũ.
+(`26.8.1901`) trên runner GitHub thật - trước đó nó mới chỉ xanh với luật cũ.
 
 **Điều này KHÔNG chứng minh được:** bước `Kiem tra quy uoc dat ten` trong
 `release.yml` vẫn **chưa từng chạy thật**, vì nó chỉ kích hoạt khi gắn tag.
 Lần phát hành đầu tiên theo quy ước mới vẫn là lần chạy đầu tiên của bước đó.
 
-### 3.1 ⛔ PR winget #419878 — vướng `Validation-Executable-Error`
+### 3.1 ⛔ PR winget #419878 - vướng `Validation-Executable-Error`
 
 PR: https://github.com/microsoft/winget-pkgs/pull/419878
 
@@ -103,14 +103,14 @@ của file `.exe` đang nằm trên release).
 
 | Bước | Kết quả |
 |---|---|
-| 01–07, 09, 10 | ✅ pass (`07. Installers Scan` — bước từng đỏ — nay 6m30s pass) |
+| 01-07, 09, 10 | ✅ pass (`07. Installers Scan` - bước từng đỏ - nay 6m30s pass) |
 | **08. Installation Validation** | ⏭️ **skipping** (53m27s) |
 
 Nhãn: `Azure-Pipeline-Passed`, `New-Package`, `Validation-Guide`,
 **`Validation-Executable-Error`**.
 
 **CHƯA BIẾT nguyên nhân.** Bot Microsoft chưa đăng bình luận giải thích tính tới
-cuối phiên S002. Giả thuyết đáng ngờ nhất — **chưa kiểm chứng** — là installer
+cuối phiên S002. Giả thuyết đáng ngờ nhất - **chưa kiểm chứng** - là installer
 chưa được ký số (mục 3.4). Bước 08 là bước cài thử thật trong sandbox Windows.
 
 **Việc cần làm:**
@@ -124,17 +124,17 @@ chưa được ký số (mục 3.4). Bước 08 là bước cài thử thật tr
    winget validate --manifest <thư-mục-manifest>
    winget install  --manifest <thư-mục-manifest>
    ```
-   Manifest lấy từ `winget-manifest-26.8.18.2.zip` đính kèm bản phát hành —
+   Manifest lấy từ `winget-manifest-26.8.18.2.zip` đính kèm bản phát hành -
    artifact này mang hash ĐÚNG, dùng thẳng được.
 
 > ⛔ **KHÔNG chạy lại `release.yml` cho `v26.8.18.2`.** Sẽ sinh file setup mới,
 > ghi đè asset trên release, và làm hash trong PR sai trở lại. Đây đúng là cái
-> bẫy đã gây ra `Error-Hash-Mismatch` — xem mục 4.4.
+> bẫy đã gây ra `Error-Hash-Mismatch` - xem mục 4.4.
 
 `winget install tsudev.SWICO` chỉ chạy được **sau khi PR được hợp nhất**. Trong
 lúc chờ, dùng `packaging/tools/winget-local-install.ps1`.
 
-### 3.2 ⛔ Kiểm chứng chức năng tự cập nhật — **cần người dùng**
+### 3.2 ⛔ Kiểm chứng chức năng tự cập nhật - **cần người dùng**
 
 `v26.8.18.2` đã phát hành nên bản **26.8.18 đang cài trên máy** sẽ phát hiện được.
 Chạy nó và kiểm:
@@ -151,10 +151,10 @@ Chạy nó và kiểm:
 > Hai dòng in đậm là **mới ở phiên S003** và là hai dòng đáng kiểm nhất: chúng
 > kiểm chính giả định "Inno Setup luôn đặt `unins000.exe` cạnh ứng dụng". Giả
 > định đó đọc từ tài liệu Inno Setup, **chưa ai xác nhận trên máy thật**. Nếu
-> sai, bản đã cài sẽ bị coi nhầm là portable — phiền chứ không hỏng, nhưng vẫn
+> sai, bản đã cài sẽ bị coi nhầm là portable - phiền chứ không hỏng, nhưng vẫn
 > phải biết.
 
-**Thêm ở phiên S004 — hai điều CHỈ kiểm được trên Windows thật:**
+**Thêm ở phiên S004 - hai điều CHỈ kiểm được trên Windows thật:**
 
 | Việc | Kỳ vọng | Vì sao chưa ai biết |
 |---|---|---|
@@ -164,7 +164,7 @@ Chạy nó và kiểm:
 > Điều thứ hai là chỗ rủi ro còn lại của cả việc đổi quy ước. Phía .NET đã **đo
 > xong** (xem `docs/VERSIONING.md` mục 4), phía Inno Setup thì **chưa**.
 
-### 3.3 ⛔ Kiểm bằng mắt phần hiển thị tiến trình — **cần người dùng**
+### 3.3 ⛔ Kiểm bằng mắt phần hiển thị tiến trình - **cần người dùng**
 
 Phiên S002 đã thêm streaming tiến trình quét: mỗi bước một dòng, có con quay,
 Ctrl+C dừng ngay và thoát mã `130`. Phần **logic** đã có 24 test (Linux) và CI
@@ -177,18 +177,18 @@ Chạy 9 mục ở `docs/WINDOWS-VERIFICATION.md` mục **H**. Quan trọng nh�
 | H4 | Sau Ctrl+C, gõ tiếp một lệnh | Con trỏ bị ẩn mà không hiện lại = terminal hỏng sau khi công cụ đã thoát |
 | H5 | Sau Ctrl+C, mở Task Manager | Còn sót `sfc.exe`/`DISM.exe` = máy vẫn gồng dù đã "thoát" |
 
-### 3.4 ⛔ Sau khi SignPath duyệt — **cần người dùng**
+### 3.4 ⛔ Sau khi SignPath duyệt - **cần người dùng**
 
 1. Thêm secret `SIGNPATH_API_TOKEN` và variable `SIGNPATH_ORGANIZATION_ID`.
 2. Phía SignPath: `project-slug=swico`, `signing-policy-slug=release-signing`,
    `artifact-configuration-slug` = `exe` và `installer`.
-3. Chạy lại `release.yml` — các bước ký **tự kích hoạt** nhờ điều kiện
+3. Chạy lại `release.yml` - các bước ký **tự kích hoạt** nhờ điều kiện
    `SIGNPATH_CONFIGURED`, gồm cả bước xác minh chữ ký **và dấu thời gian**.
 4. Nộp manifest winget mới cho bản đã ký.
 
 Chi tiết: `docs/SIGNING.md`.
 
-### 3.5 ⬜ Việc kỹ thuật còn lại — làm được không cần người dùng
+### 3.5 ⬜ Việc kỹ thuật còn lại - làm được không cần người dùng
 
 Xếp theo giá trị giảm dần:
 
@@ -207,10 +207,10 @@ Xếp theo giá trị giảm dần:
    nhãn về một bề rộng cố định trong `ConsoleProgressReporter.Finish()` là xong.
    README đang chép đúng đầu ra thật nên **không sai lệch**; đây thuần tuý là
    thẩm mỹ.
-5. **NativeAOT** — cân nhắc, nhưng đọc mục 4 trước: cắt tỉa đã hỏng, NativeAOT
+5. **NativeAOT** - cân nhắc, nhưng đọc mục 4 trước: cắt tỉa đã hỏng, NativeAOT
    gần như chắc chắn cũng hỏng vì cùng nguyên nhân (WMI qua COM + phản chiếu).
 
-### 3.6 ⬜ Phát hành `26.8.1901` — sẵn sàng, chờ quyết định
+### 3.6 ⬜ Phát hành `26.8.1901` - sẵn sàng, chờ quyết định
 
 `Directory.Build.props` đã ghi `26.8.1901`, nhưng **chưa gắn tag và chưa phát
 hành**. Repo đang ở trạng thái build được, test xanh, chỉ thiếu một quyết định.
@@ -227,18 +227,18 @@ bản phát hành **nháp** mang tên `tsudev-swico_26.8.1901`.
 
 > ⚠️ **Cân nhắc bản cầu nối trước.** Phát hành thẳng `26.8.1901` thì hai bản đã
 > cài trên máy người dùng (`26.8.18`, `26.8.18.2`) **không đọc được** số hiệu đó
-> và mất đường cập nhật — xem mục 4.7. Nếu điều đó quan trọng, phát hành
+> và mất đường cập nhật - xem mục 4.7. Nếu điều đó quan trọng, phát hành
 > `26.8.20` (dạng cũ) làm cầu nối **trước**, rồi mới sang dạng mới.
 
 > ⛔ Việc này **không đụng gì tới `v26.8.18.2`**, nên PR winget #419878 (mục 3.1)
-> không bị ảnh hưởng. Đừng chạy lại `release.yml` cho `26.8.18.2` — xem mục 4.4.
+> không bị ảnh hưởng. Đừng chạy lại `release.yml` cho `26.8.18.2` - xem mục 4.4.
 
 Nếu hôm nay đã phát hành rồi mà cần phát hành lại **trong cùng ngày**, số hiệu
-tiếp theo là `26.8.1902` — `docs/VERSIONING.md` mục 6.
+tiếp theo là `26.8.1902` - `docs/VERSIONING.md` mục 6.
 
 ---
 
-### QU-4 ✅ ĐÃ XONG — báo cáo chạy hoàn toàn bằng `tokens/`
+### QU-4 ✅ ĐÃ XONG - báo cáo chạy hoàn toàn bằng `tokens/`
 
 `AGENTS.md` mục 6 cấm hard-code màu/cỡ chữ/radius. Trước phiên S005, CSS của báo
 cáo có bảng màu riêng viết tay (`--accent:#1c5fbf`…) **lệch** với
@@ -249,11 +249,11 @@ ngoài bảng đó và ba mã màu nữa trong bộ ghi `.xlsx`.
 (`EmbeddedResource`, cùng cách `Rules/detection-rules.json` đã dùng).
 `Core/Rendering/DesignTokens.cs` đọc file đó lúc chạy và sinh ra khối biến CSS
 nội tuyến vào `<style>`. Sửa một giá trị trong `tokens/` là báo cáo đổi theo ở
-lần build sau — không ai phải đi tìm trong CSS.
+lần build sau - không ai phải đi tìm trong CSS.
 
 Không nạp tài nguyên ngoài: token nội tuyến, logo `data:` URI, font Inter chỉ
 đứng đầu chuỗi dự phòng (`'Inter', 'SF Pro Text', 'Segoe UI', …`) nên máy có thì
-dùng, không có thì rơi xuống font hệ thống — **không tải webfont**.
+dùng, không có thì rơi xuống font hệ thống - **không tải webfont**.
 
 **Ba chế độ, sinh tự động từ ba bảng màu có sẵn trong token:**
 
@@ -265,37 +265,37 @@ dùng, không có thì rơi xuống font hệ thống — **không tải webfont
 
 > ⚠️ **Đây là đảo ngược một hành vi từng bị test khóa.** `tests/unittests/Program.cs`
 > trước có câu `"KHONG con dark-mode tu dong"`. Truy lại thì đó không phải quyết
-> định sản phẩm — `docs/journal/S001` mục "viết lại lớp Rendering" chỉ **mô tả**
+> định sản phẩm - `docs/journal/S001` mục "viết lại lớp Rendering" chỉ **mô tả**
 > bản dựng lại. Chủ project đã quyết theo quy ước, 20/08/2026.
 
 **Đầu trang CỐ Ý không đổi màu theo chế độ.** Ở chế độ tối, `primary` là
 `#66A3F2` nên đầu trang sẽ thành nền **sáng**, và chữ ký thương hiệu vốn chỉnh
-cho nền đậm tụt xuống **2,4:1** — dưới cả ngưỡng 3:1 dành cho chữ cỡ lớn. Đầu
+cho nền đậm tụt xuống **2,4:1** - dưới cả ngưỡng 3:1 dành cho chữ cỡ lớn. Đầu
 trang là mảng thương hiệu chứ không phải bề mặt đọc nội dung, nên nó dùng bộ
 biến riêng `--c-hero-*` luôn lấy từ bảng **sáng**. Chữ ký ở **chân trang** thì
 vẫn lật, vì chân trang nằm trong nền trang.
 
 **Bốn giá trị màu duy nhất còn viết cứng** là sắc chữ ký `tsudev`
 (`DesignTokens.BrandTsuOnDark` và ba giá trị cùng nhóm). Bộ token mô tả **vai
-trò giao diện**, chưa có chỗ cho **bản sắc thương hiệu** — đổi `primary` thì chữ
+trò giao diện**, chưa có chỗ cho **bản sắc thương hiệu** - đổi `primary` thì chữ
 ký vẫn phải giữ nguyên màu. ⬜ **Cần chủ project quyết:** đưa 4 giá trị này vào
-`tokens/design-tokens.json` (sửa file thuộc bộ quy ước — cần cho phép trực tiếp)
+`tokens/design-tokens.json` (sửa file thuộc bộ quy ước - cần cho phép trực tiếp)
 hay để nguyên trong mã.
 
 **Ba thay đổi nhìn thấy được, do đi theo quy ước:**
 
-- Badge từ viên thuốc `999px` thành `radius-sm` 4px — `DESIGN_SYSTEM.md` mục 2
+- Badge từ viên thuốc `999px` thành `radius-sm` 4px - `DESIGN_SYSTEM.md` mục 2
   quy định badge dùng `radius-sm`.
-- Nhãn ở đầu trang **bỏ viết hoa toàn bộ** — mục 4 chỉ cho phép ALL CAPS với nhãn
+- Nhãn ở đầu trang **bỏ viết hoa toàn bộ** - mục 4 chỉ cho phép ALL CAPS với nhãn
   ≤ 2 từ, mà ở đây có `"Thời điểm quét"`.
-- Bảng có viền bao ngoài bo `radius-lg` — mục "Table" của quy ước.
+- Bảng có viền bao ngoài bo `radius-lg` - mục "Table" của quy ước.
 
 Nền badge dùng `bg-surface` chứ không phải `bg-subtle`: màu `danger` trên nền
 `bg-subtle` chỉ đạt **4,3:1**, dưới ngưỡng AA 4,5:1 mà mục 1 bắt buộc.
 
 **Còn nợ (không nằm trong QU-4):** quy ước mục "Table" đòi **số căn phải**;
 `DataTable` hiện không mang thông tin kiểu cột nên chưa làm được. Warm Mode là
-lựa chọn **thủ công**, cần nút chuyển + chỗ lưu lựa chọn — báo cáo tĩnh chưa có.
+lựa chọn **thủ công**, cần nút chuyển + chỗ lưu lựa chọn - báo cáo tĩnh chưa có.
 
 19 test ở mục 19 khóa lại: CSS viết tay **0 mã màu**, mọi `font-size`/`radius`
 đều qua `var()`, mọi biến được dùng đều có định nghĩa, không `@import`, không
@@ -303,10 +303,10 @@ lựa chọn **thủ công**, cần nút chuyển + chỗ lưu lựa chọn — 
 
 ---
 
-### QU-5 ✅ ĐÃ XONG — định dạng ngày giờ hiển thị về đúng một luật
+### QU-5 ✅ ĐÃ XONG - định dạng ngày giờ hiển thị về đúng một luật
 
 Trước phiên S005, báo cáo in ra **ba** định dạng khác nhau cho cùng một khái
-niệm — `dd/MM/yyyy HH:mm`, `dd/MM/yyyy HH:mm:ss`, `yyyy-MM-dd HH:mm:ss` — và
+niệm - `dd/MM/yyyy HH:mm`, `dd/MM/yyyy HH:mm:ss`, `yyyy-MM-dd HH:mm:ss` - và
 **không có test nào chặn**. Quy ước (`docs/DESIGN_SYSTEM.md`) chỉ có một:
 
 ```
@@ -317,7 +317,7 @@ Ngày giờ : HH:mm DD/MM/YYYY    ví dụ 14:30 19/08/2026
 Luật nay nằm ở **một chỗ duy nhất**: `Core/Reports/DateDisplay.cs`. Bảy chỗ in
 ngày (2 renderer, 2 collector, CLI) đều gọi vào đó. 12 test ở mục 18 khoá lại.
 
-**Hai điều cố ý KHÔNG thống nhất — đừng "dọn cho gọn":**
+**Hai điều cố ý KHÔNG thống nhất - đừng "dọn cho gọn":**
 
 | Chỗ | Định dạng | Vì sao |
 |---|---|---|
@@ -333,11 +333,11 @@ ngày (2 renderer, 2 collector, CLI) đều gọi vào đó. 12 test ở mục 1
 giữ `HHmmss`, nên hai lần quét cách nhau vài giây vẫn phân biệt được bằng tên.
 
 **Ngày cài đặt phần mềm** đọc từ registry (`FormatInstallDate`) cũng đổi theo:
-`2024-01-05` → `05/01/2024`. Hàm này **không** dùng `DateTime.ParseExact` — máy
+`2024-01-05` → `05/01/2024`. Hàm này **không** dùng `DateTime.ParseExact` - máy
 thật có registry ghi ngày không tồn tại (`20240230`); cắt chuỗi thì người đọc
 vẫn thấy được registry ghi gì, `ParseExact` thì ném.
 
-## 4. CẠM BẪY ĐÃ BIẾT — đọc để khỏi vấp lại
+## 4. CẠM BẪY ĐÃ BIẾT - đọc để khỏi vấp lại
 
 ### 4.1 Về đóng gói và hiệu năng
 
@@ -358,7 +358,7 @@ vẫn thấy được registry ghi gì, `ParseExact` thì ném.
 
 - Máy dev là **Linux**. `dotnet` **không có trong PATH mặc định**:
   `export PATH="$HOME/.dotnet:$PATH"`.
-- **`global.json` ghim SDK 8.0.424 — đừng xoá.** Runner GitHub có sẵn .NET 10 và
+- **`global.json` ghim SDK 8.0.424 - đừng xoá.** Runner GitHub có sẵn .NET 10 và
   `dotnet build` luôn chọn bản mới nhất nếu không ghim (đã từng làm CI đỏ).
 - **Không có `pip`, `openpyxl`, LibreOffice, Excel, `winget`, Inno Setup.** Mọi
   thứ cần Windows phải kiểm chứng qua CI hoặc nhờ người dùng.
@@ -366,12 +366,12 @@ vẫn thấy được registry ghi gì, `ParseExact` thì ném.
 
 ### 4.3 Về kiến trúc
 
-- **Logic thuần phải nằm trong Core**, không phải lớp adapter — nếu không thì bộ
+- **Logic thuần phải nằm trong Core**, không phải lớp adapter - nếu không thì bộ
   test chạy trên Linux không với tới được. Đã vấp **hai lần** trong phiên S001:
   `CliOptions` (README từng tuyên bố "16/16 test" khi không có test nào), và
   `GitHubReleaseParser`/`ChecksumFile`.
 - **Mọi mã chạm mạng nằm gọn trong `src/Tsudev.Audit.Windows/UpdateAdapters.cs`.**
-  Giữ nguyên tính chất "một file duy nhất" đó — `PRIVACY.md` mời người dùng tự
+  Giữ nguyên tính chất "một file duy nhất" đó - `PRIVACY.md` mời người dùng tự
   kiểm chứng bằng cách đọc đúng file đó.
 - **Mọi chỗ đọc/ghi JSON đi qua `Core/Serialization/AuditJson.cs`** (mã sinh lúc
   biên dịch). Đừng gọi `JsonSerializer` trực tiếp ở nơi khác.
@@ -383,10 +383,10 @@ vẫn thấy được registry ghi gì, `ParseExact` thì ném.
 - **KHÔNG BAO GIỜ tải tệp từ `dist/` lên GitHub Release.** Đã từng xảy ra: một
   `swico-portable.zip` cục bộ chứa binary **cũ hơn** và không có trong
   `SHA256SUMS.txt` bị tải lên bản `v26.8.18`.
-- **Hai release cùng một tag** thì `gh release delete <tag>` **nguy hiểm** — có
+- **Hai release cùng một tag** thì `gh release delete <tag>` **nguy hiểm** - có
   thể xoá nhầm bản đã phát hành. Phải xoá theo **ID**:
   `gh api repos/OWNER/REPO/releases` lấy id rồi `gh api -X DELETE .../releases/<id>`.
-- **Manifest winget KHÔNG cam kết sẵn trong repo** — chỉ có template. Hash chỉ
+- **Manifest winget KHÔNG cam kết sẵn trong repo** - chỉ có template. Hash chỉ
   biết sau khi đóng gói và ký, nên manifest cam kết sẵn luôn mang hash sai.
 - **CHẠY LẠI `release.yml` cho một phiên bản ĐÃ NỘP MANIFEST là làm hỏng manifest
   đó trong im lặng.** Inno Setup đóng gói lại ra file **khác byte** (dấu thời gian
@@ -401,7 +401,7 @@ vẫn thấy được registry ghi gì, `ParseExact` thì ném.
 
 ### 4.5 Về tính trung thực của tài liệu
 
-Trong phiên S001, **bốn lần** tài liệu hứa thứ chưa tồn tại — đây là lớp lỗi hay
+Trong phiên S001, **bốn lần** tài liệu hứa thứ chưa tồn tại - đây là lớp lỗi hay
 lặp lại nhất, cần chủ động chống:
 
 | Lần | Nội dung sai |
@@ -415,7 +415,7 @@ Và một lần trong PR gửi ra ngoài: **tự tick các ô** "đã ký CLA", 
 `winget validate`" trong PR gửi `microsoft/winget-pkgs` khi chưa làm. Đã sửa.
 
 **Quy tắc rút ra:** viết tài liệu theo trạng thái **thật**, không theo trạng thái
-mong muốn. Mọi ô tick trong mẫu PR là một lời khai — tick một ô chưa làm là nói
+mong muốn. Mọi ô tick trong mẫu PR là một lời khai - tick một ô chưa làm là nói
 dối với người sẽ đọc nó.
 
 #### ⚠️ MỘT MÂU THUẪN CHƯA GIẢI QUYẾT (phát hiện ở phiên S002)
@@ -428,7 +428,7 @@ Windows đã chạy thật, cài thật, đối chiếu xong từ phiên S001.
 biến một tài liệu sai thành một tài liệu sai theo kiểu khác, khó phát hiện hơn.
 Cần người dùng xác nhận cái nào đúng rồi mới sửa.
 
-### 4.6 Bản ghi lịch sử — cố ý KHÔNG sửa
+### 4.6 Bản ghi lịch sử - cố ý KHÔNG sửa
 
 `docs/journal/` và `docs/DECISIONS.md` vẫn dùng tên cũ **`tsuowlit`** và URL cũ.
 Đó là bản ghi những gì đã diễn ra; sửa chúng là làm sai sự thật. **Đừng "sửa cho
@@ -449,7 +449,7 @@ thì không sửa được bằng mã:**
 > sẽ thấy ngày `1901 > 31` và **không đọc được**.
 
 Hệ quả cụ thể, đã truy theo mã (`UpdateChecker`): hai bản đó rơi vào nhánh
-`CheckFailed` → **vẫn quét bình thường kèm ghi chú**, không sập, không chặn —
+`CheckFailed` → **vẫn quét bình thường kèm ghi chú**, không sập, không chặn -
 nhưng **mất khả năng cập nhật bắt buộc**.
 
 **Cách gỡ, nếu muốn:** phát hành **một bản cầu nối** mang số hiệu dạng **cũ**
@@ -458,7 +458,7 @@ Máy đang chạy bản cũ đọc được tag đó → tự cập nhật → t
 Sau bản cầu nối, mọi bản phát hành dùng dạng mới.
 
 > ⚠️ Bản cầu nối đòi **tạm nới cổng chặn** `ReleaseName.Validate` (nó từ chối
-> dạng cũ). Đừng nới bằng cách sửa `Validate` — thêm một biến môi trường
+> dạng cũ). Đừng nới bằng cách sửa `Validate` - thêm một biến môi trường
 > `ALLOW_LEGACY_VERSION` cho đúng một lần chạy, rồi bỏ đi.
 
 Chi tiết đầy đủ: `docs/VERSIONING.md` mục 5.
@@ -471,14 +471,14 @@ Chi tiết đầy đủ: `docs/VERSIONING.md` mục 5.
 
 | File | Nội dung |
 |---|---|
-| `AGENTS.md` | **Quy ước bắt buộc — đọc TRƯỚC file này.** Bất khả xâm phạm |
+| `AGENTS.md` | **Quy ước bắt buộc - đọc TRƯỚC file này.** Bất khả xâm phạm |
 | `docs/DESIGN_SYSTEM.md` | Hệ màu 3 chế độ, typography, component. Bất khả xâm phạm |
 | `docs/PROJECT_STRUCTURE.md` | Cây thư mục chuẩn hệ sinh thái. Bất khả xâm phạm |
 | `docs/ARCHITECTURE.md` | Kiến trúc **của riêng repo này** + vì sao `src/` khác cây mẫu |
 | `docs/templates/HANDOVER.md` | Mẫu phiếu bàn giao |
 | `docs/CONVENTIONS-README.md` | README gốc của bộ quy ước |
 | `tokens/design-tokens.json` · `tokens/tokens.css` | Nguồn giá trị giao diện duy nhất |
-| `logs/STATE.md` | Điều phối agent — **không** phải trạng thái sản phẩm |
+| `logs/STATE.md` | Điều phối agent - **không** phải trạng thái sản phẩm |
 | `logs/LOCKS.md` | Khóa file, kiểm tra TRƯỚC khi sửa bất kỳ file nào |
 | `logs/handover/` | Phiếu bàn giao |
 
@@ -486,7 +486,7 @@ Chi tiết đầy đủ: `docs/VERSIONING.md` mục 5.
 
 | File | Nội dung |
 |---|---|
-| `docs/STATE.md` | **File này** — nguồn sự thật về trạng thái **sản phẩm** |
+| `docs/STATE.md` | **File này** - nguồn sự thật về trạng thái **sản phẩm** |
 | `docs/CONTINUITY.md` | Giao thức nối tiếp phiên, môi trường dev |
 | `docs/PLAN.md` | Lộ trình theo giai đoạn |
 | `docs/DECISIONS.md` | Đối chiếu với artifact kế hoạch, các quyết định đã chốt |
@@ -497,6 +497,6 @@ Chi tiết đầy đủ: `docs/VERSIONING.md` mục 5.
 | `docs/SIGNING.md` | Ký số qua SignPath |
 | `docs/WINGET.md` | Nộp winget + cách dùng ngay |
 | `docs/UPDATES.md` | Chức năng tự cập nhật |
-| `docs/VERSIONING.md` | **Quy ước đặt tên phiên bản** — thực thi bằng mã, không chỉ bằng lời |
+| `docs/VERSIONING.md` | **Quy ước đặt tên phiên bản** - thực thi bằng mã, không chỉ bằng lời |
 | `docs/DETECTION-RULES.md` | Bộ luật phát hiện |
 | `docs/WINDOWS-VERIFICATION.md` | Kịch bản kiểm chứng trên Windows |

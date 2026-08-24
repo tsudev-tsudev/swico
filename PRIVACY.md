@@ -6,7 +6,7 @@
 ## Tóm tắt trong một câu
 
 Phần mềm này **không gửi dữ liệu nào của máy bạn đi đâu cả**. Nó thực hiện đúng
-**một** kết nối mạng — hỏi GitHub xem đã có phiên bản mới chưa — và kết nối đó
+**một** kết nối mạng - hỏi GitHub xem đã có phiên bản mới chưa - và kết nối đó
 tắt được bằng `--no-update-check`.
 
 > **Thay đổi so với bản trước:** phiên bản 26.8.18 tuyên bố *"không kết nối
@@ -32,7 +32,7 @@ quyền yêu cầu biết chính xác dữ liệu đi đâu.
 | Toàn vẹn | Kết quả DISM/SFC (chỉ khi được yêu cầu) | Tiến trình hệ thống |
 | Định danh | Tên máy, tên miền, tên người dùng đang đăng nhập | Biến môi trường |
 
-## Kết nối mạng — đúng một, và chỉ một
+## Kết nối mạng - đúng một, và chỉ một
 
 Khi khởi động, công cụ gọi **một** yêu cầu GET tới:
 
@@ -43,10 +43,10 @@ https://api.github.com/repos/tsudev-tsudev/swico/releases/latest
 **Được gửi đi** (không thể tránh với bất kỳ yêu cầu HTTP nào):
 
 - Địa chỉ IP công cộng của máy
-- Chuỗi nhận dạng `tsudev-SWICO/<phiên-bản>` — cho GitHub biết phiên bản đang dùng
+- Chuỗi nhận dạng `tsudev-SWICO/<phiên-bản>` - cho GitHub biết phiên bản đang dùng
 
 **KHÔNG được gửi đi:** tên máy, tên người dùng, số sê-ri phần cứng, danh sách
-phần mềm, trạng thái bản quyền, kết quả quét — **không một dữ liệu nào** trong
+phần mềm, trạng thái bản quyền, kết quả quét - **không một dữ liệu nào** trong
 số công cụ thu thập.
 
 Nếu bạn bấm "Cập nhật", công cụ tải thêm file cài đặt và file `SHA256SUMS.txt`
@@ -64,7 +64,7 @@ Khi tắt, công cụ **không thực hiện bất kỳ kết nối mạng nào*
 
 Toàn bộ mã chạm tới mạng nằm gọn trong **một file**:
 `src/Tsudev.Audit.Windows/UpdateAdapters.cs`. Bạn có thể đọc hết trong vài phút.
-Hoặc chặn công cụ bằng tường lửa và quan sát — nó vẫn quét bình thường, chỉ ghi
+Hoặc chặn công cụ bằng tường lửa và quan sát - nó vẫn quét bình thường, chỉ ghi
 một ghi chú rằng chưa đối chiếu được phiên bản.
 
 ## Dữ liệu quét đi đâu
@@ -90,6 +90,6 @@ phát hành. Ở phạm vi hiện tại (chỉ CLI), điều đó chưa xảy ra
 
 ## Tự kiểm chứng
 
-Mã nguồn công khai. Mọi lệnh gọi hệ thống tập trung tại đúng một file —
-`src/Tsudev.Audit.Windows/WindowsAdapters.cs` — chính là để việc rà soát bảo mật
+Mã nguồn công khai. Mọi lệnh gọi hệ thống tập trung tại đúng một file -
+`src/Tsudev.Audit.Windows/WindowsAdapters.cs` - chính là để việc rà soát bảo mật
 kiểu này làm được nhanh chóng.

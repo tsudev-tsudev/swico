@@ -1,4 +1,4 @@
-# VERSIONING — Quy ước đặt tên phiên bản phát hành
+# VERSIONING - Quy ước đặt tên phiên bản phát hành
 
 > **Đây là quy ước bắt buộc của dự án.** Nó không chỉ là thoả thuận giữa người
 > với người: quy ước này được **thực thi bằng mã** ở hai chỗ, nên viết sai sẽ bị
@@ -6,11 +6,11 @@
 >
 > | Chỗ thực thi | Việc nó làm |
 > |---|---|
-> | `src/Tsudev.Audit.Core/Updates/ReleaseName.cs` | `Validate()` — từ chối mọi số hiệu sai quy ước, có test |
+> | `src/Tsudev.Audit.Core/Updates/ReleaseName.cs` | `Validate()` - từ chối mọi số hiệu sai quy ước, có test |
 > | `.github/workflows/release.yml`, bước *Kiểm tra quy ước đặt tên* | Dừng hẳn quy trình phát hành trước khi build |
 > | `.github/workflows/ci.yml` | Kiểm `VersionPrefix` ở **mỗi PR** |
 >
-> **Nguồn quy ước:** [`docs/DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md) mục 6 — áp dụng
+> **Nguồn quy ước:** [`docs/DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md) mục 6 - áp dụng
 > cho toàn hệ sinh thái tsudev. Tài liệu này là bản diễn giải cho repo SWICO,
 > kèm những gì bị cấm và **vì sao**.
 
@@ -32,7 +32,7 @@ tsudev-swico_26.8.1901_x64-setup.exe
 | `NN` | **Thứ tự bản phát hành trong ngày**, đệm đủ hai chữ số, bắt đầu `01` | `01`, `02` |
 | `arch` | `x64` \| `x86` \| `arm64` | dự án hiện chỉ phát hành `x64` |
 
-Chuỗi phiên bản trong mã nguồn và manifest là `26.8.1901` — **đồng bộ với tên file**.
+Chuỗi phiên bản trong mã nguồn và manifest là `26.8.1901` - **đồng bộ với tên file**.
 
 Ví dụ đầy đủ cho ngày 19/08/2026:
 
@@ -67,7 +67,7 @@ viết thành: 26.9.91
 ```
 
 Một ngày 0 không tồn tại, và tên file cài đặt sinh ra từ đó là tên **không ai
-tìm thấy** — trong khi chức năng tự cập nhật tìm file cài đặt **theo tên**.
+tìm thấy** - trong khi chức năng tự cập nhật tìm file cài đặt **theo tên**.
 
 ### 2.2 Cấm số 0 đứng đầu ở `YY` và `M`
 
@@ -79,7 +79,7 @@ khác nhau trong `SHA256SUMS.txt`. Chuẩn hoá một cách viết duy nhất l�
 nhất để chuyện đó không xảy ra.
 
 > Lưu ý sự bất đối xứng: ở `YY`/`M` thì số 0 đứng đầu **bị cấm**, còn ở `DD`/`NN`
-> thì nó **bắt buộc**. Không phải mâu thuẫn — `DD` và `NN` có **độ rộng cố định**
+> thì nó **bắt buộc**. Không phải mâu thuẫn - `DD` và `NN` có **độ rộng cố định**
 > nên số 0 là một phần của giá trị; `YY`/`M` thì không.
 
 ### 2.3 Cấm hậu tố ở bản phát hành chính thức
@@ -104,7 +104,7 @@ Thành phần thứ ba được so sánh như **một số nguyên**. Nhờ `DD`
 1901 < 1902 < 2001        ĐÚNG thứ tự
 ```
 
-Kể cả ở ranh giới dễ sai nhất — ngày 9 sang ngày 10:
+Kể cả ở ranh giới dễ sai nhất - ngày 9 sang ngày 10:
 
 ```
 26.9.0901  ->   901
@@ -112,7 +112,7 @@ Kể cả ở ranh giới dễ sai nhất — ngày 9 sang ngày 10:
 26.9.1001  ->  1001        901 < 904 < 1001        ĐÚNG
 ```
 
-Thứ tự này đúng ở **mọi** nơi so sánh — `VersionNumber` của dự án,
+Thứ tự này đúng ở **mọi** nơi so sánh - `VersionNumber` của dự án,
 `System.Version` của .NET, Inno Setup, winget, GitHub.
 
 > Điều này được khoá lại bằng một ca test **quét cả tháng**: 31 ngày × 4 bản =
@@ -138,21 +138,21 @@ mọi nơi khác lấy theo:
 Tag dùng dạng ngắn `v26.8.1901` chứ không phải tên đầy đủ, vì `release.yml` kích
 hoạt theo mẫu `tags: ['v*']`.
 
-### ⚠️ Một điều đã đo, không phải phỏng đoán: ngày 1–9 trong assembly
+### ⚠️ Một điều đã đo, không phải phỏng đoán: ngày 1-9 trong assembly
 
 Với `<VersionPrefix>26.9.0901</VersionPrefix>`, MSBuild sinh ra **hai** chuỗi:
 
 | Thuộc tính | Giá trị | Ai đọc |
 |---|---|---|
-| `AssemblyInformationalVersion` | `26.9.0901` — **giữ số 0** | `swico.exe --version` |
-| `AssemblyVersion` | `26.9.901` — **mất số 0** | đường dự phòng khi thiếu cái trên |
+| `AssemblyInformationalVersion` | `26.9.0901` - **giữ số 0** | `swico.exe --version` |
+| `AssemblyVersion` | `26.9.901` - **mất số 0** | đường dự phòng khi thiếu cái trên |
 
 Đã kiểm chứng bằng cách build thật rồi đọc chuỗi trong `.dll`. Vì vậy
 `VersionNumber.TryParse` **bắt buộc** đọc được cả `0901` lẫn `901` và cho ra
-cùng một giá trị — nếu không, exe sẽ tự báo nó là một phiên bản khác với tên file
+cùng một giá trị - nếu không, exe sẽ tự báo nó là một phiên bản khác với tên file
 của chính nó. Có test riêng cho điều này.
 
-## 5. Đọc được dạng CŨ — bắt buộc, không phải tiện nghi
+## 5. Đọc được dạng CŨ - bắt buộc, không phải tiện nghi
 
 Trước ngày 20/08/2026 dự án dùng dạng `tsudev-swico-vYY.M.D[.N]`
 (`swico-setup-26.8.19.exe`). **Hai bản đã phát hành ra ngoài theo dạng đó:**
@@ -175,7 +175,7 @@ chỉ có tối đa 2 chữ số, còn `DDNN` luôn từ 3 chữ số trở lên
 
 Bỏ dạng cũ đi thì một bản phát hành cũ sẽ bị coi là "không có file cài đặt", và
 người dùng nhận được thông báo *phải tự cập nhật* thay vì **được** cập nhật. Đó
-là kiểu hỏng **im lặng** — không ai báo lỗi.
+là kiểu hỏng **im lặng** - không ai báo lỗi.
 
 ### ⛔ Giới hạn KHÔNG sửa được bằng mã: hai bản đã phát hành
 
@@ -185,7 +185,7 @@ với bộ đọc phiên bản **cũ** biên dịch sẵn bên trong. Bộ đọ
 `v26.8.1901` sẽ thấy ngày `1901 > 31` và **không đọc được**.
 
 Hệ quả cụ thể, đã truy theo mã (`UpdateChecker`): hai bản đó rơi vào nhánh
-`CheckFailed` → **vẫn quét bình thường kèm ghi chú**, không sập, không chặn —
+`CheckFailed` → **vẫn quét bình thường kèm ghi chú**, không sập, không chặn -
 nhưng **mất khả năng cập nhật bắt buộc**.
 
 **Cách gỡ, nếu muốn:** phát hành **một bản cầu nối** mang số hiệu dạng **cũ**
@@ -193,18 +193,18 @@ nhưng **mất khả năng cập nhật bắt buộc**.
 đọc được tag đó → tự cập nhật → từ đó về sau hiểu được cả dạng mới. Sau bản cầu
 nối, mọi bản phát hành dùng dạng mới.
 
-> Đây là quyết định phát hành, thuộc thẩm quyền chủ project — xem
+> Đây là quyết định phát hành, thuộc thẩm quyền chủ project - xem
 > `docs/STATE.md` mục 3.6.
 
 ## 6. Quy trình phát hành một phiên bản
 
 ```bash
-# 1. Đặt số hiệu — CHỈ sửa ở một chỗ này
+# 1. Đặt số hiệu - CHỈ sửa ở một chỗ này
 #    (bản đầu tiên trong ngày 20/08/2026)
 sed -i 's|<VersionPrefix>.*</VersionPrefix>|<VersionPrefix>26.8.2001</VersionPrefix>|' Directory.Build.props
 
 # 2. Ghi mục mới vào CHANGELOG.md theo dạng
-#    26.8.2001 — 20/08/2026 — nội dung thay đổi
+#    26.8.2001 - 20/08/2026 - nội dung thay đổi
 
 # 3. Commit, gắn tag, đẩy lên
 git commit -am "release: tsudev-swico_26.8.2001"
@@ -241,10 +241,10 @@ else                           -> chặn lại, bắt cập nhật
 ```
 
 Phép so sánh đó chỉ đúng khi thứ tự số hiệu phản ánh đúng thứ tự thời gian phát
-hành. Đó chính là điều mục 3 bảo vệ — và là lý do quy ước này được kiểm chứng
+hành. Đó chính là điều mục 3 bảo vệ - và là lý do quy ước này được kiểm chứng
 bằng test chứ không chỉ được mô tả bằng lời.
 
-## 8. Lịch sử — cố ý không sửa lại
+## 8. Lịch sử - cố ý không sửa lại
 
 | Phiên bản | Thực tế | Dạng |
 |---|---|---|
@@ -254,5 +254,5 @@ bằng test chứ không chỉ được mô tả bằng lời.
 Hai bản này **giữ nguyên tên** trên trang phát hành. Đổi tên một bản đã phát hành
 là làm hỏng mọi liên kết và mọi mã băm đã công bố về nó.
 
-Quyết định chuyển sang quy ước hiện hành: **D-S004-1**, ngày 20/08/2026 —
+Quyết định chuyển sang quy ước hiện hành: **D-S004-1**, ngày 20/08/2026 -
 `docs/journal/S004-2026-08-20.md`.
