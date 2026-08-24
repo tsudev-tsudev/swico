@@ -72,6 +72,7 @@ printf '\n# --- Riêng của repo này ---\n' >> .gitignore
 | --- | --- | --- |
 | Thêm `.gitignore` sau khi đã commit secret | Secret vẫn nằm trong lịch sử, ai clone cũng thấy | Thu hồi khóa, `git filter-repo`, xem `SECURITY_BASELINE.md` 9.2 |
 | Chặn cả thư mục `config/` | Chặn luôn file cấu hình mẫu cần commit | Chặn `config/*.local.*`, giữ `config/default.json` |
+| Chặn cả thư mục `logs/` cho nhật ký chạy | Chặn luôn `logs/STATE.md` và `logs/LOCKS.md` - **thư mục điều phối phiên bắt buộc phải commit** | Chặn `logs/*.log`, `logs/*.tmp`; nhật ký chạy của ứng dụng nên nằm ở thư mục dữ liệu của hệ điều hành, không nằm trong repo |
 | Dùng `*.env` thay vì `.env*` | Bỏ sót `.env.production`, `.env.local` | Dùng đúng bản chuẩn |
 | Xóa bớt dòng của bản chuẩn cho "gọn" | Repo lệch chuẩn, lần sau không ai biết vì sao | Đề xuất qua `proposals/` |
 

@@ -250,8 +250,11 @@ crash-*.log
 # Bổ sung cho project .NET/C# - đặt SAU nội dung base.gitignore
 [Bb]in/
 [Oo]bj/
-[Ll]og/
-[Ll]ogs/
+# KHÔNG chặn cả thư mục [Ll]ogs/ - `logs/` là thư mục điều phối phiên BẮT BUỘC
+# phải commit (AGENT_PROTOCOL.md). Chỉ chặn file nhật ký bên trong.
+[Ll]og/*.log
+[Ll]ogs/*.log
+[Ll]ogs/*.txt
 *.pdb
 *.cache
 *.VisualState.xml
@@ -267,7 +270,12 @@ msbuild.binlog
 
 # --- Riêng của repo này (giữ lại từ .gitignore cũ) ---
 *.zip
+[Ll]og/
+# [THU HẸP khi áp bộ quy ước] dòng này chặn file BẮT BUỘC phải commit (logs/STATE.md hoặc .standards/**). Xem GITIGNORE_POLICY.md mục 5.
+# [Ll]ogs/
 artifacts/
 packaging/output/
 tsudev-bao-cao-ra-quet-*/
 tsudev-ket-qua-ra-quet-*/
+/logs/*.log
+/logs/*.tmp

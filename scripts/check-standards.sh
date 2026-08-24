@@ -141,6 +141,48 @@ fi
 
 # ------------------------------------------------------------------
 echo
+echo "3b. File BẮT BUỘC phải được commit"
+# ------------------------------------------------------------------
+# Quy tắc .gitignore riêng của repo có thể nuốt mất chính những file mà bộ quy
+# ước bắt buộc phải commit - và nuốt hoàn toàn im lặng. Hay gặp nhất: repo có
+# sẵn dòng `logs/` cho nhật ký chạy của ứng dụng, dòng đó chặn luôn thư mục
+# điều phối phiên mà AGENT_PROTOCOL.md dựa vào.
+if git rev-parse --git-dir >/dev/null 2>&1; then
+  REQUIRED=(logs/STATE.md logs/LOCKS.md)
+  [[ $IS_CENTRAL == 0 ]] && REQUIRED+=("$STD_DIR/AGENTS.md" "$STD_DIR/VERSION")
+  req_ok=1
+  for f in "${REQUIRED[@]}"; do
+    if [[ ! -e "$f" ]]; then
+      fail "thiếu file bắt buộc: $f"
+      req_ok=0
+    elif ! git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
+      why="$(git check-ignore -v "$f" 2>/dev/null || true)"
+      if [[ -n "$why" ]]; then
+        fail "$f TỒN TẠI nhưng bị .gitignore chặn nên không được commit"
+        echo "        Quy tắc chặn: $why" >&2
+        echo "        Sửa quy tắc đó cho hẹp lại (ví dụ logs/*.log thay vì logs/)." >&2
+      else
+        fail "$f chưa được thêm vào git"
+      fi
+      req_ok=0
+    fi
+  done
+  # Toàn bộ bản sao quy ước cũng phải commit được, không được khuyết file nào.
+  if [[ $IS_CENTRAL == 0 && -d "$STD_DIR" ]]; then
+    swallowed="$(find "$STD_DIR" -type f -print0 2>/dev/null \
+      | xargs -0 -r git check-ignore 2>/dev/null || true)"
+    if [[ -n "$swallowed" ]]; then
+      n="$(printf '%s\n' "$swallowed" | grep -c . || true)"
+      fail "$n file trong $STD_DIR bị .gitignore chặn - bản sao quy ước sẽ khuyết"
+      printf '%s\n' "$swallowed" | head -5 | sed 's/^/        /' >&2
+      req_ok=0
+    fi
+  fi
+  [[ $req_ok == 1 ]] && pass "mọi file bắt buộc đều được commit"
+fi
+
+# ------------------------------------------------------------------
+echo
 echo "4. Quy ước gạch ngang (AGENTS.md mục 6)"
 # ------------------------------------------------------------------
 if git rev-parse --git-dir >/dev/null 2>&1; then
@@ -205,6 +247,32 @@ if [[ $IS_CENTRAL == 1 ]]; then
   else
     warn "thiếu node - bỏ qua kiểm tra token"
   fi
+
+  echo
+  echo "6b. Bản mẫu .gitignore không được chặn file bắt buộc"
+  # Chính bản mẫu của bộ quy ước từng mắc lỗi này: dotnet.gitignore có dòng
+  # [Ll]ogs/ chặn đúng thư mục điều phối phiên mà AGENT_PROTOCOL.md bắt buộc
+  # phải commit. Đây là cổng canh để không tái diễn.
+  tpl_bad=0
+  TMPT="$(mktemp -d)"
+  for tpl in templates/gitignore/*.gitignore; do
+    name="$(basename "$tpl")"
+    [[ "$name" == "base.gitignore" ]] && continue
+    rm -rf "${TMPT:?}/t"; mkdir -p "$TMPT/t/logs" "$TMPT/t/.standards/templates/logs"
+    ( cd "$TMPT/t" && git init -q . ) || continue
+    cat templates/gitignore/base.gitignore "$tpl" > "$TMPT/t/.gitignore"
+    touch "$TMPT/t/logs/STATE.md" "$TMPT/t/logs/LOCKS.md" \
+          "$TMPT/t/.standards/templates/logs/STATE.md"
+    blocked="$( cd "$TMPT/t" && for f in logs/STATE.md logs/LOCKS.md .standards/templates/logs/STATE.md; do
+        git check-ignore -q "$f" && echo "$f"
+      done || true )"
+    if [[ -n "$blocked" ]]; then
+      fail "$name chặn file bắt buộc: $(printf '%s' "$blocked" | tr '\n' ' ')"
+      tpl_bad=$((tpl_bad + 1))
+    fi
+  done
+  rm -rf "$TMPT"
+  [[ $tpl_bad == 0 ]] && pass "không bản mẫu nào chặn file bắt buộc"
 
   echo
   echo "7. MANIFEST.sha256"
