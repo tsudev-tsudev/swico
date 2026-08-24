@@ -71,6 +71,25 @@ git commit -m "chore(standards): đồng bộ bộ quy ước tsudev v2.0.0"
 Sau bước này, repo con `MUST` có `AGENTS.md` ở gốc trỏ về `.standards/AGENTS.md`
 và bổ sung phần phân vai riêng. Mẫu: `.standards/templates/AGENTS.downstream.md`.
 
+### 3.1. Loại `.standards/` khỏi mọi công cụ tự sửa file
+
+`MUST` thêm `.standards/` vào danh sách loại trừ của **mọi** công cụ có khả năng
+ghi đè file: Prettier, ESLint `--fix`, Black, `dotnet format`, `clang-format`,
+`rustfmt`, và cả cấu hình "format on save" của IDE.
+
+```bash
+printf '\n# Bản sao chỉ-đọc của bộ quy ước trung tâm - không định dạng lại.\n.standards/\n' >> .prettierignore
+printf '\n# Bản sao chỉ-đọc của bộ quy ước trung tâm - không lint, không sửa.\n.standards/\n' >> .eslintignore
+```
+
+**Vì sao bắt buộc:** `MANIFEST.sha256` băm từng byte của mỗi file quy ước. Một
+lần Prettier chạy qua là đủ đổi dấu cách và xuống dòng, làm lệch băm, và
+`./scripts/sync-standards.sh --check` sẽ báo lệch **vĩnh viễn** cho tới khi ai
+đó đồng bộ lại. Tệ hơn: cổng kiểm CI đỏ vì một lý do không liên quan gì tới nội
+dung công việc, và người ta bắt đầu học cách bỏ qua nó.
+
+Đây là lỗi có thật, gặp ngay ở repo đầu tiên áp bộ quy ước v2.
+
 ## 4. Cập nhật định kỳ
 
 ```bash
@@ -176,5 +195,6 @@ biết repo cố ý đứng ở bản nào, chứ không phải quên nâng.
 | `LỆCH: .standards/... khác bản trung tâm` | Có người sửa bản sao chỉ-đọc | Chạy `./scripts/sync-standards.sh`, đưa thay đổi lên `proposals/` |
 | `thiếu .standards-version` | Chép tay thay vì chạy script | Chạy `./scripts/sync-standards.sh` |
 | Không ghi được vào `.standards/` | File đã bị đặt chỉ-đọc sau khi đồng bộ | Đúng như thiết kế. Đừng `chmod` để sửa, hãy sửa ở trung tâm |
+| Cổng kiểm CI đỏ ngay sau khi chạy công cụ định dạng | Prettier hoặc tương đương đã sửa file trong `.standards/`, làm lệch băm | Thêm `.standards/` vào `.prettierignore` và `.eslintignore` theo mục 3.1, rồi `./scripts/sync-standards.sh` để khôi phục |
 | `Permission denied` khi agent ghi `logs/STATE.md` | File được `cp` từ `.standards/templates/` nên thừa hưởng quyền chỉ-đọc | `chmod u+w logs/STATE.md logs/LOCKS.md` |
 | `git checkout` báo `unable to unlink '.standards/...'` | Cây cũ đồng bộ bằng bản trước v2.2.1 bị đặt chỉ-đọc cả **thư mục** | `chmod -R u+w .standards` một lần, rồi `./scripts/sync-standards.sh` để lấy bản đã vá |
