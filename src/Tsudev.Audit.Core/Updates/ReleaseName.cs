@@ -182,7 +182,7 @@ public static class ReleaseName
         if (!VersionNumber.TryParse(s, out version))
         {
             problem = $"'{text}' không đọc được thành phiên bản YY.M.DDNN hợp lệ " +
-                      "(tháng phải là 1–12, ngày phải là 01–31, số thứ tự phải từ 01).";
+                      "(tháng phải là 1-12, ngày phải là 01-31, số thứ tự phải từ 01).";
             return false;
         }
 
